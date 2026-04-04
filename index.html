@@ -13,46 +13,12 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- YouTube IFrame Player API - Global Initializer (v16 fix) -->
-    <script>
-        window.ytPlayers = { rain: null, forest: null, white: null, brown: null, lofi: null };
-        const ytConfigs = { rain: 'gVKEM4K8J8A', forest: 'YV28HGdG8RE', white: 'Og40mpl8VNc', brown: '0GDfOAuUvQ0', lofi: 'kSNH-18gjQY' };
 
-        function onYouTubeIframeAPIReady() {
-            Object.keys(ytConfigs).forEach(key => {
-                const containerId = 'yt-player-' + key;
-                window.ytPlayers[key] = new YT.Player(containerId, {
-                    videoId: ytConfigs[key],
-                    playerVars: { 'autoplay': 1, 'controls': 0, 'loop': 1, 'playlist': ytConfigs[key], 'modestbranding': 1, 'mute': 1, 'playsinline': 1 },
-                    events: { 'onReady': (e) => { e.target.mute(); e.target.playVideo(); e.target.setVolume(0); } }
-                });
-            });
-        }
-    </script>
-    <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
-    <!-- Hareketli (Canvas) Atmosferler -->
-    <div id="atmosphere-rain" class="atmosphere rain-mode">
-        <canvas id="rain-canvas"></canvas>
-    </div>
-    <div id="atmosphere-sun" class="atmosphere sun-mode">
-        <canvas id="sun-canvas"></canvas>
-        <div class="sun-glow"></div>
-    </div>
-    
-    <video id="bg-video" autoplay loop muted playsinline style="display:none;">
-        <source src="" type="video/mp4">
-    </video>
-    <div id="video-overlay" class="video-overlay"></div>
 
-    <!-- YouTube Arka Plan Video Konteynerleri -->
-    <div id="yt-player-rain" class="yt-bg-container"></div>
-    <div id="yt-player-forest" class="yt-bg-container"></div>
-    <!-- Önemli: Ses kanalları (görünmez) -->
-    <div id="yt-player-white" class="yt-audio-container"></div>
-    <div id="yt-player-brown" class="yt-audio-container"></div>
-    <div id="yt-player-lofi" class="yt-audio-container"></div>
+
+
 
     <!-- Sidebar ve Overlay -->
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
@@ -153,16 +119,7 @@
                         <button class="theme-btn" data-theme="system" title="Sistem Teması"><i class="fas fa-desktop"></i></button>
                     </div>
                     
-                    <div class="video-theme-wrapper">
-                        <button id="loop-toggle-btn" class="icon-btn loop-btn" title="Hareketli Arka Planlar"><i class="fas fa-infinity"></i></button>
-                        <div class="video-options" id="video-options">
-                            <button id="vp-rain-btn" class="video-btn" title="Yağmur Modu" data-video="rain"><i class="fas fa-cloud-showers-heavy"></i></button>
-                            <button id="vp-forest-btn" class="video-btn" title="Orman Modu" data-video="forest"><i class="fas fa-tree"></i></button>
-                            <button id="vp-sun-btn" class="video-btn" title="Güneş Modu" data-video="sun"><i class="fas fa-sun"></i></button>
-                        </div>
-                    </div>
 
-                    <button id="sounds-btn" class="icon-btn" title="Odaklanma ve Ambiyans Sesleri"><i class="fas fa-music"></i></button>
                     <button id="settings-btn" class="icon-btn" title="Ayarlar ve Veri Yönetimi"><i class="fas fa-cog"></i></button>
                 </div>
             </div>
@@ -221,74 +178,9 @@
         </div>
     </div>
 
-    <!-- Ses Modalı -->
-    <div id="sounds-modal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Ambiyans Mikseri 🎧</h2>
-                <button id="close-sounds-btn" class="icon-btn">&times;</button>
-            </div>
-            <div class="modal-body" style="display: flex; flex-direction: column; gap: 20px;">
-                <p style="margin-bottom: 5px;">Kendi çalışma atmosferini yarat! Seçtiğin sesleri dilediğin oranda karıştır.</p>
-                
-                <!-- Video Sesi -->
-                <div class="mixer-track">
-                    <div class="track-info">
-                        <i class="fas fa-video"></i> <span>Arka Plan Videosu</span>
-                    </div>
-                    <input type="range" id="vol-video" class="vol-slider" min="0" max="100" value="50">
-                </div>
 
-                <!-- Orman -->
-                <div class="mixer-track">
-                    <div class="track-info">
-                        <i class="fas fa-tree"></i> <span>Orman Sesi</span>
-                    </div>
-                    <input type="range" id="vol-forest" class="vol-slider" min="0" max="100" value="0">
-                </div>
 
-                <!-- Şehir / Kafe -->
-                <div class="mixer-track">
-                    <div class="track-info">
-                        <i class="fas fa-city"></i> <span>Şehir / Kafe Sesi</span>
-                    </div>
-                    <input type="range" id="vol-city" class="vol-slider" min="0" max="100" value="0">
-                </div>
 
-                <!-- Beyaz Gürültü -->
-                <div class="mixer-track">
-                    <div class="track-info">
-                        <i class="fas fa-fan"></i> <span>Beyaz Gürültü</span>
-                    </div>
-                    <input type="range" id="vol-white" class="vol-slider" min="0" max="100" value="0">
-                </div>
-
-                <!-- Kahverengi Gürültü -->
-                <div class="mixer-track">
-                    <div class="track-info">
-                        <i class="fas fa-wind"></i> <span>Kahverengi Gürültü</span>
-                    </div>
-                    <input type="range" id="vol-brown" class="vol-slider" min="0" max="100" value="0">
-                </div>
-
-                <!-- Lofi Müzik -->
-                <div class="mixer-track">
-                    <div class="track-info">
-                        <i class="fas fa-headphones"></i> <span>Lofi Müzik</span>
-                    </div>
-                    <input type="range" id="vol-lofi" class="vol-slider" min="0" max="100" value="0">
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-    <!-- Eski Ses Kaynakları Devre Dışı (YT'ye Geçildi) -->
-    <div style="display:none;">
-        <audio id="audio-forest" loop></audio>
-        <audio id="audio-city" loop></audio>
-        <audio id="audio-noise" loop></audio>
-    </div>
 
     <!-- PWA Service Worker -->
     <script>

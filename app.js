@@ -19,36 +19,6 @@ const currentIndexEl = document.getElementById('current-index');
 const totalCountEl = document.getElementById('total-count');
 const categoryBtns = document.querySelectorAll('.category-btn');
 const themeBtns = document.querySelectorAll('.theme-btn');
-const bgVideo = document.getElementById('bg-video');
-const videoOverlay = document.getElementById('video-overlay');
-const atmosphereRain = document.getElementById('atmosphere-rain');
-const atmosphereSun = document.getElementById('atmosphere-sun');
-
-const atmosphereSun = document.getElementById('atmosphere-sun');
-
-// YouTube Players (v16: artık window'dan okunuyor)
-const getYTPlayers = () => window.ytPlayers || {};
-
-// Loop Menu & Sounds
-const loopToggleBtn = document.getElementById('loop-toggle-btn');
-const videoOptions = document.getElementById('video-options');
-const videoBtns = document.querySelectorAll('.video-btn');
-const rainCanvas = document.getElementById('rain-canvas');
-const sunCanvas = document.getElementById('sun-canvas');
-
-let rainEngine = null;
-let sunEngine = null;
-const soundsModal = document.getElementById('sounds-modal');
-const closeSoundsBtn = document.getElementById('close-sounds-btn');
-
-// Audio Mixer Controls (Updated for YT)
-const volWhite = document.getElementById('vol-white');
-const volBrown = document.getElementById('vol-brown');
-const volLofi = document.getElementById('vol-lofi');
-const volForest = document.getElementById('vol-forest'); // Modal'daki orman slider'ı
-const volVideo = document.getElementById('vol-video');   // Modal'daki yağmur slider'ı
-const audioNoise = document.getElementById('audio-noise');
-const volNoise = document.getElementById('vol-noise');
 
 // Sidebar Elements
 const sidebar = document.getElementById('sidebar');
@@ -113,172 +83,9 @@ function init() {
         updateTimeUI();
     }, 1000);
 
-    // Loop Video & Theme Toggle Logic
-    if(loopToggleBtn && videoOptions) {
-        loopToggleBtn.addEventListener('click', () => {
-            videoOptions.classList.toggle('active');
-        });
-    }
 
-    if(videoBtns) {
-        videoBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const vidType = btn.getAttribute('data-video');
-                
-                // Tema aktifleştirme (Canvas/YT Mode)
-                stopAtmospheres();
-                
-                if (vidType === 'rain') {
-                    atmosphereRain.classList.add('active');
-                    const rainYT = document.getElementById('yt-player-rain');
-                    if(rainYT) rainYT.classList.add('active');
-                    const players = getYTPlayers();
-                    if(players.rain) {
-                        players.rain.playVideo();
-                        players.rain.unMute();
-                    }
-                    startRain();
-                } else if (vidType === 'sun') {
-                    atmosphereSun.classList.add('active');
-                    startSun();
-                } else if (vidType === 'forest') {
-                    const forestYT = document.getElementById('yt-player-forest');
-                    if(forestYT) forestYT.classList.add('active');
-                    const players = getYTPlayers();
-                    if(players.forest) {
-                        players.forest.playVideo();
-                        players.forest.unMute();
-                    }
-                }
-                
-                // UI Güncelleme (Video ikonları için özel genişleme gerekebilir)
-                themeBtns.forEach(b => b.classList.remove('active'));
-                videoBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            });
-        });
-    }
 
-    // Audio Mixer & YouTube Volume Control
-    if(volWhite) volWhite.addEventListener('input', e => setYTVolume('white', e.target.value));
-    if(volBrown) volBrown.addEventListener('input', e => setYTVolume('brown', e.target.value));
-    if(volLofi) volLofi.addEventListener('input', e => setYTVolume('lofi', e.target.value));
-    if(volForest) volForest.addEventListener('input', e => setYTVolume('forest', e.target.value));
-    if(volVideo) volVideo.addEventListener('input', e => setYTVolume('rain', e.target.value));
 
-    function setYTVolume(key, val) {
-        const players = getYTPlayers();
-        if(players[key]) {
-            if(val == 0) players[key].mute();
-            else {
-                players[key].unMute();
-                players[key].setVolume(val);
-                players[key].playVideo(); // Ses açılınca başlasın
-            }
-        }
-    }
-
-    function stopAtmospheres() {
-        atmosphereRain.classList.remove('active');
-        atmosphereSun.classList.remove('active');
-        document.querySelectorAll('.yt-bg-container').forEach(c => c.classList.remove('active'));
-        
-        // Videoları durdur/sessize al
-        const players = getYTPlayers();
-        if(players.rain) players.rain.mute();
-        if(players.forest) players.forest.mute();
-
-        if (rainEngine) cancelAnimationFrame(rainEngine);
-        if (sunEngine) cancelAnimationFrame(sunEngine);
-    }
-    // YouTube API Initialization - Silindi (v16: index.html içine taşındı)
-
-    function startRain() {
-        const ctx = rainCanvas.getContext('2d');
-        rainCanvas.width = window.innerWidth;
-        rainCanvas.height = window.innerHeight;
-
-        class Drop {
-            constructor() { this.init(); }
-            init() {
-                this.x = Math.random() * rainCanvas.width;
-                this.y = Math.random() * rainCanvas.height - rainCanvas.height;
-                this.speed = Math.random() * 10 + 5;
-                this.len = Math.random() * 20 + 10;
-                this.opacity = Math.random() * 0.5;
-            }
-            draw() {
-                ctx.beginPath();
-                ctx.strokeStyle = `rgba(174, 194, 224, ${this.opacity})`;
-                ctx.lineWidth = 1;
-                ctx.moveTo(this.x, this.y);
-                ctx.lineTo(this.x, this.y + this.len);
-                ctx.stroke();
-            }
-            update() {
-                this.y += this.speed;
-                if (this.y > rainCanvas.height) this.init();
-                this.draw();
-            }
-        }
-
-        const drops = Array.from({ length: 500 }, () => new Drop());
-        function animate() {
-            ctx.fillStyle = 'rgba(11, 16, 24, 0.3)';
-            ctx.fillRect(0, 0, rainCanvas.width, rainCanvas.height);
-            drops.forEach(drop => drop.update());
-            rainEngine = requestAnimationFrame(animate);
-        }
-        animate();
-    }
-
-    function startSun() {
-        const ctx = sunCanvas.getContext('2d');
-        sunCanvas.width = window.innerWidth;
-        sunCanvas.height = window.innerHeight;
-        
-        let rays = [];
-        for(let i=0; i<12; i++) rays.push({ angle: (i/12)*Math.PI*2, speed: 0.005 + Math.random()*0.01 });
-
-        function animate() {
-            ctx.clearRect(0,0, sunCanvas.width, sunCanvas.height);
-            const centerX = sunCanvas.width * 0.8;
-            const centerY = sunCanvas.height * 0.2;
-            
-            // Draw rays
-            rays.forEach(ray => {
-                ray.angle += ray.speed;
-                ctx.beginPath();
-                ctx.strokeStyle = 'rgba(255, 234, 167, 0.2)';
-                ctx.lineWidth = 20;
-                ctx.moveTo(centerX, centerY);
-                ctx.lineTo(centerX + Math.cos(ray.angle)*1000, centerY + Math.sin(ray.angle)*1000);
-                ctx.stroke();
-            });
-            sunEngine = requestAnimationFrame(animate);
-        }
-        animate();
-    }
-
-    if(volVideo) volVideo.addEventListener('input', e => { if(bgVideo) bgVideo.volume = e.target.value / 100; });
-    if(volForest) {
-        volForest.addEventListener('input', e => {
-            const v = e.target.value / 100;
-            if(audioForest) { audioForest.volume = v; v > 0 ? audioForest.play() : audioForest.pause(); }
-        });
-    }
-    if(volCity) {
-        volCity.addEventListener('input', e => {
-            const v = e.target.value / 100;
-            if(audioCity) { audioCity.volume = v; v > 0 ? audioCity.play() : audioCity.pause(); }
-        });
-    }
-    if(volNoise) {
-        volNoise.addEventListener('input', e => {
-            const v = e.target.value / 100;
-            if(audioNoise) { audioNoise.volume = v; v > 0 ? audioNoise.play() : audioNoise.pause(); }
-        });
-    }
 }
 
 function initTheme() {
@@ -286,11 +93,6 @@ function initTheme() {
     applyTheme(savedTheme);
     themeBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            // Klasik temaya tıklandı, CSS atmosferlerini ve videoyu gizle
-            if(bgVideo) bgVideo.style.display = 'none';
-            if(videoOverlay) videoOverlay.style.display = 'none';
-            stopAtmospheres();
-            if(videoBtns) videoBtns.forEach(b => b.classList.remove('active'));
             applyTheme(btn.getAttribute('data-theme'));
         });
     });
