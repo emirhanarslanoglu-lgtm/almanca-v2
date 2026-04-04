@@ -24,6 +24,23 @@ const videoOverlay = document.getElementById('video-overlay');
 const atmosphereRain = document.getElementById('atmosphere-rain');
 const atmosphereSun = document.getElementById('atmosphere-sun');
 
+// YouTube Players Map
+let ytPlayers = {
+    rain: null,
+    forest: null,
+    white: null,
+    brown: null,
+    lofi: null
+};
+
+const ytConfigs = {
+    rain: 'gVKEM4K8J8A',
+    forest: 'YV28HGdG8RE',
+    white: 'Og40mpl8VNc',
+    brown: '0GDfOAuUvQ0',
+    lofi: 'kSNH-18gjQY'
+};
+
 // Loop Menu & Sounds
 const loopToggleBtn = document.getElementById('loop-toggle-btn');
 const videoOptions = document.getElementById('video-options');
@@ -33,16 +50,15 @@ const sunCanvas = document.getElementById('sun-canvas');
 
 let rainEngine = null;
 let sunEngine = null;
-const soundsBtn = document.getElementById('sounds-btn');
 const soundsModal = document.getElementById('sounds-modal');
 const closeSoundsBtn = document.getElementById('close-sounds-btn');
 
-// Audio Tracking elements
-const volVideo = document.getElementById('vol-video');
-const audioForest = document.getElementById('audio-forest');
-const volForest = document.getElementById('vol-forest');
-const audioCity = document.getElementById('audio-city');
-const volCity = document.getElementById('vol-city');
+// Audio Mixer Controls (Updated for YT)
+const volWhite = document.getElementById('vol-white');
+const volBrown = document.getElementById('vol-brown');
+const volLofi = document.getElementById('vol-lofi');
+const volForest = document.getElementById('vol-forest'); // Modal'daki orman slider'ı
+const volVideo = document.getElementById('vol-video');   // Modal'daki yağmur slider'ı
 const audioNoise = document.getElementById('audio-noise');
 const volNoise = document.getElementById('vol-noise');
 
@@ -121,18 +137,31 @@ function init() {
             btn.addEventListener('click', () => {
                 const vidType = btn.getAttribute('data-video');
                 
-                // Tema aktifleştirme (Canvas Mode)
+                // Tema aktifleştirme (Canvas/YT Mode)
                 stopAtmospheres();
                 
                 if (vidType === 'rain') {
                     atmosphereRain.classList.add('active');
+                    const rainYT = document.getElementById('yt-player-rain');
+                    if(rainYT) rainYT.classList.add('active');
+                    if(ytPlayers.rain) {
+                        ytPlayers.rain.playVideo();
+                        ytPlayers.rain.unMute();
+                    }
                     startRain();
                 } else if (vidType === 'sun') {
                     atmosphereSun.classList.add('active');
                     startSun();
+                } else if (vidType === 'forest') {
+                    const forestYT = document.getElementById('yt-player-forest');
+                    if(forestYT) forestYT.classList.add('active');
+                    if(ytPlayers.forest) {
+                        ytPlayers.forest.playVideo();
+                        ytPlayers.forest.unMute();
+                    }
                 }
                 
-                // UI Güncelleme
+                // UI Güncelleme (Video ikonları için özel genişleme gerekebilir)
                 themeBtns.forEach(b => b.classList.remove('active'));
                 videoBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
@@ -140,17 +169,60 @@ function init() {
         });
     }
 
-    // Audio Mixer & Stable URLs
-    if(audioForest) audioForest.src = 'https://www.soundjay.com/nature/sounds/rain-02.mp3'; 
-    if(audioCity) audioCity.src = 'https://www.soundjay.com/nature/sounds/rain-07.mp3';
-    if(audioNoise) audioNoise.src = 'https://www.soundjay.com/misc/sounds/white-noise-01.mp3';
+    // Audio Mixer & YouTube Volume Control
+    if(volWhite) volWhite.addEventListener('input', e => setYTVolume('white', e.target.value));
+    if(volBrown) volBrown.addEventListener('input', e => setYTVolume('brown', e.target.value));
+    if(volLofi) volLofi.addEventListener('input', e => setYTVolume('lofi', e.target.value));
+    if(volForest) volForest.addEventListener('input', e => setYTVolume('forest', e.target.value));
+    if(volVideo) volVideo.addEventListener('input', e => setYTVolume('rain', e.target.value));
+
+    function setYTVolume(key, val) {
+        if(ytPlayers[key]) {
+            if(val == 0) ytPlayers[key].mute();
+            else {
+                ytPlayers[key].unMute();
+                ytPlayers[key].setVolume(val);
+                ytPlayers[key].playVideo(); // Ses açılınca başlasın
+            }
+        }
+    }
 
     function stopAtmospheres() {
         atmosphereRain.classList.remove('active');
         atmosphereSun.classList.remove('active');
+        document.querySelectorAll('.yt-bg-container').forEach(c => c.classList.remove('active'));
+        
+        // Videoları durdur/sessize al
+        if(ytPlayers.rain) ytPlayers.rain.mute();
+        if(ytPlayers.forest) ytPlayers.forest.mute();
+
         if (rainEngine) cancelAnimationFrame(rainEngine);
         if (sunEngine) cancelAnimationFrame(sunEngine);
     }
+
+    // YouTube API Initialization
+    window.onYouTubeIframeAPIReady = function() {
+        Object.keys(ytConfigs).forEach(key => {
+            const containerId = `yt-player-${key}`;
+            ytPlayers[key] = new YT.Player(containerId, {
+                videoId: ytConfigs[key],
+                playerVars: {
+                    'autoplay': 0,
+                    'controls': 0,
+                    'loop': 1,
+                    'playlist': ytConfigs[key],
+                    'modestbranding': 1,
+                    'mute': 1,
+                    'playsinline': 1
+                },
+                events: {
+                    'onReady': (event) => {
+                        event.target.setVolume(0);
+                    }
+                }
+            });
+        });
+    };
 
     function startRain() {
         const ctx = rainCanvas.getContext('2d');
