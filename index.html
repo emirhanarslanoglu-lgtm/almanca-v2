@@ -15,9 +15,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Hareketli (CSS) Atmosferler -->
-    <div id="atmosphere-rain" class="atmosphere rain-mode"></div>
+    <!-- Hareketli (Canvas) Atmosferler -->
+    <div id="atmosphere-rain" class="atmosphere rain-mode">
+        <canvas id="rain-canvas"></canvas>
+    </div>
     <div id="atmosphere-sun" class="atmosphere sun-mode">
+        <canvas id="sun-canvas"></canvas>
         <div class="sun-glow"></div>
     </div>
     
@@ -239,9 +242,9 @@
     </div>
 
     <!-- Ses Kaynakları (Görünmez) -->
-    <audio id="audio-forest" loop src="forest.mp3"></audio>
-    <audio id="audio-city" loop src="city.mp3"></audio>
-    <audio id="audio-noise" loop src="whitenoise.mp3"></audio>
+    <audio id="audio-forest" loop></audio>
+    <audio id="audio-city" loop></audio>
+    <audio id="audio-noise" loop></audio>
 
     <!-- PWA Service Worker -->
     <script>

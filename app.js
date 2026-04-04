@@ -28,6 +28,11 @@ const atmosphereSun = document.getElementById('atmosphere-sun');
 const loopToggleBtn = document.getElementById('loop-toggle-btn');
 const videoOptions = document.getElementById('video-options');
 const videoBtns = document.querySelectorAll('.video-btn');
+const rainCanvas = document.getElementById('rain-canvas');
+const sunCanvas = document.getElementById('sun-canvas');
+
+let rainEngine = null;
+let sunEngine = null;
 const soundsBtn = document.getElementById('sounds-btn');
 const soundsModal = document.getElementById('sounds-modal');
 const closeSoundsBtn = document.getElementById('close-sounds-btn');
@@ -116,14 +121,15 @@ function init() {
             btn.addEventListener('click', () => {
                 const vidType = btn.getAttribute('data-video');
                 
-                // Tema aktifleştirme (CSS Mode)
-                atmosphereRain.classList.remove('active');
-                atmosphereSun.classList.remove('active');
+                // Tema aktifleştirme (Canvas Mode)
+                stopAtmospheres();
                 
                 if (vidType === 'rain') {
                     atmosphereRain.classList.add('active');
+                    startRain();
                 } else if (vidType === 'sun') {
                     atmosphereSun.classList.add('active');
+                    startSun();
                 }
                 
                 // UI Güncelleme
@@ -134,24 +140,84 @@ function init() {
         });
     }
 
-    // Sounds Modal Logic
-    if(soundsBtn && soundsModal) {
-        // ... previous logic remains ...
+    // Audio Mixer & Stable URLs
+    if(audioForest) audioForest.src = 'https://www.soundjay.com/nature/sounds/rain-02.mp3'; 
+    if(audioCity) audioCity.src = 'https://www.soundjay.com/nature/sounds/rain-07.mp3';
+    if(audioNoise) audioNoise.src = 'https://www.soundjay.com/misc/sounds/white-noise-01.mp3';
+
+    function stopAtmospheres() {
+        atmosphereRain.classList.remove('active');
+        atmosphereSun.classList.remove('active');
+        if (rainEngine) cancelAnimationFrame(rainEngine);
+        if (sunEngine) cancelAnimationFrame(sunEngine);
     }
 
-    // Audio Mixer & Stable URLs
-    // Not: GitHub Raw linkleri bazen kısıtlı olduğundan en stabil kamuya açık kaynaklar kullanıldı.
-    const audioSources = {
-        forest: 'https://www.soundjay.com/nature/sounds/rain-02.mp3', // Placeholder example, will be replaced with raw github if verified
-        rain: 'https://raw.githubusercontent.com/btahir/open-lofi/master/public/sounds/rain.mp3',
-        city: 'https://raw.githubusercontent.com/btahir/open-lofi/master/public/sounds/cafe.mp3',
-        noise: 'https://raw.githubusercontent.com/btahir/open-lofi/master/public/sounds/white-noise.mp3'
-    };
-    
-    // Uygulama içinde verileri set etme
-    if(audioForest) audioForest.src = 'https://raw.githubusercontent.com/yom-sc/lofi-player/master/src/assets/audio/forest.mp3'; 
-    if(audioCity) audioCity.src = 'https://raw.githubusercontent.com/yom-sc/lofi-player/master/src/assets/audio/cafe.mp3';
-    if(audioNoise) audioNoise.src = 'https://raw.githubusercontent.com/yom-sc/lofi-player/master/src/assets/audio/white_noise.mp3';
+    function startRain() {
+        const ctx = rainCanvas.getContext('2d');
+        rainCanvas.width = window.innerWidth;
+        rainCanvas.height = window.innerHeight;
+
+        class Drop {
+            constructor() { this.init(); }
+            init() {
+                this.x = Math.random() * rainCanvas.width;
+                this.y = Math.random() * rainCanvas.height - rainCanvas.height;
+                this.speed = Math.random() * 10 + 5;
+                this.len = Math.random() * 20 + 10;
+                this.opacity = Math.random() * 0.5;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.strokeStyle = `rgba(174, 194, 224, ${this.opacity})`;
+                ctx.lineWidth = 1;
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(this.x, this.y + this.len);
+                ctx.stroke();
+            }
+            update() {
+                this.y += this.speed;
+                if (this.y > rainCanvas.height) this.init();
+                this.draw();
+            }
+        }
+
+        const drops = Array.from({ length: 500 }, () => new Drop());
+        function animate() {
+            ctx.fillStyle = 'rgba(11, 16, 24, 0.3)';
+            ctx.fillRect(0, 0, rainCanvas.width, rainCanvas.height);
+            drops.forEach(drop => drop.update());
+            rainEngine = requestAnimationFrame(animate);
+        }
+        animate();
+    }
+
+    function startSun() {
+        const ctx = sunCanvas.getContext('2d');
+        sunCanvas.width = window.innerWidth;
+        sunCanvas.height = window.innerHeight;
+        
+        let rays = [];
+        for(let i=0; i<12; i++) rays.push({ angle: (i/12)*Math.PI*2, speed: 0.005 + Math.random()*0.01 });
+
+        function animate() {
+            ctx.clearRect(0,0, sunCanvas.width, sunCanvas.height);
+            const centerX = sunCanvas.width * 0.8;
+            const centerY = sunCanvas.height * 0.2;
+            
+            // Draw rays
+            rays.forEach(ray => {
+                ray.angle += ray.speed;
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(255, 234, 167, 0.2)';
+                ctx.lineWidth = 20;
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(centerX + Math.cos(ray.angle)*1000, centerY + Math.sin(ray.angle)*1000);
+                ctx.stroke();
+            });
+            sunEngine = requestAnimationFrame(animate);
+        }
+        animate();
+    }
 
     if(volVideo) volVideo.addEventListener('input', e => { if(bgVideo) bgVideo.volume = e.target.value / 100; });
     if(volForest) {
@@ -182,8 +248,7 @@ function initTheme() {
             // Klasik temaya tıklandı, CSS atmosferlerini ve videoyu gizle
             if(bgVideo) bgVideo.style.display = 'none';
             if(videoOverlay) videoOverlay.style.display = 'none';
-            if(atmosphereRain) atmosphereRain.classList.remove('active');
-            if(atmosphereSun) atmosphereSun.classList.remove('active');
+            stopAtmospheres();
             if(videoBtns) videoBtns.forEach(b => b.classList.remove('active'));
             applyTheme(btn.getAttribute('data-theme'));
         });
