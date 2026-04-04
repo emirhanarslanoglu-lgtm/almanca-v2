@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Almanca B2 Flaş Kart Oyunu</title>
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
@@ -15,9 +15,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Video Arka Plan ve Göz Yormayan Overlay -->
-    <video id="bg-video" autoplay loop muted playsinline>
-        <source src="rain.mp4" type="video/mp4">
+    <!-- Hareketli (CSS) Atmosferler -->
+    <div id="atmosphere-rain" class="atmosphere rain-mode"></div>
+    <div id="atmosphere-sun" class="atmosphere sun-mode">
+        <div class="sun-glow"></div>
+    </div>
+    
+    <video id="bg-video" autoplay loop muted playsinline style="display:none;">
+        <source src="" type="video/mp4">
     </video>
     <div id="video-overlay" class="video-overlay"></div>
 

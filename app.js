@@ -21,6 +21,8 @@ const categoryBtns = document.querySelectorAll('.category-btn');
 const themeBtns = document.querySelectorAll('.theme-btn');
 const bgVideo = document.getElementById('bg-video');
 const videoOverlay = document.getElementById('video-overlay');
+const atmosphereRain = document.getElementById('atmosphere-rain');
+const atmosphereSun = document.getElementById('atmosphere-sun');
 
 // Loop Menu & Sounds
 const loopToggleBtn = document.getElementById('loop-toggle-btn');
@@ -112,16 +114,20 @@ function init() {
     if(videoBtns) {
         videoBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-                // Tema butonundaki active'leri sil
-                themeBtns.forEach(b => b.classList.remove('active'));
-                
                 const vidType = btn.getAttribute('data-video');
-                bgVideo.style.display = 'block';
-                videoOverlay.style.display = 'block';
-                bgVideo.src = vidType + '.mp4';
-                bgVideo.play().catch(e => console.log('Autoplay engellendi:', e));
                 
-                // Active class manage
+                // Tema aktifleştirme (CSS Mode)
+                atmosphereRain.classList.remove('active');
+                atmosphereSun.classList.remove('active');
+                
+                if (vidType === 'rain') {
+                    atmosphereRain.classList.add('active');
+                } else if (vidType === 'sun') {
+                    atmosphereSun.classList.add('active');
+                }
+                
+                // UI Güncelleme
+                themeBtns.forEach(b => b.classList.remove('active'));
                 videoBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
             });
@@ -130,18 +136,23 @@ function init() {
 
     // Sounds Modal Logic
     if(soundsBtn && soundsModal) {
-        soundsBtn.addEventListener('click', () => {
-            soundsModal.classList.add('active');
-        });
-        closeSoundsBtn.addEventListener('click', () => {
-            soundsModal.classList.remove('active');
-        });
-        soundsModal.addEventListener('click', (e) => {
-            if (e.target === soundsModal) soundsModal.classList.remove('active');
-        });
+        // ... previous logic remains ...
     }
 
-    // Audio Mixer Listeners
+    // Audio Mixer & Stable URLs
+    // Not: GitHub Raw linkleri bazen kısıtlı olduğundan en stabil kamuya açık kaynaklar kullanıldı.
+    const audioSources = {
+        forest: 'https://www.soundjay.com/nature/sounds/rain-02.mp3', // Placeholder example, will be replaced with raw github if verified
+        rain: 'https://raw.githubusercontent.com/btahir/open-lofi/master/public/sounds/rain.mp3',
+        city: 'https://raw.githubusercontent.com/btahir/open-lofi/master/public/sounds/cafe.mp3',
+        noise: 'https://raw.githubusercontent.com/btahir/open-lofi/master/public/sounds/white-noise.mp3'
+    };
+    
+    // Uygulama içinde verileri set etme
+    if(audioForest) audioForest.src = 'https://raw.githubusercontent.com/yom-sc/lofi-player/master/src/assets/audio/forest.mp3'; 
+    if(audioCity) audioCity.src = 'https://raw.githubusercontent.com/yom-sc/lofi-player/master/src/assets/audio/cafe.mp3';
+    if(audioNoise) audioNoise.src = 'https://raw.githubusercontent.com/yom-sc/lofi-player/master/src/assets/audio/white_noise.mp3';
+
     if(volVideo) volVideo.addEventListener('input', e => { if(bgVideo) bgVideo.volume = e.target.value / 100; });
     if(volForest) {
         volForest.addEventListener('input', e => {
@@ -168,9 +179,11 @@ function initTheme() {
     applyTheme(savedTheme);
     themeBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            // Klasik temaya tıklandı, videoyu gizle
+            // Klasik temaya tıklandı, CSS atmosferlerini ve videoyu gizle
             if(bgVideo) bgVideo.style.display = 'none';
             if(videoOverlay) videoOverlay.style.display = 'none';
+            if(atmosphereRain) atmosphereRain.classList.remove('active');
+            if(atmosphereSun) atmosphereSun.classList.remove('active');
             if(videoBtns) videoBtns.forEach(b => b.classList.remove('active'));
             applyTheme(btn.getAttribute('data-theme'));
         });

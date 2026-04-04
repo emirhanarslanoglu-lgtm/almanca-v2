@@ -18,5 +18,22 @@
       "sizes": "512x512",
       "type": "image/png"
     }
+  ],
+  "categories": ["education", "books", "reference"],
+  "shortcuts": [
+    {
+      "name": "Hızlı Quiz",
+      "short_name": "Quiz",
+      "description": "Hemen bir quiz başlat",
+      "url": "/?view=quiz",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Öğrenilenler",
+      "short_name": "Öğrenilenler",
+      "description": "Öğrendiğim kelimelere göz at",
+      "url": "/?view=learned",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
   ]
 }
