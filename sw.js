@@ -1,4 +1,4 @@
-const CACHE_NAME = 'b2-flashcard-v17';
+const CACHE_NAME = 'b2-flashcard-v18';
 const ASSETS = [
     './',
     './index.html',
@@ -40,7 +40,5 @@ self.addEventListener('fetch', (e) => {
         }).catch(() => {
             return caches.match('./index.html');
         })
-    );
-});
     );
 });
