@@ -13,7 +13,22 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- YouTube IFrame Player API -->
+    <!-- YouTube IFrame Player API - Global Initializer (v16 fix) -->
+    <script>
+        window.ytPlayers = { rain: null, forest: null, white: null, brown: null, lofi: null };
+        const ytConfigs = { rain: 'gVKEM4K8J8A', forest: 'YV28HGdG8RE', white: 'Og40mpl8VNc', brown: '0GDfOAuUvQ0', lofi: 'kSNH-18gjQY' };
+
+        function onYouTubeIframeAPIReady() {
+            Object.keys(ytConfigs).forEach(key => {
+                const containerId = 'yt-player-' + key;
+                window.ytPlayers[key] = new YT.Player(containerId, {
+                    videoId: ytConfigs[key],
+                    playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1, 'playlist': ytConfigs[key], 'modestbranding': 1, 'mute': 1, 'playsinline': 1 },
+                    events: { 'onReady': (e) => e.target.setVolume(0) }
+                });
+            });
+        }
+    </script>
     <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>

@@ -24,22 +24,10 @@ const videoOverlay = document.getElementById('video-overlay');
 const atmosphereRain = document.getElementById('atmosphere-rain');
 const atmosphereSun = document.getElementById('atmosphere-sun');
 
-// YouTube Players Map
-let ytPlayers = {
-    rain: null,
-    forest: null,
-    white: null,
-    brown: null,
-    lofi: null
-};
+const atmosphereSun = document.getElementById('atmosphere-sun');
 
-const ytConfigs = {
-    rain: 'gVKEM4K8J8A',
-    forest: 'YV28HGdG8RE',
-    white: 'Og40mpl8VNc',
-    brown: '0GDfOAuUvQ0',
-    lofi: 'kSNH-18gjQY'
-};
+// YouTube Players (v16: artık window'dan okunuyor)
+const getYTPlayers = () => window.ytPlayers || {};
 
 // Loop Menu & Sounds
 const loopToggleBtn = document.getElementById('loop-toggle-btn');
@@ -144,9 +132,10 @@ function init() {
                     atmosphereRain.classList.add('active');
                     const rainYT = document.getElementById('yt-player-rain');
                     if(rainYT) rainYT.classList.add('active');
-                    if(ytPlayers.rain) {
-                        ytPlayers.rain.playVideo();
-                        ytPlayers.rain.unMute();
+                    const players = getYTPlayers();
+                    if(players.rain) {
+                        players.rain.playVideo();
+                        players.rain.unMute();
                     }
                     startRain();
                 } else if (vidType === 'sun') {
@@ -155,9 +144,10 @@ function init() {
                 } else if (vidType === 'forest') {
                     const forestYT = document.getElementById('yt-player-forest');
                     if(forestYT) forestYT.classList.add('active');
-                    if(ytPlayers.forest) {
-                        ytPlayers.forest.playVideo();
-                        ytPlayers.forest.unMute();
+                    const players = getYTPlayers();
+                    if(players.forest) {
+                        players.forest.playVideo();
+                        players.forest.unMute();
                     }
                 }
                 
@@ -177,12 +167,13 @@ function init() {
     if(volVideo) volVideo.addEventListener('input', e => setYTVolume('rain', e.target.value));
 
     function setYTVolume(key, val) {
-        if(ytPlayers[key]) {
-            if(val == 0) ytPlayers[key].mute();
+        const players = getYTPlayers();
+        if(players[key]) {
+            if(val == 0) players[key].mute();
             else {
-                ytPlayers[key].unMute();
-                ytPlayers[key].setVolume(val);
-                ytPlayers[key].playVideo(); // Ses açılınca başlasın
+                players[key].unMute();
+                players[key].setVolume(val);
+                players[key].playVideo(); // Ses açılınca başlasın
             }
         }
     }
@@ -193,36 +184,14 @@ function init() {
         document.querySelectorAll('.yt-bg-container').forEach(c => c.classList.remove('active'));
         
         // Videoları durdur/sessize al
-        if(ytPlayers.rain) ytPlayers.rain.mute();
-        if(ytPlayers.forest) ytPlayers.forest.mute();
+        const players = getYTPlayers();
+        if(players.rain) players.rain.mute();
+        if(players.forest) players.forest.mute();
 
         if (rainEngine) cancelAnimationFrame(rainEngine);
         if (sunEngine) cancelAnimationFrame(sunEngine);
     }
-
-    // YouTube API Initialization
-    window.onYouTubeIframeAPIReady = function() {
-        Object.keys(ytConfigs).forEach(key => {
-            const containerId = `yt-player-${key}`;
-            ytPlayers[key] = new YT.Player(containerId, {
-                videoId: ytConfigs[key],
-                playerVars: {
-                    'autoplay': 0,
-                    'controls': 0,
-                    'loop': 1,
-                    'playlist': ytConfigs[key],
-                    'modestbranding': 1,
-                    'mute': 1,
-                    'playsinline': 1
-                },
-                events: {
-                    'onReady': (event) => {
-                        event.target.setVolume(0);
-                    }
-                }
-            });
-        });
-    };
+    // YouTube API Initialization - Silindi (v16: index.html içine taşındı)
 
     function startRain() {
         const ctx = rainCanvas.getContext('2d');
