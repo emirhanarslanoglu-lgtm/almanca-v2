@@ -15,6 +15,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- Video Arka Plan ve Göz Yormayan Overlay -->
+    <video id="bg-video" autoplay loop muted playsinline>
+        <source src="rain.mp4" type="video/mp4">
+    </video>
+    <div id="video-overlay" class="video-overlay"></div>
+
     <!-- Sidebar ve Overlay -->
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
     <div id="sidebar" class="sidebar">
@@ -107,12 +113,22 @@
                 <button id="sidebar-toggle-btn" class="icon-btn" title="Menü"><i class="fas fa-bars"></i></button>
                 <h1>Almanca B2 🇩🇪</h1>
                 <div class="header-controls">
-                    <div class="theme-controls">
+                    <div class="theme-controls" title="Klasik Temalar">
                         <button class="theme-btn active" data-theme="light" title="Açık Tema"><i class="fas fa-sun"></i></button>
                         <button class="theme-btn" data-theme="dark" title="Siyah Tema"><i class="fas fa-moon"></i></button>
                         <button class="theme-btn" data-theme="navy" title="Lacivert Tema"><i class="fas fa-water"></i></button>
                         <button class="theme-btn" data-theme="system" title="Sistem Teması"><i class="fas fa-desktop"></i></button>
                     </div>
+                    
+                    <div class="video-theme-wrapper">
+                        <button id="loop-toggle-btn" class="icon-btn loop-btn" title="Hareketli Arka Planlar"><i class="fas fa-infinity"></i></button>
+                        <div class="video-options" id="video-options">
+                            <button id="vp-rain-btn" class="video-btn" title="Yağmur Videolu Mod" data-video="rain"><i class="fas fa-cloud-showers-heavy"></i></button>
+                            <button id="vp-sun-btn" class="video-btn" title="Güneş Videolu Mod" data-video="sun"><i class="fas fa-sun"></i></button>
+                        </div>
+                    </div>
+
+                    <button id="sounds-btn" class="icon-btn" title="Odaklanma ve Ambiyans Sesleri"><i class="fas fa-music"></i></button>
                     <button id="settings-btn" class="icon-btn" title="Ayarlar ve Veri Yönetimi"><i class="fas fa-cog"></i></button>
                 </div>
             </div>
@@ -170,6 +186,57 @@
             </div>
         </div>
     </div>
+
+    <!-- Ses Modalı -->
+    <div id="sounds-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Ambiyans Mikseri 🎧</h2>
+                <button id="close-sounds-btn" class="icon-btn">&times;</button>
+            </div>
+            <div class="modal-body" style="display: flex; flex-direction: column; gap: 20px;">
+                <p style="margin-bottom: 5px;">Kendi çalışma atmosferini yarat! Seçtiğin sesleri dilediğin oranda karıştır.</p>
+                
+                <!-- Video Sesi -->
+                <div class="mixer-track">
+                    <div class="track-info">
+                        <i class="fas fa-video"></i> <span>Arka Plan Videosu</span>
+                    </div>
+                    <input type="range" id="vol-video" class="vol-slider" min="0" max="100" value="50">
+                </div>
+
+                <!-- Orman -->
+                <div class="mixer-track">
+                    <div class="track-info">
+                        <i class="fas fa-tree"></i> <span>Orman Sesi</span>
+                    </div>
+                    <input type="range" id="vol-forest" class="vol-slider" min="0" max="100" value="0">
+                </div>
+
+                <!-- Şehir / Kafe -->
+                <div class="mixer-track">
+                    <div class="track-info">
+                        <i class="fas fa-city"></i> <span>Şehir / Kafe Sesi</span>
+                    </div>
+                    <input type="range" id="vol-city" class="vol-slider" min="0" max="100" value="0">
+                </div>
+
+                <!-- Beyaz Gürültü -->
+                <div class="mixer-track">
+                    <div class="track-info">
+                        <i class="fas fa-fan"></i> <span>Beyaz Gürültü</span>
+                    </div>
+                    <input type="range" id="vol-noise" class="vol-slider" min="0" max="100" value="0">
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Ses Kaynakları (Görünmez) -->
+    <audio id="audio-forest" loop src="forest.mp3"></audio>
+    <audio id="audio-city" loop src="city.mp3"></audio>
+    <audio id="audio-noise" loop src="whitenoise.mp3"></audio>
 
     <!-- PWA Service Worker -->
     <script>

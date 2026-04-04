@@ -19,6 +19,25 @@ const currentIndexEl = document.getElementById('current-index');
 const totalCountEl = document.getElementById('total-count');
 const categoryBtns = document.querySelectorAll('.category-btn');
 const themeBtns = document.querySelectorAll('.theme-btn');
+const bgVideo = document.getElementById('bg-video');
+const videoOverlay = document.getElementById('video-overlay');
+
+// Loop Menu & Sounds
+const loopToggleBtn = document.getElementById('loop-toggle-btn');
+const videoOptions = document.getElementById('video-options');
+const videoBtns = document.querySelectorAll('.video-btn');
+const soundsBtn = document.getElementById('sounds-btn');
+const soundsModal = document.getElementById('sounds-modal');
+const closeSoundsBtn = document.getElementById('close-sounds-btn');
+
+// Audio Tracking elements
+const volVideo = document.getElementById('vol-video');
+const audioForest = document.getElementById('audio-forest');
+const volForest = document.getElementById('vol-forest');
+const audioCity = document.getElementById('audio-city');
+const volCity = document.getElementById('vol-city');
+const audioNoise = document.getElementById('audio-noise');
+const volNoise = document.getElementById('vol-noise');
 
 // Sidebar Elements
 const sidebar = document.getElementById('sidebar');
@@ -82,13 +101,79 @@ function init() {
         if (stats.timeSpentSec % 5 === 0) saveStats(); // Her 5 sn de bir kaydet
         updateTimeUI();
     }, 1000);
+
+    // Loop Video & Theme Toggle Logic
+    if(loopToggleBtn && videoOptions) {
+        loopToggleBtn.addEventListener('click', () => {
+            videoOptions.classList.toggle('active');
+        });
+    }
+
+    if(videoBtns) {
+        videoBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Tema butonundaki active'leri sil
+                themeBtns.forEach(b => b.classList.remove('active'));
+                
+                const vidType = btn.getAttribute('data-video');
+                bgVideo.style.display = 'block';
+                videoOverlay.style.display = 'block';
+                bgVideo.src = vidType + '.mp4';
+                bgVideo.play().catch(e => console.log('Autoplay engellendi:', e));
+                
+                // Active class manage
+                videoBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+    }
+
+    // Sounds Modal Logic
+    if(soundsBtn && soundsModal) {
+        soundsBtn.addEventListener('click', () => {
+            soundsModal.classList.add('active');
+        });
+        closeSoundsBtn.addEventListener('click', () => {
+            soundsModal.classList.remove('active');
+        });
+        soundsModal.addEventListener('click', (e) => {
+            if (e.target === soundsModal) soundsModal.classList.remove('active');
+        });
+    }
+
+    // Audio Mixer Listeners
+    if(volVideo) volVideo.addEventListener('input', e => { if(bgVideo) bgVideo.volume = e.target.value / 100; });
+    if(volForest) {
+        volForest.addEventListener('input', e => {
+            const v = e.target.value / 100;
+            if(audioForest) { audioForest.volume = v; v > 0 ? audioForest.play() : audioForest.pause(); }
+        });
+    }
+    if(volCity) {
+        volCity.addEventListener('input', e => {
+            const v = e.target.value / 100;
+            if(audioCity) { audioCity.volume = v; v > 0 ? audioCity.play() : audioCity.pause(); }
+        });
+    }
+    if(volNoise) {
+        volNoise.addEventListener('input', e => {
+            const v = e.target.value / 100;
+            if(audioNoise) { audioNoise.volume = v; v > 0 ? audioNoise.play() : audioNoise.pause(); }
+        });
+    }
 }
 
 function initTheme() {
     const savedTheme = localStorage.getItem('b2_german_theme') || 'system';
     applyTheme(savedTheme);
     themeBtns.forEach(btn => {
-        btn.addEventListener('click', () => applyTheme(btn.getAttribute('data-theme')));
+        btn.addEventListener('click', () => {
+            // Klasik temaya tıklandı, videoyu gizle
+            if(bgVideo) bgVideo.style.display = 'none';
+            if(videoOverlay) videoOverlay.style.display = 'none';
+            if(videoBtns) videoBtns.forEach(b => b.classList.remove('active'));
+            applyTheme(btn.getAttribute('data-theme'));
+        });
     });
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
         if (localStorage.getItem('b2_german_theme') === 'system') applySystemTheme();
