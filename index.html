@@ -23,8 +23,8 @@
                 const containerId = 'yt-player-' + key;
                 window.ytPlayers[key] = new YT.Player(containerId, {
                     videoId: ytConfigs[key],
-                    playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1, 'playlist': ytConfigs[key], 'modestbranding': 1, 'mute': 1, 'playsinline': 1 },
-                    events: { 'onReady': (e) => e.target.setVolume(0) }
+                    playerVars: { 'autoplay': 1, 'controls': 0, 'loop': 1, 'playlist': ytConfigs[key], 'modestbranding': 1, 'mute': 1, 'playsinline': 1 },
+                    events: { 'onReady': (e) => { e.target.mute(); e.target.playVideo(); e.target.setVolume(0); } }
                 });
             });
         }

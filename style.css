@@ -43,7 +43,7 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: -3;
+    z-index: -2;
     pointer-events: none;
     opacity: 0;
     transition: opacity 1s ease;
@@ -59,7 +59,7 @@ body {
 
 .rain-mode.active {
     opacity: 1;
-    background: #0b1018; /* Gece mavisi/siyah arka plan */
+    background: transparent; /* YT videosunun görünmesi için şeffaf yapıldı */
 }
 
 /* Rain animation handled by Canvas JS now, CSS-only removed for performance */
@@ -71,11 +71,12 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: -4;
+    z-index: -3; /* Videolar en altta (Body bg üstü) */
     pointer-events: none;
     opacity: 0;
     transition: opacity 1.5s ease;
     transform: scale(1.1); /* Siyah kenarları gizlemek için hafif zoom */
+    background: #000; /* Video yüklenene kadar siyah kalsın */
 }
 
 .yt-bg-container iframe {
@@ -99,7 +100,7 @@ body {
 
 .sun-mode.active {
     opacity: 1;
-    background: linear-gradient(135deg, #74b9ff 0%, #81ecec 100%);
+    background: transparent;
 }
 
 .sun-glow {
@@ -127,8 +128,8 @@ body {
     width: 100vw;
     height: 100vh;
     object-fit: cover;
-    z-index: -2;
-    opacity: 0.8; /* Genel görünürlük yumuşatma */
+    z-index: -4; /* Eski videoyu en arkaya itelim */
+    opacity: 0;
 }
 
 .video-overlay {
