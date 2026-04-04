@@ -42,3 +42,16 @@ self.addEventListener('fetch', (e) => {
         })
     );
 });
+const ASSETS = [
+    './',
+    './index.html',
+    './style.css',
+    './app.js',
+    './data.js',
+    './manifest.json',
+    './rain.mp4',
+    './sun.mp4',
+    './forest.mp3',
+    './city.mp3',
+    './whitenoise.mp3'
+];
