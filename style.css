@@ -53,6 +53,7 @@ body {
 .app-container {
     width: 100%;
     max-width: 500px;
+    margin: 0 auto;
     padding: calc(20px + var(--safe-top)) 20px calc(20px + var(--safe-bottom)) 20px;
     display: flex;
     flex-direction: column;
@@ -564,27 +565,27 @@ body.theme-dark .theme-btn.active {
 
 /* Temalar */
 body.theme-pastel-blue {
-    --bg-gradient: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    --bg-gradient: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
     --card-bg: rgba(255, 255, 255, 0.7);
     --text-color: #0f172a;
 }
 body.theme-mint-green {
-    --bg-gradient: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    --bg-gradient: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%);
     --card-bg: rgba(255, 255, 255, 0.7);
     --text-color: #064e3b;
 }
 body.theme-pastel-purple {
-    --bg-gradient: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+    --bg-gradient: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%);
     --card-bg: rgba(255, 255, 255, 0.7);
     --text-color: #4c1d95;
 }
 body.theme-peach-pink {
-    --bg-gradient: linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%);
+    --bg-gradient: linear-gradient(135deg, #fecdd3 0%, #fda4af 100%);
     --card-bg: rgba(255, 255, 255, 0.7);
     --text-color: #881337;
 }
 body.theme-sun-yellow {
-    --bg-gradient: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    --bg-gradient: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
     --card-bg: rgba(255, 255, 255, 0.7);
     --text-color: #78350f;
 }

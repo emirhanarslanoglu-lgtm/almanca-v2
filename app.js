@@ -426,48 +426,54 @@ function setupModalListeners() {
         guideModal.addEventListener('click', (e) => { if(e.target === guideModal) guideModal.classList.remove('active'); });
     }
 
-    exportBtn.addEventListener('click', () => {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(activeDeck, null, 2));
-        const downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", "almanca_b2_deck.json");
-        document.body.appendChild(downloadAnchorNode); 
-        downloadAnchorNode.click();
-        downloadAnchorNode.remove();
-        alert("Desteniz JSON olarak indirildi!");
-    });
+    if(exportBtn) {
+        exportBtn.addEventListener('click', () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(activeDeck, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "almanca_b2_deck.json");
+            document.body.appendChild(downloadAnchorNode); 
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+            alert("Desteniz JSON olarak indirildi!");
+        });
+    }
 
-    importFile.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if(!file) return;
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            try {
-                const importedData = JSON.parse(event.target.result);
-                if(Array.isArray(importedData) && importedData.length > 0) {
-                    activeDeck = importedData;
-                    localStorage.setItem('b2_german_custom_deck', JSON.stringify(activeDeck));
-                    if(deckSizeEl) deckSizeEl.textContent = activeDeck.length;
-                    filterCards('tümü');
-                    alert(`${importedData.length} kelime içeri aktarıldı!`);
-                    settingsModal.classList.remove('active');
-                } else alert("Geçersiz JSON formatı.");
-            } catch(error) { alert("Dosya okunamadı!"); }
-        };
-        reader.readAsText(file);
-        importFile.value = '';
-    });
+    if(importFile) {
+        importFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const importedData = JSON.parse(event.target.result);
+                    if(Array.isArray(importedData) && importedData.length > 0) {
+                        activeDeck = importedData;
+                        localStorage.setItem('b2_german_custom_deck', JSON.stringify(activeDeck));
+                        if(deckSizeEl) deckSizeEl.textContent = activeDeck.length;
+                        filterCards('tümü');
+                        alert(`${importedData.length} kelime içeri aktarıldı!`);
+                        if(settingsModal) settingsModal.classList.remove('active');
+                    } else alert("Geçersiz JSON formatı.");
+                } catch(error) { alert("Dosya okunamadı!"); }
+            };
+            reader.readAsText(file);
+            importFile.value = '';
+        });
+    }
 
-    resetBtn.addEventListener('click', () => {
-        if(confirm("Kendi destenizi silip varsayılan desteye dönmek istediğinize emin misiniz?")) {
-            localStorage.removeItem('b2_german_custom_deck');
-            activeDeck = [...defaultDeck];
-            if(deckSizeEl) deckSizeEl.textContent = activeDeck.length;
-            filterCards('tümü');
-            alert("Varsayılan desteye dönüldü.");
-            settingsModal.classList.remove('active');
-        }
-    });
+    if(resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            if(confirm("Kendi destenizi silip varsayılan desteye dönmek istediğinize emin misiniz?")) {
+                localStorage.removeItem('b2_german_custom_deck');
+                activeDeck = [...defaultDeck];
+                if(deckSizeEl) deckSizeEl.textContent = activeDeck.length;
+                filterCards('tümü');
+                alert("Varsayılan desteye dönüldü.");
+                if(settingsModal) settingsModal.classList.remove('active');
+            }
+        });
+    }
 }
 
 function capitalize(str) {
