@@ -25,127 +25,29 @@
 }
 
 body {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Outfit', sans-serif;
     background: var(--bg-gradient);
     color: var(--text-color);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: block;
     min-height: 100vh;
     overflow-x: hidden;
-    position: relative; /* Video için eklendi */
+    overflow-y: auto;
 }
 
-/* Atmosphere CSS Effects (High performance, No Video needed) */
-.atmosphere {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -2;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 1s ease;
+@keyframes floatAnim {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+    100% { transform: translateY(0px); }
 }
 
-.atmosphere canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+.bouncy-btn {
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-
-.rain-mode.active {
-    opacity: 1;
-    background: transparent; /* YT videosunun görünmesi için şeffaf yapıldı */
+.bouncy-btn:hover {
+    transform: scale(1.1);
 }
-
-/* Rain animation handled by Canvas JS now, CSS-only removed for performance */
-
-/* YouTube Background Containers */
-.yt-bg-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -3; /* Videolar en altta (Body bg üstü) */
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 1.5s ease;
-    transform: scale(1.1); /* Siyah kenarları gizlemek için hafif zoom */
-    background: #000; /* Video yüklenene kadar siyah kalsın */
-}
-
-.yt-bg-container iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-}
-
-.yt-bg-container.active {
-    opacity: 1;
-}
-
-.yt-audio-container {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    opacity: 0;
-    pointer-events: none;
-    overflow: hidden;
-}
-
-.sun-mode.active {
-    opacity: 1;
-    background: transparent;
-}
-
-.sun-glow {
-    position: absolute;
-    top: 60px;
-    right: 60px;
-    width: 100px;
-    height: 100px;
-    background: radial-gradient(circle, #ffeaa7 0%, rgba(253, 203, 110, 0) 70%);
-    border-radius: 50%;
-    filter: blur(10px);
-    animation: pulseSun 4s infinite ease-in-out;
-}
-
-@keyframes pulseSun {
-    0%, 100% { transform: scale(1); opacity: 0.6; }
-    50% { transform: scale(1.5); opacity: 0.9; }
-}
-
-/* Video Background Styles */
-#bg-video {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    object-fit: cover;
-    z-index: -4; /* Eski videoyu en arkaya itelim */
-    opacity: 0;
-}
-
-.video-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.4); /* Göz yormayı önleyen gölge/filtre */
-    z-index: -1;
-    backdrop-filter: blur(2px); /* Hafif flulaştırma ortamı yumuşatır */
-}
-
-/* Koyu temalarda overlay'i biraz daha karartalım */
-body.theme-dark .video-overlay, body.theme-navy .video-overlay {
-    background: rgba(0, 0, 0, 0.7);
+.bouncy-btn:active {
+    transform: scale(0.9);
 }
 
 .app-container {
@@ -154,9 +56,8 @@ body.theme-dark .video-overlay, body.theme-navy .video-overlay {
     padding: calc(20px + var(--safe-top)) 20px calc(20px + var(--safe-bottom)) 20px;
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    max-height: 100dvh; /* Dynamic viewport height for mobile */
-    overflow: hidden;
+    min-height: 100vh;
+    overflow-y: auto;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
 }
@@ -203,7 +104,7 @@ body.theme-dark .theme-controls, body.theme-navy .theme-controls {
 
 .theme-btn {
     background: transparent;
-    border: none;
+    border: 2px solid transparent;
     color: #a0aec0;
     cursor: pointer;
     font-size: 1rem;
@@ -213,79 +114,27 @@ body.theme-dark .theme-controls, body.theme-navy .theme-controls {
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .theme-btn:hover {
-    color: var(--primary-color);
+    transform: scale(1.1);
     background: rgba(0, 0, 0, 0.05);
 }
 
-body.theme-dark .theme-btn:hover, body.theme-navy .theme-btn:hover {
+body.theme-dark .theme-btn:hover {
     background: rgba(255, 255, 255, 0.1);
 }
 
 .theme-btn.active {
-    color: var(--primary-color);
-    background: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 2px solid var(--text-color);
+    transform: scale(1.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
-body.dark .theme-btn.active, body.navy .theme-btn.active {
-    background: #2d3748;
-    color: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.video-theme-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.video-options {
-    display: flex;
-    gap: 5px;
-    background: rgba(0,0,0,0.05);
-    border-radius: 20px;
-    padding: 3px 6px;
-    margin-left: 5px;
-    opacity: 0;
-    max-width: 0;
-    overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    pointer-events: none;
-}
-
-.video-options.active {
-    opacity: 1;
-    max-width: 100px; /* Yağmur ve Güneş Butonu sığsın */
-    pointer-events: all;
-}
-
-.video-btn {
-    background: transparent;
-    border: none;
-    color: #a0aec0;
-    cursor: pointer;
-    font-size: 1rem;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: all 0.3s ease;
-}
-
-.video-btn:hover, .video-btn.active {
-    color: var(--primary-color);
-    background: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-body.theme-dark .video-btn:hover, body.theme-dark .video-btn.active, 
-body.theme-navy .video-btn:hover, body.theme-navy .video-btn.active {
-    background: #2d3748; color: #fff;
+body.theme-dark .theme-btn.active {
+    border-color: #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .icon-btn {
@@ -351,6 +200,7 @@ body.theme-navy .video-btn:hover, body.theme-navy .video-btn.active {
     position: absolute;
     transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.4s;
     transform-style: preserve-3d;
+    animation: floatAnim 6s ease-in-out infinite;
 }
 
 .flashcard.flipped .front {
@@ -366,17 +216,19 @@ body.theme-navy .video-btn:hover, body.theme-navy .video-btn.active {
     width: 100%;
     height: 100%;
     backface-visibility: hidden;
-    border-radius: 20px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    border-radius: 24px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.08);
     display: flex;
     flex-direction: column;
     padding: 20px 15px;
     justify-content: center;
     align-items: center;
     text-align: center;
-    background: var(--card-bg);
-    border-top: 8px solid transparent; 
-    transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+    background: rgba(255, 255, 255, 0.85); /* Glassmorphism Base */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1), box-shadow 0.3s;
 }
 
 .front {
@@ -388,11 +240,11 @@ body.theme-navy .video-btn:hover, body.theme-navy .video-btn.active {
     transform: rotateY(-180deg);
 }
 
-/* Kategori Renkleri - Kart Üst Sınırı */
-.flashcard[data-cat="isimler"] .card-face { border-top-color: var(--isimler-color); }
-.flashcard[data-cat="fiiller"] .card-face { border-top-color: var(--fiiller-color); }
-.flashcard[data-cat="sıfatlar"] .card-face { border-top-color: var(--sıfatlar-color); }
-.flashcard[data-cat="bağlaçlar"] .card-face { border-top-color: var(--bağlaçlar-color); }
+/* Kategori Renkleri - Kart Üst Sınırı (Artık Glow Gölge Olarak Kullanılıyor) */
+.flashcard[data-cat="isimler"] .card-face { box-shadow: 0 15px 35px rgba(66, 153, 225, 0.15), inset 0 0 0 2px rgba(66, 153, 225, 0.1); }
+.flashcard[data-cat="fiiller"] .card-face { box-shadow: 0 15px 35px rgba(245, 101, 101, 0.15), inset 0 0 0 2px rgba(245, 101, 101, 0.1); }
+.flashcard[data-cat="sıfatlar"] .card-face { box-shadow: 0 15px 35px rgba(72, 187, 120, 0.15), inset 0 0 0 2px rgba(72, 187, 120, 0.1); }
+.flashcard[data-cat="bağlaçlar"] .card-face { box-shadow: 0 15px 35px rgba(237, 137, 54, 0.15), inset 0 0 0 2px rgba(237, 137, 54, 0.1); }
 
 /* Kategori Etiketi */
 .category-label {
@@ -711,98 +563,123 @@ body.theme-navy .video-btn:hover, body.theme-navy .video-btn.active {
 }
 
 /* Temalar */
+body.theme-pastel-blue {
+    --bg-gradient: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    --card-bg: rgba(255, 255, 255, 0.7);
+    --text-color: #0f172a;
+}
+body.theme-mint-green {
+    --bg-gradient: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    --card-bg: rgba(255, 255, 255, 0.7);
+    --text-color: #064e3b;
+}
+body.theme-pastel-purple {
+    --bg-gradient: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+    --card-bg: rgba(255, 255, 255, 0.7);
+    --text-color: #4c1d95;
+}
+body.theme-peach-pink {
+    --bg-gradient: linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%);
+    --card-bg: rgba(255, 255, 255, 0.7);
+    --text-color: #881337;
+}
+body.theme-sun-yellow {
+    --bg-gradient: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    --card-bg: rgba(255, 255, 255, 0.7);
+    --text-color: #78350f;
+}
 body.theme-dark {
-    --bg-gradient: #121212;
-    --card-bg: #1e1e1e;
-    --text-color: #e2e8f0;
+    --bg-gradient: #1e293b; /* Slate 800 */
+    --card-bg: rgba(15, 23, 42, 0.85); /* Slate 900 wit opacity */
+    --text-color: #f1f5f9;
 }
 
-body.theme-navy {
-    --bg-gradient: linear-gradient(135deg, #09121a 0%, #15273b 100%);
-    --card-bg: #1e2e42;
-    --text-color: #e2e8f0;
+body.theme-dark .card-face {
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.4);
 }
 
-body.theme-dark .word, body.theme-navy .word {
+body.theme-dark .word {
     color: #f7fafc;
 }
 
-body.theme-dark .translation-word, body.theme-navy .translation-word {
+body.theme-dark .translation-word {
     color: #63b3ed;
 }
 
-body.theme-dark h1, body.theme-navy h1 {
+body.theme-dark h1 {
     color: #e2e8f0;
 }
 
-body.theme-dark .sentence, body.theme-navy .sentence,
-body.theme-dark .translation-sentence, body.theme-navy .translation-sentence {
+body.theme-dark .sentence, 
+body.theme-dark .translation-sentence {
     background: rgba(255, 255, 255, 0.05);
     color: #cbd5e0;
 }
 
-body.theme-dark .category-btn, body.theme-navy .category-btn {
+body.theme-dark .category-btn {
     background: rgba(255, 255, 255, 0.1);
     color: #cbd5e0;
 }
 
-body.theme-dark .category-btn:hover, body.theme-navy .category-btn:hover {
+body.theme-dark .category-btn:hover {
     background: rgba(255, 255, 255, 0.2);
 }
 
-body.theme-dark .category-btn.active, body.theme-navy .category-btn.active {
+body.theme-dark .category-btn.active {
     background: var(--primary-color);
     color: white;
 }
 
-body.theme-dark .nav-btn, body.theme-navy .nav-btn {
+body.theme-dark .nav-btn {
     background: rgba(255, 255, 255, 0.05);
     border-color: rgba(255, 255, 255, 0.1);
     color: #cbd5e0;
 }
 
-body.theme-dark .nav-btn:hover, body.theme-navy .nav-btn:hover {
+body.theme-dark .nav-btn:hover {
     background: rgba(255, 255, 255, 0.1);
 }
 
-body.theme-dark .modal-content, body.theme-navy .modal-content {
-    background: #1e2e42;
+body.theme-dark .modal-content {
+    background: #1e293b;
     color: #e2e8f0;
 }
 
-body.theme-dark .modal-header h2, body.theme-navy .modal-header h2 {
+body.theme-dark .modal-header h2 {
     color: #e2e8f0;
 }
 
-body.theme-dark .modal-header, body.theme-navy .modal-header {
+body.theme-dark .modal-header {
     border-color: rgba(255, 255, 255, 0.1);
 }
 
-body.theme-dark .modal-body p, body.theme-navy .modal-body p {
-    color: #a0aec0;
+body.theme-dark .modal-body p, body.theme-dark ul {
+    color: #a0aec0 !important;
 }
 
-body.theme-dark .action-btn.secondary, body.theme-navy .action-btn.secondary {
+body.theme-dark .action-btn.secondary {
     background: rgba(255, 255, 255, 0.05);
     color: #e2e8f0;
     border-color: rgba(255, 255, 255, 0.1);
 }
 
-body.theme-dark .action-btn.secondary:hover, body.theme-navy .action-btn.secondary:hover {
+body.theme-dark .action-btn.secondary:hover {
     background: rgba(255, 255, 255, 0.1);
 }
 
-body.theme-dark .danger-zone, body.theme-navy .danger-zone {
+body.theme-dark .danger-zone {
     border-color: rgba(255, 255, 255, 0.1);
 }
 
-body.theme-dark .action-btn.danger, body.theme-navy .action-btn.danger {
+body.theme-dark .action-btn.danger {
     background: rgba(229, 62, 62, 0.1);
     color: #fc8181;
     border-color: rgba(229, 62, 62, 0.2);
 }
 
-body.theme-dark .action-btn.danger:hover, body.theme-navy .action-btn.danger:hover {
+body.theme-dark .action-btn.danger:hover {
     background: rgba(229, 62, 62, 0.2);
 }
 
@@ -925,59 +802,3 @@ body.theme-dark .status-btn, body.theme-navy .status-btn {
 }
 #quiz-answer-input:focus { box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.3); }
 
-/* Ses Mikseri Modalı */
-.mixer-track {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: rgba(160,174,192,0.1);
-    padding: 12px 15px;
-    border-radius: 12px;
-}
-
-.track-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: var(--text-color);
-    min-width: 150px;
-}
-
-.track-info i {
-    color: var(--primary-color);
-    font-size: 1.1rem;
-    width: 20px;
-    text-align: center;
-}
-
-/* Özel Çubuk (Slider) Tasarımı */
-.vol-slider {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 120px;
-    height: 6px;
-    background: #cbd5e0;
-    border-radius: 5px;
-    outline: none;
-    cursor: pointer;
-}
-
-.vol-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: var(--primary-color);
-    cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    transition: transform 0.2s;
-}
-
-.vol-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.2);
-}
-
-body.theme-dark .vol-slider, body.theme-navy .vol-slider { background: #4a5568; }

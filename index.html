@@ -11,49 +11,12 @@
     <link rel="apple-touch-icon" href="icon-192.png">
     
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- YouTube IFrame Player API - Global Initializer (v16 fix) -->
-    <script>
-        window.ytPlayers = { rain: null, forest: null, white: null, brown: null, lofi: null };
-        const ytConfigs = { rain: 'gVKEM4K8J8A', forest: 'YV28HGdG8RE', white: 'Og40mpl8VNc', brown: '0GDfOAuUvQ0', lofi: 'kSNH-18gjQY' };
-
-        function onYouTubeIframeAPIReady() {
-            Object.keys(ytConfigs).forEach(key => {
-                const containerId = 'yt-player-' + key;
-                window.ytPlayers[key] = new YT.Player(containerId, {
-                    videoId: ytConfigs[key],
-                    playerVars: { 'autoplay': 1, 'controls': 0, 'loop': 1, 'playlist': ytConfigs[key], 'modestbranding': 1, 'mute': 1, 'playsinline': 1 },
-                    events: { 'onReady': (e) => { e.target.mute(); e.target.playVideo(); e.target.setVolume(0); } }
-                });
-            });
-        }
-    </script>
-    <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
-    <!-- Hareketli (Canvas) Atmosferler -->
-    <div id="atmosphere-rain" class="atmosphere rain-mode">
-        <canvas id="rain-canvas"></canvas>
-    </div>
-    <div id="atmosphere-sun" class="atmosphere sun-mode">
-        <canvas id="sun-canvas"></canvas>
-        <div class="sun-glow"></div>
-    </div>
-    
-    <video id="bg-video" autoplay loop muted playsinline style="display:none;">
-        <source src="" type="video/mp4">
-    </video>
-    <div id="video-overlay" class="video-overlay"></div>
-
-    <!-- YouTube Arka Plan Video Konteynerleri -->
-    <div id="yt-player-rain" class="yt-bg-container"></div>
-    <div id="yt-player-forest" class="yt-bg-container"></div>
-    <!-- Önemli: Ses kanalları (görünmez) -->
-    <div id="yt-player-white" class="yt-audio-container"></div>
-    <div id="yt-player-brown" class="yt-audio-container"></div>
-    <div id="yt-player-lofi" class="yt-audio-container"></div>
-
     <!-- Sidebar ve Overlay -->
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
     <div id="sidebar" class="sidebar">
@@ -133,7 +96,6 @@
                     <div style="color:#48bb78;"><i class="fas fa-check"></i> Doğru: <span id="quiz-res-correct">0</span></div>
                     <div style="color:#f56565;"><i class="fas fa-times"></i> Yanlış: <span id="quiz-res-wrong">0</span></div>
                 </div>
-                <!-- Kelime kelime liste -->
                 <div id="quiz-res-list" style="max-height: 300px; overflow-y:auto; border-top:1px dashed #ccc; padding-top:10px; margin-bottom:15px; display:flex; flex-direction:column; gap:8px;"></div>
                 <button id="quiz-back-to-menu-btn" class="action-btn primary">Menüye Dön</button>
             </div>
@@ -143,27 +105,19 @@
     <div class="app-container">
         <header>
             <div class="header-top">
-                <button id="sidebar-toggle-btn" class="icon-btn" title="Menü"><i class="fas fa-bars"></i></button>
+                <button id="sidebar-toggle-btn" class="icon-btn bouncy-btn" title="Menü"><i class="fas fa-bars"></i></button>
                 <h1>Almanca B2 🇩🇪</h1>
                 <div class="header-controls">
-                    <div class="theme-controls" title="Klasik Temalar">
-                        <button class="theme-btn active" data-theme="light" title="Açık Tema"><i class="fas fa-sun"></i></button>
-                        <button class="theme-btn" data-theme="dark" title="Siyah Tema"><i class="fas fa-moon"></i></button>
-                        <button class="theme-btn" data-theme="navy" title="Lacivert Tema"><i class="fas fa-water"></i></button>
-                        <button class="theme-btn" data-theme="system" title="Sistem Teması"><i class="fas fa-desktop"></i></button>
+                    <div class="theme-controls" title="Renk Temaları">
+                        <button class="theme-btn active" data-theme="pastel-blue" style="background:#e0f2fe; color:#0369a1;" title="Tatlı Mavi"></button>
+                        <button class="theme-btn" data-theme="mint-green" style="background:#d1fae5; color:#047857;" title="Nane Yeşili"></button>
+                        <button class="theme-btn" data-theme="pastel-purple" style="background:#f3e8ff; color:#7e22ce;" title="Pastel Mor"></button>
+                        <button class="theme-btn" data-theme="peach-pink" style="background:#ffe4e6; color:#be123c;" title="Şeftali Pembe"></button>
+                        <button class="theme-btn" data-theme="sun-yellow" style="background:#fef3c7; color:#b45309;" title="Güneş Sarısı"></button>
+                        <button class="theme-btn" data-theme="dark" style="background:#334155; color:#f8fafc;" title="Gece Modu"><i class="fas fa-moon" style="font-size:0.75rem;"></i></button>
                     </div>
-                    
-                    <div class="video-theme-wrapper">
-                        <button id="loop-toggle-btn" class="icon-btn loop-btn" title="Hareketli Arka Planlar"><i class="fas fa-infinity"></i></button>
-                        <div class="video-options" id="video-options">
-                            <button id="vp-rain-btn" class="video-btn" title="Yağmur Modu" data-video="rain"><i class="fas fa-cloud-showers-heavy"></i></button>
-                            <button id="vp-forest-btn" class="video-btn" title="Orman Modu" data-video="forest"><i class="fas fa-tree"></i></button>
-                            <button id="vp-sun-btn" class="video-btn" title="Güneş Modu" data-video="sun"><i class="fas fa-sun"></i></button>
-                        </div>
-                    </div>
-
-                    <button id="sounds-btn" class="icon-btn" title="Odaklanma ve Ambiyans Sesleri"><i class="fas fa-music"></i></button>
-                    <button id="settings-btn" class="icon-btn" title="Ayarlar ve Veri Yönetimi"><i class="fas fa-cog"></i></button>
+                    <button id="guide-btn" class="icon-btn bouncy-btn" title="Nasıl Kullanılır?"><i class="fas fa-question-circle"></i></button>
+                    <button id="settings-btn" class="icon-btn bouncy-btn" title="Ayarlar ve Veri Yönetimi"><i class="fas fa-cog"></i></button>
                 </div>
             </div>
             <nav class="categories">
@@ -181,9 +135,9 @@
         </main>
 
         <div class="controls">
-            <button id="prev-btn" class="nav-btn"><i class="fas fa-chevron-left"></i> Önceki</button>
+            <button id="prev-btn" class="nav-btn bouncy-btn"><i class="fas fa-chevron-left"></i> Önceki</button>
             <div class="progress"><span id="current-index">0</span> / <span id="total-count">0</span></div>
-            <button id="next-btn" class="nav-btn">Sonraki <i class="fas fa-chevron-right"></i></button>
+            <button id="next-btn" class="nav-btn bouncy-btn">Sonraki <i class="fas fa-chevron-right"></i></button>
         </div>
         <div class="swipe-hint">
             <i class="fas fa-hand-pointer"></i> Yüzü çevirmek için dokun<br>
@@ -191,103 +145,26 @@
         </div>
     </div>
 
-    <!-- Ayarlar Modal -->
-    <div id="settings-modal" class="modal-overlay">
+    <!-- Nasıl Kullanılır Modalı -->
+    <div id="guide-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Veri Yönetimi</h2>
-                <button id="close-modal-btn" class="icon-btn">&times;</button>
+                <h2>📖 Nasıl Kullanılır?</h2>
+                <button id="close-guide-btn" class="icon-btn bouncy-btn">&times;</button>
             </div>
-            <div class="modal-body">
-                <p>Kendi kelime destenizi (JSON) formatında içe aktarabilir veya mevcut <span id="deck-size">1000</span> kelimelik desteyi dışa aktarabilirsiniz.</p>
-                
-                <div class="action-buttons">
-                    <button id="export-btn" class="action-btn primary">
-                        <i class="fas fa-download"></i> JSON Dışa Aktar
-                    </button>
-                    
-                    <label for="import-file" class="action-btn secondary custom-file-upload">
-                        <i class="fas fa-upload"></i> JSON İçe Aktar
-                        <input type="file" id="import-file" accept=".json" style="display: none;">
-                    </label>
-                </div>
-                
-                <div class="danger-zone">
-                    <button id="reset-btn" class="action-btn danger">
-                        <i class="fas fa-trash-alt"></i> Varsayılan Desteye Dön
-                    </button>
-                </div>
+            <div class="modal-body" style="font-size:0.95rem; line-height:1.6;">
+                <p><strong>1. Kart Çevirme:</strong> Almanca kelimenin anlamını görmek için karta bir kez tıklayın veya dokunun.</p>
+                <p><strong>2. Kaydırma (Swipe):</strong> Sonraki kelimeye geçmek için ekranı (kartı) hafifçe sola kaydırın. Önceki için sağa kaydırın.</p>
+                <p><strong>3. Butonlar:</strong></p>
+                <ul style="padding-left: 20px; text-align: left; margin-bottom:15px; color:#4a5568;">
+                    <li><i class="fas fa-heart" style="color:var(--accent-color)"></i> Favorilere Ekle</li>
+                    <li><i class="fas fa-check"></i> Öğrendiğim kelimeler listesine at</li>
+                    <li><i class="fas fa-times"></i> Tekrar edilecek kelimeler (Zorlandıklarım)</li>
+                </ul>
+                <p><strong>4. Temalar:</strong> Sağ üst köşedeki yuvarlak renk tonlarına basarak uygulamanın ambiyansını ruh halinize göre değiştirebilirsiniz.</p>
             </div>
+            <button id="guide-ok-btn" class="action-btn primary bouncy-btn" style="margin-top:10px;">Anladım, Teşekkürler!</button>
         </div>
-    </div>
-
-    <!-- Ses Modalı -->
-    <div id="sounds-modal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Ambiyans Mikseri 🎧</h2>
-                <button id="close-sounds-btn" class="icon-btn">&times;</button>
-            </div>
-            <div class="modal-body" style="display: flex; flex-direction: column; gap: 20px;">
-                <p style="margin-bottom: 5px;">Kendi çalışma atmosferini yarat! Seçtiğin sesleri dilediğin oranda karıştır.</p>
-                
-                <!-- Video Sesi -->
-                <div class="mixer-track">
-                    <div class="track-info">
-                        <i class="fas fa-video"></i> <span>Arka Plan Videosu</span>
-                    </div>
-                    <input type="range" id="vol-video" class="vol-slider" min="0" max="100" value="50">
-                </div>
-
-                <!-- Orman -->
-                <div class="mixer-track">
-                    <div class="track-info">
-                        <i class="fas fa-tree"></i> <span>Orman Sesi</span>
-                    </div>
-                    <input type="range" id="vol-forest" class="vol-slider" min="0" max="100" value="0">
-                </div>
-
-                <!-- Şehir / Kafe -->
-                <div class="mixer-track">
-                    <div class="track-info">
-                        <i class="fas fa-city"></i> <span>Şehir / Kafe Sesi</span>
-                    </div>
-                    <input type="range" id="vol-city" class="vol-slider" min="0" max="100" value="0">
-                </div>
-
-                <!-- Beyaz Gürültü -->
-                <div class="mixer-track">
-                    <div class="track-info">
-                        <i class="fas fa-fan"></i> <span>Beyaz Gürültü</span>
-                    </div>
-                    <input type="range" id="vol-white" class="vol-slider" min="0" max="100" value="0">
-                </div>
-
-                <!-- Kahverengi Gürültü -->
-                <div class="mixer-track">
-                    <div class="track-info">
-                        <i class="fas fa-wind"></i> <span>Kahverengi Gürültü</span>
-                    </div>
-                    <input type="range" id="vol-brown" class="vol-slider" min="0" max="100" value="0">
-                </div>
-
-                <!-- Lofi Müzik -->
-                <div class="mixer-track">
-                    <div class="track-info">
-                        <i class="fas fa-headphones"></i> <span>Lofi Müzik</span>
-                    </div>
-                    <input type="range" id="vol-lofi" class="vol-slider" min="0" max="100" value="0">
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-    <!-- Eski Ses Kaynakları Devre Dışı (YT'ye Geçildi) -->
-    <div style="display:none;">
-        <audio id="audio-forest" loop></audio>
-        <audio id="audio-city" loop></audio>
-        <audio id="audio-noise" loop></audio>
     </div>
 
     <!-- PWA Service Worker -->
@@ -300,7 +177,6 @@
             });
         }
     </script>
-
     <!-- Modül olarak JS dosyasının eklenmesi -->
     <script type="module" src="app.js"></script>
 </body>
