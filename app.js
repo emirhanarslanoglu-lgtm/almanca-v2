@@ -5,12 +5,13 @@ let currentCategory = 'tümü';
 let filteredCards = [];
 let currentIndex = 0;
 
-// Durum Yönetimi (LocalStorage)
+// State Management
 let favorites = JSON.parse(localStorage.getItem('b2_german_favorites')) || [];
 let learned = JSON.parse(localStorage.getItem('b2_german_learned')) || [];
 let review = JSON.parse(localStorage.getItem('b2_german_review')) || [];
 let customFolders = JSON.parse(localStorage.getItem('b2_german_folders')) || {};
 let stats = JSON.parse(localStorage.getItem('b2_german_stats')) || { flipped: 0, timeSpentSec: 0 };
+let quizWrongs = JSON.parse(localStorage.getItem('b2_quiz_wrongs')) || {}; 
 
 // DOM Elements
 const cardContainer = document.getElementById('card-container');
@@ -65,10 +66,140 @@ const quizTotalEl = document.getElementById('quiz-total-count');
 
 // Quiz State
 let isQuizActive = false;
-let quizMode = 0; // 1: all, 2: review, 3: turkish
+let quizMode = 0; 
 let quizCards = [];
 let currentQuizIdx = 0;
-let quizResults = []; // { id, isCorrect, input }
+let quizResults = [];
+let mcqAnswered = false; 
+
+// ==========================================
+// STREAK SYSTEM
+// ==========================================
+function getStreak() {
+    const activityLog = JSON.parse(localStorage.getItem('b2_activity_log')) || {};
+    const allDates = Object.keys(activityLog).sort().reverse();
+    if (allDates.length === 0) return 0;
+
+    const today = new Date().toISOString().split('T')[0];
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+    // If not active today or yesterday, streak is broken
+    if (!activityLog[today] && !activityLog[yesterday]) return 0;
+
+    let streak = 0;
+    let checkDate = activityLog[today] ? new Date() : new Date(Date.now() - 86400000);
+
+    for (let i = 0; i < 365; i++) {
+        const dateStr = checkDate.toISOString().split('T')[0];
+        if (activityLog[dateStr] && activityLog[dateStr] > 0) {
+            streak++;
+            checkDate = new Date(checkDate.getTime() - 86400000);
+        } else {
+            break;
+        }
+    }
+    return streak;
+}
+
+function renderStreakUI() {
+    const streakEl = document.getElementById('streak-display');
+    if (!streakEl) return;
+
+    const today = new Date().toISOString().split('T')[0];
+    const activityLog = JSON.parse(localStorage.getItem('b2_activity_log')) || {};
+    const todayActive = activityLog[today] > 0;
+    const streak = getStreak();
+
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    const yesterdayActive = activityLog[yesterday] > 0;
+    
+    // Streak broken if neither today nor yesterday has activity
+    const isBroken = !todayActive && !yesterdayActive;
+
+    let emoji, color, label, statusText, animClass;
+    
+    if (isBroken || streak === 0) {
+        emoji = '🧊';
+        color = '#63b3ed';
+        label = 'Seri Bozuldu';
+        statusText = 'Tekrar canlandırmak için bugün çalış!';
+        animClass = 'ice';
+    } else {
+        color = streak >= 7 ? '#f56565' : (streak >= 3 ? '#ed8936' : '#f6ad55');
+        emoji = streak >= 7 ? '🔥🔥🔥' : (streak >= 3 ? '🔥🔥' : '🔥');
+        label = `${streak} Günlük Seri!`;
+        statusText = todayActive ? 'Harika! Bugünlük kotanı doldurdun.' : 'Seriyi devam ettirmek için çalış!';
+        animClass = 'fire';
+    }
+
+    streakEl.innerHTML = `
+        <div class="streak-box">
+            <span class="streak-emoji ${animClass}">${emoji}</span>
+            <div>
+                <div style="font-weight:700; font-size:1.1rem; color:${color};">${label}</div>
+                <div style="font-size:0.78rem; color:#718096; opacity: 0.8;">
+                    ${statusText}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ==========================================
+// WEAK POINT ANALYSIS
+// ==========================================
+function renderWeakPointsUI() {
+    const el = document.getElementById('weak-points-panel');
+    if (!el) return;
+
+    const wrongEntries = Object.entries(quizWrongs)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+
+    if (wrongEntries.length === 0) {
+        el.innerHTML = `<div style="text-align:center; color:#a0aec0; font-size:0.85rem; padding:15px; background:rgba(0,0,0,0.02); border-radius:12px;">
+            Yeterli veri yok.<br>Quiz yaparak analizi başlat! 🎯
+        </div>`;
+        return;
+    }
+
+    let html = '';
+    wrongEntries.forEach(([id, cnt]) => {
+        const card = activeDeck.find(c => c.id == id);
+        if (!card) return;
+        const barW = Math.min(100, cnt * 20);
+        html += `
+            <div class="weak-point-item">
+                <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:4px;">
+                    <span style="font-weight:700; color:var(--text-color);">${card.germanWord}</span>
+                    <span style="color:#f56565; font-weight:600;">${cnt} hata</span>
+                </div>
+                <div class="weak-point-bar-container">
+                    <div class="weak-point-bar-fill" style="width:${barW}%"></div>
+                </div>
+            </div>
+        `;
+    });
+
+    // Category Breakdown
+    const catWrongs = {};
+    Object.entries(quizWrongs).forEach(([id, cnt]) => {
+        const card = activeDeck.find(c => c.id == id);
+        if (card) {
+            catWrongs[card.category] = (catWrongs[card.category] || 0) + cnt;
+        }
+    });
+
+    const catEntries = Object.entries(catWrongs).sort((a,b) => b[1]-a[1]).slice(0, 3);
+    if (catEntries.length > 0) {
+        html += `<div style="font-size:0.8rem; color:#718096; margin-top:15px; padding-left:5px; border-left:3px solid #ed8936;">
+            <strong>En çok zorlandığın kategoriler:</strong><br>
+            ${catEntries.map(([cat, cnt]) => `${capitalize(cat)} (${cnt} hata)`).join(', ')}
+        </div>`;
+    }
+
+    el.innerHTML = html;
+}
 
 // Initialize
 function init() {
@@ -86,10 +217,13 @@ function init() {
     // Time tracking
     setInterval(() => {
         stats.timeSpentSec += 1;
-        if (stats.timeSpentSec % 5 === 0) saveStats(); // Her 5 sn de bir kaydet
+        if (stats.timeSpentSec % 10 === 0) saveStats();
         updateTimeUI();
     }, 1000);
+
     renderHeatmap();
+    renderStreakUI();
+    renderWeakPointsUI();
     loadFolders();
     
     const addFolderBtn = document.getElementById('add-folder-btn');
@@ -120,13 +254,11 @@ function initTheme() {
 function applyTheme(theme) {
     localStorage.setItem('b2_german_theme', theme);
     
-    // Sistem teması için zel özellik
     let effectiveTheme = theme;
     if (theme === 'system') {
         effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'white';
     }
     
-    // Sadece theme- sınıflarını temizle, zen-active gibi diğerleri kalsın
     document.body.classList.forEach(cls => {
         if (cls.startsWith('theme-')) document.body.classList.remove(cls);
     });
@@ -136,17 +268,6 @@ function applyTheme(theme) {
     });
     
     document.body.classList.add(`theme-${effectiveTheme}`);
-    
-    // Sistem teması değişikliklerini dinle
-    if (theme === 'system') {
-        const mq = window.matchMedia('(prefers-color-scheme: dark)');
-        mq.onchange = (e) => {
-            if (localStorage.getItem('b2_german_theme') === 'system') {
-                document.body.classList.forEach(cls => { if (cls.startsWith('theme-')) document.body.classList.remove(cls); });
-                document.body.classList.add(e.matches ? 'theme-dark' : 'theme-white');
-            }
-        };
-    }
 }
 
 function loadActiveDeck() {
@@ -160,7 +281,7 @@ function loadActiveDeck() {
     if(deckSizeEl) deckSizeEl.textContent = activeDeck.length;
 }
 
-// ----- STATS & TRACKING -----
+// ----- STATS -----
 function saveStats() {
     localStorage.setItem('b2_german_stats', JSON.stringify(stats));
 }
@@ -172,6 +293,8 @@ function updateStatsUI() {
     statLearned.textContent = learned.length;
     statReview.textContent = review.length;
     updateTimeUI();
+    renderStreakUI();
+    renderWeakPointsUI();
 }
 
 function updateTimeUI() {
@@ -195,25 +318,14 @@ function setupSidebar() {
     sidebarNavBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const view = btn.getAttribute('data-view');
-            
-            // Eğer kategori butonları varsa active'i sil
             categoryBtns.forEach(b => b.classList.remove('active'));
             sidebarNavBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
 
-            if (view === 'learned') {
-                filterCards('learned');
-                setSidebar(false);
-            } else if (view === 'review') {
-                filterCards('review');
-                setSidebar(false);
-            } else if (view === 'quiz') {
-                openQuizModal();
-                setSidebar(false);
-            } else if (view === 'zen') {
-                setSidebar(false);
-                startZenMode();
-            }
+            if (view === 'learned') { filterCards('learned'); setSidebar(false); }
+            else if (view === 'review') { filterCards('review'); setSidebar(false); }
+            else if (view === 'quiz') { openQuizModal(); setSidebar(false); }
+            else if (view === 'zen') { startZenMode(); setSidebar(false); }
         });
     });
 }
@@ -232,21 +344,14 @@ function setSidebar(show) {
 // ----- CARD RENDERING -----
 function filterCards(category) {
     currentCategory = category;
-    
-    if (category === 'tümü') {
-        filteredCards = [...activeDeck];
-    } else if (category === 'favoriler') {
-        filteredCards = activeDeck.filter(card => favorites.includes(card.id));
-    } else if (category === 'learned') {
-        filteredCards = activeDeck.filter(card => learned.includes(card.id));
-    } else if (category === 'review') {
-        filteredCards = activeDeck.filter(card => review.includes(card.id));
-    } else if (category.startsWith('folder:')) {
+    if (category === 'tümü') filteredCards = [...activeDeck];
+    else if (category === 'favoriler') filteredCards = activeDeck.filter(card => favorites.includes(card.id));
+    else if (category === 'learned') filteredCards = activeDeck.filter(card => learned.includes(card.id));
+    else if (category === 'review') filteredCards = activeDeck.filter(card => review.includes(card.id));
+    else if (category.startsWith('folder:')) {
         const folderName = category.split(':')[1];
         filteredCards = activeDeck.filter(card => customFolders[folderName] && customFolders[folderName].includes(card.id));
-    } else {
-        filteredCards = activeDeck.filter(card => card.category === category);
-    }
+    } else filteredCards = activeDeck.filter(card => card.category === category);
     
     currentIndex = 0;
     filteredCards.length > 0 ? renderCard(filteredCards[currentIndex]) : renderCard(null);
@@ -254,24 +359,19 @@ function filterCards(category) {
 
 function loadFolders() {
     const nav = document.getElementById('categories-nav');
-    const addBtn = document.getElementById('add-folder-btn');
-    if(!nav || !addBtn) return;
-    
+    if(!nav) return;
     document.querySelectorAll('.custom-folder-btn').forEach(el => el.remove());
     
     Object.keys(customFolders).forEach(folderName => {
         const btn = document.createElement('button');
         btn.className = 'category-btn custom-folder-btn';
-        btn.setAttribute('data-category', `folder:${folderName}`);
         btn.innerHTML = `<i class="fas fa-folder"></i> ${folderName}`;
-        nav.insertBefore(btn, addBtn);
-        
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-            if(document.querySelectorAll('.sidebar-nav .menu-btn')) document.querySelectorAll('.sidebar-nav .menu-btn').forEach(b => b.classList.remove('active'));
+        nav.insertBefore(btn, document.getElementById('add-folder-btn'));
+        btn.onclick = () => {
+            categoryBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             filterCards(`folder:${folderName}`);
-        });
+        };
     });
 }
 
@@ -279,7 +379,6 @@ function setupCategoryListeners() {
     categoryBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             categoryBtns.forEach(b => b.classList.remove('active'));
-            if(sidebarNavBtns) sidebarNavBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             filterCards(btn.getAttribute('data-category'));
         });
@@ -287,358 +386,101 @@ function setupCategoryListeners() {
 }
 
 function renderCard(cardData, animationClass = '') {
-    // Önceki floating animasyonu temizle
-    const prevCard = document.getElementById('current-card');
-    if (prevCard) prevCard.style.animation = 'none';
     cardContainer.innerHTML = '';
     if (!cardData) {
-        cardContainer.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-box-open"></i>
-                <h2>Kelime bulunamadı.</h2>
-            </div>
-        `;
-        updateProgress();
-        updateControls();
-        return;
+        cardContainer.innerHTML = `<div class="empty-state"><i class="fas fa-box-open"></i><h2>Kelime bulunamadı.</h2></div>`;
+        updateProgress(); updateControls(); return;
     }
 
     const isFavorite = favorites.includes(cardData.id);
     const isLearned = learned.includes(cardData.id);
     const isReview = review.includes(cardData.id);
 
-    // Der/Die/Das Color Engine
     let articleClass = '';
-    if(cardData.germanWord) {
-        const wordLower = cardData.germanWord.toLowerCase();
-        if (wordLower.startsWith('der ')) articleClass = 'article-der';
-        else if (wordLower.startsWith('die ')) articleClass = 'article-die';
-        else if (wordLower.startsWith('das ')) articleClass = 'article-das';
-    }
-
-    // Learning Status Buttons HTML
-    const learningControlsHTML = `
-        <div class="learning-status-controls">
-            <button class="status-btn add-folder-card-btn bouncy-btn" data-id="${cardData.id}" title="Klasöre Ekle"><i class="fas fa-folder-plus"></i></button>
-            <button class="status-btn learned-btn bouncy-btn ${isLearned ? 'active' : ''}" data-id="${cardData.id}" title="Öğrendim"><i class="fas fa-check"></i></button>
-            <button class="status-btn review-btn bouncy-btn ${isReview ? 'active' : ''}" data-id="${cardData.id}" title="Tekrar Edilecek"><i class="fas fa-times"></i></button>
-        </div>
-    `;
+    const wordLower = cardData.germanWord.toLowerCase();
+    if (wordLower.startsWith('der ')) articleClass = 'article-der';
+    else if (wordLower.startsWith('die ')) articleClass = 'article-die';
+    else if (wordLower.startsWith('das ')) articleClass = 'article-das';
 
     const cardHTML = `
         <div class="flashcard ${animationClass}" data-cat="${cardData.category}" id="current-card">
-            <!-- Ön Yüz (Almanca) -->
             <div class="card-face front">
                 <div class="category-label">${capitalize(cardData.category)}</div>
-                <button class="favorite-btn ${isFavorite ? 'active' : ''}" data-id="${cardData.id}" title="Favorilere Ekle">
-                    <i class="fas fa-heart"></i>
-                </button>
+                <button class="favorite-btn ${isFavorite ? 'active' : ''}" data-id="${cardData.id}"><i class="fas fa-heart"></i></button>
                 <div class="pronunciation">${cardData.pronunciation || ''}</div>
                 <div class="word word-main ${articleClass}">${cardData.germanWord}</div>
                 <div class="sentence">${cardData.germanSentence || ''}</div>
-                ${learningControlsHTML}
+                <div class="learning-status-controls">
+                    <button class="status-btn bouncy-btn learned-btn ${isLearned ? 'active' : ''}" data-id="${cardData.id}"><i class="fas fa-check"></i></button>
+                    <button class="status-btn bouncy-btn review-btn ${isReview ? 'active' : ''}" data-id="${cardData.id}"><i class="fas fa-times"></i></button>
+                </div>
             </div>
-            
-            <!-- Arka Yüz (Türkçe) -->
             <div class="card-face back">
-                <div class="category-label">${capitalize(cardData.category)}</div>
-                <button class="favorite-btn ${isFavorite ? 'active' : ''}" data-id="${cardData.id}" title="Favorilere Ekle">
-                    <i class="fas fa-heart"></i>
-                </button>
                 <div class="translation-word">${cardData.turkishWord}</div>
                 <div class="translation-sentence">${cardData.turkishSentence || ''}</div>
-                ${learningControlsHTML}
             </div>
         </div>
     `;
 
     cardContainer.insertAdjacentHTML('beforeend', cardHTML);
     const cardEl = document.getElementById('current-card');
-
-    // Animasyon bitince floating efekti başlat (ilk render'da kart görünmeme sorunu için)
-    if(animationClass) {
-        setTimeout(() => { 
-            if(cardEl) { 
-                cardEl.classList.remove(animationClass); 
-                cardEl.classList.add('floating');
-            } 
-        }, 420); 
-    } else {
-        // İlk yüklemede hemen floatAnim'e geçme, kısa gecikme ver
-        setTimeout(() => { if(cardEl) cardEl.classList.add('floating'); }, 100);
-    }
-
-    // Flip Event
-    cardEl.addEventListener('click', (e) => {
-        if (e.target.closest('.favorite-btn') || e.target.closest('.status-btn')) return;
-        cardEl.classList.toggle('flipped');
-        
-        // Sadece ilk defa çevrildiğinde sayalım
-        if (!cardEl.dataset.countedFlag && !cardEl.classList.contains('slide-in-right') ) {
-            stats.flipped++;
-            saveStats();
-            cardEl.dataset.countedFlag = "true";
-        }
-    });
-
-    // Favorite Event
-    cardEl.querySelectorAll('.favorite-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => { e.stopPropagation(); toggleFavorite(cardData.id); });
-    });
-
-    // Learning Status Event
-    cardEl.querySelectorAll('.learned-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => { e.stopPropagation(); toggleStatus(cardData.id, 'learned'); });
-    });
-    cardEl.querySelectorAll('.review-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => { e.stopPropagation(); toggleStatus(cardData.id, 'review'); });
-    });
-
-    // Folder Add Event
-    cardEl.querySelectorAll('.add-folder-card-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => { 
-            e.stopPropagation(); 
-            const keys = Object.keys(customFolders);
-            if(keys.length === 0) return alert("Hata: Önce üst menüdeki (+) klasör butonuna basarak bir klasör oluşturun!");
-            
-            let msg = "Bu kelimeyi hangi klasöre eklemek istiyorsunuz?\n(Lütfen klasör numarasını girin)\n\n" + keys.map((k, i) => `${i+1}. ${k}`).join('\n');
-            let num = prompt(msg);
-            if(!num || isNaN(num)) return;
-            
-            let target = keys[parseInt(num)-1];
-            if(target) {
-                if(!customFolders[target].includes(cardData.id)) {
-                    customFolders[target].push(cardData.id);
-                    localStorage.setItem('b2_german_folders', JSON.stringify(customFolders));
-                    alert(`✅ Kelime '${target}' klasörüne eklendi!`);
-                } else {
-                    alert(`❌ Kelime zaten '${target}' klasöründe mevcut.`);
-                }
+    
+    cardEl.onclick = (e) => {
+        if (!e.target.closest('button')) {
+            cardEl.classList.toggle('flipped');
+            if (cardEl.classList.contains('flipped')) {
+                stats.flipped++; saveStats(); updateStatsUI();
             }
-        });
-    });
+        }
+    };
 
-    updateProgress();
-    updateControls();
+    cardEl.querySelector('.favorite-btn').onclick = (e) => {
+        e.stopPropagation(); toggleFavorite(cardData.id);
+    };
+    cardEl.querySelector('.learned-btn').onclick = (e) => {
+        e.stopPropagation(); toggleStatus(cardData.id, 'learned');
+    };
+    cardEl.querySelector('.review-btn').onclick = (e) => {
+        e.stopPropagation(); toggleStatus(cardData.id, 'review');
+    };
+
+    updateProgress(); updateControls();
 }
 
 function toggleFavorite(id) {
     if (favorites.includes(id)) favorites = favorites.filter(favId => favId !== id);
     else favorites.push(id);
     localStorage.setItem('b2_german_favorites', JSON.stringify(favorites));
-    document.querySelectorAll('.favorite-btn').forEach(btn => btn.classList.toggle('active', favorites.includes(id)));
-    checkAutoRemove(id, 'favoriler', favorites);
+    updateStatsUI();
+    const btn = document.querySelector(`.favorite-btn[data-id="${id}"]`);
+    if(btn) btn.classList.toggle('active', favorites.includes(id));
 }
 
 function toggleStatus(id, type) {
     if (type === 'learned') {
         if (learned.includes(id)) learned = learned.filter(i => i !== id);
         else { learned.push(id); review = review.filter(i => i !== id); }
-    } else if (type === 'review') {
+    } else {
         if (review.includes(id)) review = review.filter(i => i !== id);
         else { review.push(id); learned = learned.filter(i => i !== id); }
     }
-    
     localStorage.setItem('b2_german_learned', JSON.stringify(learned));
     localStorage.setItem('b2_german_review', JSON.stringify(review));
-    
-    logActivity(); // HEATMAP UPDATE
-    
-    // UI Güncelleme (Geçerli Kart İçin)
-    const cardEl = document.getElementById('current-card');
-    if (cardEl) {
-        cardEl.querySelectorAll('.learned-btn').forEach(b => b.classList.toggle('active', learned.includes(id)));
-        cardEl.querySelectorAll('.review-btn').forEach(b => b.classList.toggle('active', review.includes(id)));
-    }
-
-    if (currentCategory === 'learned') checkAutoRemove(id, 'learned', learned);
-    if (currentCategory === 'review') checkAutoRemove(id, 'review', review);
+    logActivity();
+    updateStatsUI();
 }
 
-function checkAutoRemove(id, matchingCategory, arr) {
-    if (currentCategory === matchingCategory && !arr.includes(id)) {
-        setTimeout(() => {
-            filteredCards = filteredCards.filter(c => c.id !== id);
-            if (currentIndex >= filteredCards.length && currentIndex > 0) currentIndex--;
-            filteredCards.length > 0 ? renderCard(filteredCards[currentIndex]) : renderCard(null);
-            updateStatsUI();
-        }, 300);
-    } else {
-        updateStatsUI();
-    }
+function logActivity() {
+    const today = new Date().toISOString().split('T')[0];
+    let activityLog = JSON.parse(localStorage.getItem('b2_activity_log')) || {};
+    activityLog[today] = (activityLog[today] || 0) + 1;
+    localStorage.setItem('b2_activity_log', JSON.stringify(activityLog));
+    renderHeatmap();
+    renderStreakUI();
 }
 
-// ----- CONTROLS & NAV -----
-function setupControls() {
-    prevBtn.addEventListener('click', () => navigate(-1));
-    nextBtn.addEventListener('click', () => navigate(1));
-}
-
-function navigate(direction) {
-    if (filteredCards.length === 0) return;
-    const currentCard = document.getElementById('current-card');
-    
-    if (direction === 1 && currentIndex < filteredCards.length - 1) {
-        if (currentCard) {
-            currentCard.style.transform = '';
-            currentCard.classList.add('slide-out-left');
-            setTimeout(() => { currentIndex++; renderCard(filteredCards[currentIndex], 'slide-in-right'); }, 300);
-        }
-    } else if (direction === -1 && currentIndex > 0) {
-        if (currentCard) {
-            currentCard.style.transform = '';
-            currentCard.classList.add('slide-out-right');
-            setTimeout(() => { currentIndex--; renderCard(filteredCards[currentIndex], 'slide-in-left'); }, 300);
-        }
-    }
-}
-
-function updateProgress() {
-    currentIndexEl.textContent = filteredCards.length === 0 ? 0 : currentIndex + 1;
-    totalCountEl.textContent = filteredCards.length;
-}
-
-function updateControls() {
-    prevBtn.disabled = currentIndex === 0 || filteredCards.length === 0;
-    nextBtn.disabled = currentIndex === filteredCards.length - 1 || filteredCards.length === 0;
-}
-
-function setupSwipe() {
-    let isDragging = false;
-    let startX = 0;
-    let currentX = 0;
-
-    const dragStart = (e) => {
-        if (filteredCards.length <= 1) return;
-        const currentCard = document.getElementById('current-card');
-        if (!currentCard) return;
-        if (e.target.closest('.status-btn') || e.target.closest('.favorite-btn')) return; // Ignore buttons
-        
-        isDragging = true;
-        startX = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
-        currentX = startX; // fix for tap without drag
-        currentCard.style.transition = 'none';
-        currentCard.style.cursor = 'grabbing';
-    };
-
-    const dragMove = (e) => {
-        if (!isDragging) return;
-        // e.preventDefault(); // removed to allow scrolling or prevent click block if necessary, but keep it if it's card container
-        currentX = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
-        const diff = currentX - startX;
-        const currentCard = document.getElementById('current-card');
-        if (currentCard) {
-            const rotateFactor = diff * 0.05;
-            currentCard.style.transform = `translateX(${diff}px) rotate(${rotateFactor}deg)`;
-        }
-    };
-
-    const dragEnd = (e) => {
-        if (!isDragging) return;
-        isDragging = false;
-        const diff = currentX - startX;
-        const currentCard = document.getElementById('current-card');
-        
-        if (currentCard) {
-            currentCard.style.cursor = 'pointer';
-            currentCard.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-            if (diff > 100) {
-                navigate(-1);
-            } else if (diff < -100) {
-                navigate(1);
-            } else {
-                currentCard.style.transform = 'translateX(0px) rotate(0deg)';
-                setTimeout(() => { if(currentCard) currentCard.style.transform = ''; }, 300);
-            }
-        }
-        startX = 0; currentX = 0;
-    };
-
-    cardContainer.addEventListener('mousedown', dragStart);
-    cardContainer.addEventListener('mousemove', dragMove);
-    cardContainer.addEventListener('mouseup', dragEnd);
-    cardContainer.addEventListener('mouseleave', dragEnd);
-
-    cardContainer.addEventListener('touchstart', dragStart, {passive: true});
-    cardContainer.addEventListener('touchmove', dragMove, {passive: true}); // passive true lets page scroll if needed
-    cardContainer.addEventListener('touchend', dragEnd);
-}
-
-// ----- MODALS -----
-function setupModalListeners() {
-    if(settingsBtn && settingsModal && closeModalBtn) {
-        settingsBtn.addEventListener('click', () => settingsModal.classList.add('active'));
-        closeModalBtn.addEventListener('click', () => settingsModal.classList.remove('active'));
-        settingsModal.addEventListener('click', (e) => { if(e.target === settingsModal) settingsModal.classList.remove('active'); });
-    }
-
-    if(guideBtn && guideModal && closeGuideBtn && guideOkBtn) {
-        guideBtn.addEventListener('click', () => guideModal.classList.add('active'));
-        closeGuideBtn.addEventListener('click', () => guideModal.classList.remove('active'));
-        guideOkBtn.addEventListener('click', () => guideModal.classList.remove('active'));
-        guideModal.addEventListener('click', (e) => { if(e.target === guideModal) guideModal.classList.remove('active'); });
-    }
-
-    if(exportBtn) {
-        exportBtn.addEventListener('click', () => {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(activeDeck, null, 2));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "almanca_b2_deck.json");
-            document.body.appendChild(downloadAnchorNode); 
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-            alert("Desteniz JSON olarak indirildi!");
-        });
-    }
-
-    if(importFile) {
-        importFile.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                try {
-                    const importedData = JSON.parse(event.target.result);
-                    if(Array.isArray(importedData) && importedData.length > 0) {
-                        activeDeck = importedData;
-                        localStorage.setItem('b2_german_custom_deck', JSON.stringify(activeDeck));
-                        if(deckSizeEl) deckSizeEl.textContent = activeDeck.length;
-                        filterCards('tümü');
-                        alert(`${importedData.length} kelime içeri aktarıldı!`);
-                        if(settingsModal) settingsModal.classList.remove('active');
-                    } else alert("Geçersiz JSON formatı.");
-                } catch(error) { alert("Dosya okunamadı!"); }
-            };
-            reader.readAsText(file);
-            importFile.value = '';
-        });
-    }
-
-    if(resetBtn) {
-        resetBtn.addEventListener('click', () => {
-            if(confirm("Kendi destenizi silip varsayılan desteye dönmek istediğinize emin misiniz?")) {
-                localStorage.removeItem('b2_german_custom_deck');
-                activeDeck = [...defaultDeck];
-                if(deckSizeEl) deckSizeEl.textContent = activeDeck.length;
-                filterCards('tümü');
-                alert("Varsayılan desteye dönüldü.");
-                if(settingsModal) settingsModal.classList.remove('active');
-            }
-        });
-    }
-}
-
-function capitalize(str) {
-    if (!str) return '';
-    return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-// ==========================================
-// QUIZ SİSTEMİ
-// ==========================================
+// ----- QUIZ SYSTEM -----
 function openQuizModal() {
-    if(!quizModal) return;
     quizModal.classList.add('active');
     quizMenu.style.display = 'block';
     quizPlayArea.style.display = 'none';
@@ -646,273 +488,167 @@ function openQuizModal() {
 }
 
 function setupQuizListeners() {
-    if(!closeQuizBtn) return;
-    closeQuizBtn.addEventListener('click', () => {
-        if (isQuizActive && !confirm("Quiz devam ediyor. Çıkmak istediğinize emin misiniz?")) return;
+    closeQuizBtn.onclick = () => {
+        if (isQuizActive && !confirm("Çıkmak istiyor musunuz?")) return;
         quizModal.classList.remove('active');
         isQuizActive = false;
-    });
-
-    document.getElementById('quiz-back-to-menu-btn').addEventListener('click', () => {
-        openQuizModal();
-    });
-
+    };
     quizStartBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            quizMode = parseInt(btn.getAttribute('data-mode'));
-            startQuiz(quizMode);
-        });
+        btn.onclick = () => startQuiz(parseInt(btn.dataset.mode));
     });
-
-    quizNextBtn.addEventListener('click', () => handleQuizNext());
-    quizFinishEarlyBtn.addEventListener('click', () => finishQuiz());
+    quizNextBtn.onclick = handleQuizNext;
+    quizFinishEarlyBtn.onclick = finishQuiz;
+    document.getElementById('quiz-back-to-menu-btn').onclick = openQuizModal;
 }
 
 function startQuiz(mode) {
-    let sourcePool = [];
-    if (mode === 2) {
-        sourcePool = activeDeck.filter(c => review.includes(c.id));
-        if (sourcePool.length === 0) {
-            alert("Tekrar edilecek kelimeler (kırmızı çarpı) işaretlemediniz!");
-            return;
-        }
-    } else {
-        sourcePool = [...activeDeck];
-    }
+    quizMode = mode;
+    let pool = mode === 2 ? activeDeck.filter(c => review.includes(c.id)) : [...activeDeck];
+    if (pool.length === 0) return alert("Soru bulunamadı!");
 
-    // Mix cards
-    quizCards = sourcePool.sort(() => 0.5 - Math.random());
-
-    if (quizCards.length === 0) return;
-
+    quizCards = pool.sort(() => 0.5 - Math.random());
+    isQuizActive = true; currentQuizIdx = 0; quizResults = [];
     quizMenu.style.display = 'none';
     quizPlayArea.style.display = 'block';
-    quizResultsArea.style.display = 'none';
-    
-    currentQuizIdx = 0;
-    quizResults = [];
-    isQuizActive = true;
     quizTotalEl.textContent = quizCards.length;
-
     renderQuizCard();
 }
 
 function renderQuizCard() {
-    if (currentQuizIdx >= quizCards.length) {
-        finishQuiz();
-        return;
-    }
-
+    if (currentQuizIdx >= quizCards.length) return finishQuiz();
     quizIdxEl.textContent = currentQuizIdx + 1;
-    const currentCard = quizCards[currentQuizIdx];
-    quizCardWrapper.innerHTML = '';
+    const card = quizCards[currentQuizIdx];
+    quizCardWrapper.innerHTML = ''; mcqAnswered = false;
 
-    if (quizMode === 1 || quizMode === 2) {
-        // Flashcard Modu
-        quizNextBtn.innerHTML = 'İleri <i class="fas fa-arrow-right"></i>';
-        const cardHTML = `
-            <div class="flashcard slide-in-right" style="position:relative; width:100%; height:300px;" id="q-card">
-                <div class="card-face front">
-                    <div class="category-label">${capitalize(currentCard.category)}</div>
-                    <div class="word">${currentCard.germanWord}</div>
-                </div>
-                <div class="card-face back">
-                    <div class="category-label">${capitalize(currentCard.category)}</div>
-                    <div class="translation-word">${currentCard.turkishWord}</div>
-                    <div style="margin-top:15px; font-size: 0.9rem; color: #718096">Bildiysen İleri de.</div>
-                </div>
-            </div>
-        `;
-        quizCardWrapper.insertAdjacentHTML('beforeend', cardHTML);
-        const qc = document.getElementById('q-card');
-        qc.addEventListener('click', () => qc.classList.toggle('flipped'));
-    } 
-    else if (quizMode === 3) {
-        // Türkçe Yazılı Mod
-        quizNextBtn.innerHTML = 'Kontrol Et <i class="fas fa-check"></i>';
-        const cardHTML = `
-            <div class="card-face front slide-in-right" style="position:relative; width: 100%; height:auto; padding: 40px 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
-                <div class="category-label">${capitalize(currentCard.category)}</div>
-                <div class="word" style="margin-bottom:10px;">${currentCard.germanWord}</div>
-                <div class="sentence" style="font-size:0.9rem; margin-bottom:10px;">${currentCard.germanSentence || ''}</div>
-                
-                <input type="text" id="quiz-answer-input" placeholder="Türkçesini girin..." autocomplete="off">
-            </div>
-        `;
-        quizCardWrapper.insertAdjacentHTML('beforeend', cardHTML);
-        const inputEl = document.getElementById('quiz-answer-input');
-        inputEl.focus();
-        inputEl.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') handleQuizNext();
+    if (quizMode <= 2) {
+        quizNextBtn.innerHTML = 'İleri'; quizNextBtn.disabled = false;
+        quizCardWrapper.innerHTML = `<div class="flashcard" id="q-card" style="width:100%"><div class="card-face front"><div class="word">${card.germanWord}</div></div><div class="card-face back"><div class="word">${card.turkishWord}</div></div></div>`;
+        document.getElementById('q-card').onclick = () => document.getElementById('q-card').classList.toggle('flipped');
+    } else if (quizMode === 3) {
+        quizNextBtn.innerHTML = 'Kontrol Et'; quizNextBtn.disabled = false;
+        quizCardWrapper.innerHTML = `<div class="mcq-question" style="width:100%"><div class="mcq-german-word">${card.germanWord}</div><input type="text" id="q-input" style="width:100%; padding:12px; border-radius:10px; border:2px solid #ddd; margin-top:15px; font-size:1.1rem;" placeholder="Türkçesini yazın..."></div>`;
+        const inp = document.getElementById('q-input'); inp.focus();
+        inp.onkeydown = (e) => { if(e.key === 'Enter') handleQuizNext(); };
+    } else {
+        quizNextBtn.innerHTML = 'İleri'; quizNextBtn.disabled = true;
+        let wr = activeDeck.filter(c => c.id !== card.id).sort(() => 0.5 - Math.random()).slice(0,3);
+        let choices = [card, ...wr].sort(() => 0.5 - Math.random());
+        let html = `<div class="mcq-wrapper"><div class="mcq-question"><div class="mcq-german-word">${card.germanWord}</div></div><div class="mcq-choices">`;
+        choices.forEach((c, i) => html += `<button class="mcq-choice-btn" data-correct="${c.id === card.id}"><span class="mcq-letter">${String.fromCharCode(65+i)}</span>${c.turkishWord}</button>`);
+        html += `</div><div id="mcq-feedback"></div></div>`;
+        quizCardWrapper.innerHTML = html;
+        document.querySelectorAll('.mcq-choice-btn').forEach(btn => {
+            btn.onclick = () => {
+                if(mcqAnswered) return; mcqAnswered = true;
+                const ok = btn.dataset.correct === 'true';
+                btn.classList.add(ok ? 'mcq-correct' : 'mcq-wrong');
+                if(!ok) document.querySelector('.mcq-choice-btn[data-correct="true"]').classList.add('mcq-correct');
+                document.getElementById('mcq-feedback').innerHTML = ok ? '<span style="color:#48bb78">Doğru! 🔥</span>' : `<span style="color:#f56565">Yanlış! Doğrusu: ${card.turkishWord}</span>`;
+                if(!ok) { quizWrongs[card.id] = (quizWrongs[card.id] || 0) + 1; localStorage.setItem('b2_quiz_wrongs', JSON.stringify(quizWrongs)); }
+                quizResults.push({card, ok}); quizNextBtn.disabled = false; logActivity();
+            };
         });
     }
 }
 
 function handleQuizNext() {
-    if (!isQuizActive) return;
-
-    const currentCard = quizCards[currentQuizIdx];
-
-    if (quizMode === 3) {
-        const inputEl = document.getElementById('quiz-answer-input');
-        const userAnswer = inputEl.value.trim().toLowerCase();
-        
-        // Çok basit kelime eşleştirme
-        const baseTurkishWords = currentCard.turkishWord.toLowerCase().split(',').map(s => s.trim());
-        let correctAnswers = [];
-        baseTurkishWords.forEach(w => {
-           let splits = w.split('/');
-           splits.forEach(sp => correctAnswers.push(sp.trim()));
-        });
-        
-        let isCorrect = false;
-        if(userAnswer !== '') {
-            isCorrect = correctAnswers.some(ans => userAnswer.includes(ans) || ans.includes(userAnswer));
-        }
-
-        quizResults.push({
-            card: currentCard,
-            userOutput: userAnswer,
-            correct: isCorrect
-        });
-    } else {
-        quizResults.push({ card: currentCard, correct: true, userOutput: 'Görüldü' });
+    const card = quizCards[currentQuizIdx];
+    if(quizMode === 3) {
+        const val = document.getElementById('q-input').value.trim().toLowerCase();
+        const ok = card.turkishWord.toLowerCase().includes(val) && val.length > 2;
+        quizResults.push({card, ok, out: val});
+        if(!ok) { quizWrongs[card.id] = (quizWrongs[card.id] || 0) + 1; localStorage.setItem('b2_quiz_wrongs', JSON.stringify(quizWrongs)); }
+        logActivity();
+    } else if(quizMode <= 2) {
+        quizResults.push({card, ok: true});
     }
-
-    currentQuizIdx++;
-    renderQuizCard();
+    currentQuizIdx++; renderQuizCard();
 }
 
 function finishQuiz() {
-    isQuizActive = false;
-    quizPlayArea.style.display = 'none';
-    quizResultsArea.style.display = 'block';
-
-    let correctCount = 0;
-    let wrongCount = 0;
-    const resListEl = document.getElementById('quiz-res-list');
-    resListEl.innerHTML = '';
-
-    if (quizResults.length === 0) {
-        resListEl.innerHTML = '<p style="text-align:center;color:#a0aec0;">Quiz test edilmeden bitirildi.</p>';
-        document.getElementById('quiz-res-correct').textContent = '0';
-        document.getElementById('quiz-res-wrong').textContent = '0';
-        return;
-    }
-
-    quizResults.forEach(res => {
-        if (res.correct) correctCount++;
-        else wrongCount++;
-
-        const tr = document.createElement('div');
-        tr.style.padding = '10px';
-        tr.style.borderRadius = '8px';
-        
-        tr.style.background = res.correct ? 'rgba(72,187,120,0.1)' : 'rgba(245,101,101,0.1)';
-        tr.style.border = res.correct ? '1px solid rgba(72,187,120,0.3)' : '1px solid rgba(245,101,101,0.3)';
-        
-        let correctIconHTML = res.correct ? '<i class="fas fa-check-circle" style="color:#48bb78;"></i>' : '<i class="fas fa-times-circle" style="color:#f56565;"></i>';
-
-        if (quizMode === 3) {
-            tr.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <strong style="color:var(--text-color)">${res.card.germanWord}</strong>
-                    <span style="font-size:1.2rem;">${correctIconHTML}</span>
-                </div>
-                <div style="font-size:0.9rem; margin-top:5px; color:var(--text-color);">
-                    Senin Cevabın: <em>${res.userOutput || '(Boş)'}</em><br>
-                    Doğru Çeviri: <strong>${res.card.turkishWord}</strong>
-                </div>
-            `;
-        } else {
-            tr.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <strong style="color:var(--text-color)">${res.card.germanWord}</strong>
-                    <span style="color:var(--text-color); font-size:0.9rem;">${res.card.turkishWord}</span>
-                </div>
-            `;
-        }
-        resListEl.appendChild(tr);
-    });
-
-    document.getElementById('quiz-res-correct').textContent = correctCount;
-    document.getElementById('quiz-res-wrong').textContent = wrongCount;
+    isQuizActive = false; quizPlayArea.style.display = 'none'; quizResultsArea.style.display = 'block';
+    let okCount = quizResults.filter(r => r.ok).length;
+    document.getElementById('quiz-res-correct').textContent = okCount;
+    document.getElementById('quiz-res-wrong').textContent = quizResults.length - okCount;
+    renderWeakPointsUI();
 }
 
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-}
-
-// ----- HEATMAP & ZEN MODE -----
-function logActivity() {
-    const today = new Date().toISOString().split('T')[0];
-    let activityLog = JSON.parse(localStorage.getItem('b2_activity_log')) || {};
-    activityLog[today] = (activityLog[today] || 0) + 1;
-    localStorage.setItem('b2_activity_log', JSON.stringify(activityLog));
-    renderHeatmap();
-}
-
+// ----- HEATMAP -----
 function renderHeatmap() {
     const grid = document.getElementById('heatmap-grid');
     if (!grid) return;
     grid.innerHTML = '';
     const activityLog = JSON.parse(localStorage.getItem('b2_activity_log')) || {};
-    
     const today = new Date();
     for (let i = 29; i >= 0; i--) {
-        const d = new Date(today);
-        d.setDate(d.getDate() - i);
+        const d = new Date(today); d.setDate(d.getDate() - i);
         const dateStr = d.toISOString().split('T')[0];
         const count = activityLog[dateStr] || 0;
-        
-        let level = 0;
-        if(count > 0) level = 1;
-        if(count > 5) level = 2;
-        if(count > 20) level = 3;
-        if(count > 50) level = 4;
-        
-        const square = document.createElement('div');
-        square.className = 'heatmap-day';
-        square.setAttribute('data-level', level);
-        square.title = `${dateStr}: ${count} kelime`;
-        grid.appendChild(square);
+        let level = count > 50 ? 4 : (count > 20 ? 3 : (count > 5 ? 2 : (count > 0 ? 1 : 0)));
+        const sq = document.createElement('div');
+        sq.className = 'heatmap-day';
+        sq.dataset.level = level;
+        sq.title = `${dateStr}: ${count} kelime`;
+        grid.appendChild(sq);
     }
 }
 
-let zenInterval = null;
-let zenTimeLeft = 900; 
-
+// ----- ZEN MODE -----
+let zenInterval = null; let zenTime = 900;
 function startZenMode() {
     document.body.classList.add('zen-active');
-    zenTimeLeft = 900;
-    updateZenTimerDisplay();
+    zenTime = 900; updateZenUI();
     clearInterval(zenInterval);
     zenInterval = setInterval(() => {
-        zenTimeLeft--;
-        updateZenTimerDisplay();
-        if(zenTimeLeft <= 0) {
-            stopZenMode();
-            alert("Tebrikler! 15 Dakikalık Derin Odak Seansını Başarıyla Tamamladınız! 🧠✨");
-        }
+        zenTime--; updateZenUI();
+        if(zenTime <= 0) { stopZenMode(); alert("Zen seansı bitti! 🧘"); }
     }, 1000);
 }
+function stopZenMode() { document.body.classList.remove('zen-active'); clearInterval(zenInterval); }
+function updateZenUI() { 
+    const m = Math.floor(zenTime/60), s = zenTime%60;
+    const el = document.getElementById('zen-timer-display');
+    if(el) el.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+}
+document.getElementById('exit-zen-btn').onclick = stopZenMode;
 
-function stopZenMode() {
-    document.body.classList.remove('zen-active');
-    clearInterval(zenInterval);
+// ----- CONTROLS -----
+function setupControls() {
+    prevBtn.onclick = () => { if(currentIndex > 0) { currentIndex--; renderCard(filteredCards[currentIndex]); } };
+    nextBtn.onclick = () => { if(currentIndex < filteredCards.length - 1) { currentIndex++; renderCard(filteredCards[currentIndex]); } };
+}
+function updateProgress() {
+    currentIndexEl.textContent = filteredCards.length > 0 ? currentIndex + 1 : 0;
+    totalCountEl.textContent = filteredCards.length;
+}
+function updateControls() {
+    prevBtn.disabled = currentIndex === 0;
+    nextBtn.disabled = currentIndex === filteredCards.length - 1;
 }
 
-function updateZenTimerDisplay() {
-    const min = Math.floor(zenTimeLeft / 60);
-    const sec = zenTimeLeft % 60;
-    const display = document.getElementById('zen-timer-display');
-    if(display) display.textContent = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+function setupSwipe() {
+    let startX = 0;
+    cardContainer.ontouchstart = (e) => startX = e.touches[0].clientX;
+    cardContainer.ontouchend = (e) => {
+        let diff = e.changedTouches[0].clientX - startX;
+        if(Math.abs(diff) > 50) diff > 0 ? prevBtn.click() : nextBtn.click();
+    };
 }
 
-const exitZenBtn = document.getElementById('exit-zen-btn');
-if(exitZenBtn) exitZenBtn.addEventListener('click', stopZenMode);
+function setupModalListeners() {
+    settingsBtn.onclick = () => settingsModal.classList.add('active');
+    closeModalBtn.onclick = () => settingsModal.classList.remove('active');
+    guideBtn.onclick = () => guideModal.classList.add('active');
+    closeGuideBtn.onclick = guideOkBtn.onclick = () => guideModal.classList.remove('active');
+    
+    exportBtn.onclick = () => {
+        const blob = new Blob([JSON.stringify(activeDeck)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'destem.json'; a.click();
+    };
+    resetBtn.onclick = () => { if(confirm("Sıfırlansın mı?")) { localStorage.clear(); location.reload(); } };
+}
+
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
 document.addEventListener('DOMContentLoaded', init);

@@ -15,16 +15,24 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <!-- Sidebar ve Overlay -->
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
     <div id="sidebar" class="sidebar">
         <div class="sidebar-header">
-            <h2>İstatistikler & Menü</h2>
+            <h2>İstatistikler &amp; Menü</h2>
             <button id="close-sidebar" class="icon-btn">&times;</button>
         </div>
         
+        <!-- STREAK KUTUSU -->
+        <div id="streak-display"></div>
+
         <div class="stats-container">
             <div class="stat-box">
                 <i class="fas fa-layer-group"></i>
@@ -53,9 +61,19 @@
             </div>
         </div>
 
-        <div class="heatmap-container" style="margin: 0 15px 15px 15px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 12px;">
-            <h3 style="font-size: 0.9rem; margin-bottom: 10px; color: #4a5568;"><i class="fas fa-fire" style="color:#ed8936;"></i> Çalışma Haritası</h3>
+        <!-- HEATMAP -->
+        <div class="heatmap-container" style="margin: 0 15px 10px 15px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 12px;">
+            <h3 style="font-size: 0.9rem; margin-bottom: 10px; color: #4a5568;"><i class="fas fa-fire" style="color:#ed8936;"></i> Çalışma Haritası (Son 30 Gün)</h3>
             <div id="heatmap-grid" style="display: flex; gap: 3px; flex-wrap: wrap; height: 60px; align-content: flex-start;"></div>
+            <div style="font-size:0.72rem; color:#a0aec0; margin-top:6px;">
+                ⬜ Boş &nbsp; 🟩 Az &nbsp; 🟨 Orta &nbsp; 🟧 İyi &nbsp; 🟥 Harika
+            </div>
+        </div>
+
+        <!-- ZAYIF NOKTA ANALİZİ -->
+        <div style="margin: 0 15px 15px 15px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 12px;">
+            <h3 style="font-size: 0.9rem; margin-bottom: 10px; color: #4a5568;"><i class="fas fa-exclamation-triangle" style="color:#ed8936;"></i> Zayıf Nokta Analizi</h3>
+            <div id="weak-points-panel"></div>
         </div>
 
         <nav class="sidebar-nav">
@@ -83,6 +101,9 @@
                 </button>
                 <button class="action-btn secondary quiz-start-btn" data-mode="3" style="margin-bottom:10px; text-align:left;">
                     <i class="fas fa-keyboard"></i> 3. Türkçe Quizi (Yazılı)
+                </button>
+                <button class="action-btn primary quiz-start-btn" data-mode="4" style="margin-bottom:10px; text-align:left;">
+                    <i class="fas fa-tasks"></i> 4. Çoktan Seçmeli (4 Şık) 🎯
                 </button>
             </div>
 
@@ -198,6 +219,30 @@
                     <li><i class="fas fa-times"></i> Tekrar edilecek kelimeler (Zorlandıklarım)</li>
                 </ul>
                 <p><strong>4. Temalar:</strong> Sağ üst köşedeki yuvarlak renk tonlarına basarak uygulamanın ambiyansını ruh halinize göre değiştirebilirsiniz.</p>
+
+                <hr style="margin: 12px 0; border-color:#edf2f7;">
+
+                <p><strong>🔥 Streak (Çalışma Serisi):</strong> Her gün uygulamaya girip en az bir kelimeyi öğrenildi veya tekrar olarak işaretlediğinizde seriniz artar. Arka arkaya 3+ gün çalışırsan alev 🔥 emojisi büyür! Bir gün kaçırırsan seri sıfırlanır ve buz 🧊 emojisine döner.</p>
+
+                <hr style="margin: 12px 0; border-color:#edf2f7;">
+
+                <p><strong>📅 Çalışma Haritası (Heatmap):</strong> Sol menüdeki renkli kareler son 30 günlük çalışma yoğunluğunu gösterir.</p>
+                <ul style="padding-left: 20px; text-align: left; margin-bottom:10px; color:#4a5568; font-size:0.9rem;">
+                    <li>⬜ <strong>Gri:</strong> O gün çalışılmadı</li>
+                    <li>🟩 <strong>Açık Yeşil:</strong> Az çalışıldı (1–5 kelime)</li>
+                    <li>🟨 <strong>Sarı:</strong> Orta düzey (6–20 kelime)</li>
+                    <li>🟧 <strong>Turuncu:</strong> İyi çalışıldı (21–50 kelime)</li>
+                    <li>🟥 <strong>Kırmızı:</strong> Yoğun çalışma! (50+ kelime)</li>
+                </ul>
+                <p style="font-size:0.88rem; color:#718096;">💡 <em>Heatmap, öğrenildi veya tekrar butonu tıklandığında güncellenir.</em></p>
+
+                <hr style="margin: 12px 0; border-color:#edf2f7;">
+
+                <p><strong>🎯 Çoktan Seçmeli Quiz:</strong> Sol menüden Quiz → "4. Çoktan Seçmeli" seçin. Her soruda Almanca kelimeyi görür, 4 Türkçe seçenek arasından doğruyu bulursunuz. Yanlışlar otomatik olarak "Zayıf Nokta Analizi"ne kaydedilir!</p>
+
+                <hr style="margin: 12px 0; border-color:#edf2f7;">
+
+                <p><strong>📊 Zayıf Nokta Analizi:</strong> Sol menünün altında "Zayıf Nokta Analizi" bölümü yer alır. Quiz'de en çok yanlış yaptığınız kelimeler ve hangi kategorilerde zorlandığınız burada gösterilir. Odaklanmak için bu kelimeleri önce çalışın!</p>
             </div>
             <button id="guide-ok-btn" class="action-btn primary bouncy-btn" style="margin-top:10px;">Anladım, Teşekkürler!</button>
         </div>
