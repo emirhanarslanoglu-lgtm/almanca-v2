@@ -1,4 +1,4 @@
-const CACHE_NAME = 'b2-flashcard-v22';
+const CACHE_NAME = 'b2-flashcard-v26';
 const ASSETS = [
     './',
     './index.html',
@@ -9,6 +9,7 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (e) => {
+    self.skipWaiting();
     e.waitUntil(
         caches.open(CACHE_NAME)
         .then(cache => {
@@ -29,6 +30,8 @@ self.addEventListener('activate', (e) => {
                     }
                 })
             );
+        }).then(() => {
+            return self.clients.claim();
         })
     );
 });

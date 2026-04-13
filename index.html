@@ -53,10 +53,16 @@
             </div>
         </div>
 
+        <div class="heatmap-container" style="margin: 0 15px 15px 15px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 12px;">
+            <h3 style="font-size: 0.9rem; margin-bottom: 10px; color: #4a5568;"><i class="fas fa-fire" style="color:#ed8936;"></i> Çalışma Haritası</h3>
+            <div id="heatmap-grid" style="display: flex; gap: 3px; flex-wrap: wrap; height: 60px; align-content: flex-start;"></div>
+        </div>
+
         <nav class="sidebar-nav">
             <button class="menu-btn" data-view="learned"><i class="fas fa-check-double"></i> Öğrendiğim Kelimeler</button>
             <button class="menu-btn" data-view="review"><i class="fas fa-list-ul"></i> Tekrar Edilecekler</button>
             <button class="menu-btn" data-view="quiz"><i class="fas fa-gamepad"></i> Quiz Modu</button>
+            <button class="menu-btn" data-view="zen" style="color: #805ad5;"><i class="fas fa-brain"></i> 15 Dk Derin Odak (Zen)</button>
         </nav>
     </div>
 
@@ -102,6 +108,10 @@
         </div>
     </div>
 
+    <!-- Zen Mode Overlays -->
+    <div id="zen-timer-display">15:00</div>
+    <button id="exit-zen-btn"><i class="fas fa-times"></i> Zen Modundan Çık</button>
+
     <div class="app-container">
         <header>
             <div class="header-top">
@@ -109,24 +119,27 @@
                 <h1>Almanca B2 🇩🇪</h1>
                 <div class="header-controls">
                     <div class="theme-controls" title="Renk Temaları">
-                        <button class="theme-btn active" data-theme="pastel-blue" style="background:#e0f2fe; color:#0369a1;" title="Tatlı Mavi"></button>
-                        <button class="theme-btn" data-theme="mint-green" style="background:#d1fae5; color:#047857;" title="Nane Yeşili"></button>
-                        <button class="theme-btn" data-theme="pastel-purple" style="background:#f3e8ff; color:#7e22ce;" title="Pastel Mor"></button>
-                        <button class="theme-btn" data-theme="peach-pink" style="background:#ffe4e6; color:#be123c;" title="Şeftali Pembe"></button>
-                        <button class="theme-btn" data-theme="sun-yellow" style="background:#fef3c7; color:#b45309;" title="Güneş Sarısı"></button>
-                        <button class="theme-btn" data-theme="dark" style="background:#334155; color:#f8fafc;" title="Gece Modu"><i class="fas fa-moon" style="font-size:0.75rem;"></i></button>
+                        <button class="theme-btn" data-theme="white" style="background:#f8fafc; border:1.5px solid #e2e8f0; color:#64748b;" title="Sade Beyaz"><i class="fas fa-circle" style="font-size:0.6rem;"></i></button>
+                        <button class="theme-btn active" data-theme="pastel-blue" style="background:#dbeafe; color:#3b82f6;" title="Tatlı Mavi"></button>
+                        <button class="theme-btn" data-theme="mint-green" style="background:#d1fae5; color:#10b981;" title="Nane Yeşili"></button>
+                        <button class="theme-btn" data-theme="pastel-purple" style="background:#ede9fe; color:#8b5cf6;" title="Pastel Mor"></button>
+                        <button class="theme-btn" data-theme="peach-pink" style="background:#ffe4e6; color:#f43f5e;" title="Şeftali Pembe"></button>
+                        <button class="theme-btn" data-theme="sun-yellow" style="background:#fef9c3; color:#f59e0b;" title="Güneş Sarısı"></button>
+                        <button class="theme-btn" data-theme="dark" style="background:#1e293b; color:#94a3b8;" title="Gece Modu"><i class="fas fa-moon" style="font-size:0.7rem;"></i></button>
+                        <button class="theme-btn" data-theme="system" style="background:linear-gradient(135deg,#f8fafc 50%,#1e293b 50%); color:#64748b; border:1.5px solid #e2e8f0;" title="Sistem Teması"><i class="fas fa-adjust" style="font-size:0.7rem; color:#64748b;"></i></button>
                     </div>
                     <button id="guide-btn" class="icon-btn bouncy-btn" title="Nasıl Kullanılır?"><i class="fas fa-question-circle"></i></button>
                     <button id="settings-btn" class="icon-btn bouncy-btn" title="Ayarlar ve Veri Yönetimi"><i class="fas fa-cog"></i></button>
                 </div>
             </div>
-            <nav class="categories">
+            <nav class="categories" id="categories-nav">
                 <button class="category-btn active" data-category="tümü">Tümü</button>
                 <button class="category-btn" data-category="isimler">İsimler</button>
                 <button class="category-btn" data-category="fiiller">Fiiller</button>
                 <button class="category-btn" data-category="sıfatlar">Sıfatlar</button>
                 <button class="category-btn" data-category="bağlaçlar">Bağlaçlar</button>
                 <button class="category-btn" data-category="favoriler"><i class="fas fa-heart"></i> Favoriler</button>
+                <button class="category-btn" id="add-folder-btn" title="Yeni Özel Klasör Ekle" style="background:var(--primary-color);color:white;"><i class="fas fa-plus"></i></button>
             </nav>
         </header>
 
@@ -142,6 +155,29 @@
         <div class="swipe-hint">
             <i class="fas fa-hand-pointer"></i> Yüzü çevirmek için dokun<br>
             <i class="fas fa-exchange-alt"></i> Gezinmek için sağa sola kaydır
+        </div>
+    </div>
+
+    <!-- Ayarlar Modalı -->
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ Ayarlar ve Veri</h2>
+                <button id="close-modal-btn" class="icon-btn bouncy-btn">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <p>Kendi kelimelerinizi içeren JSON dosyasını yükleyin veya destenizi yedekleyin.</p>
+                <div class="action-buttons">
+                    <button id="export-btn" class="action-btn secondary bouncy-btn"><i class="fas fa-download"></i> Desteyi Dışa Aktar</button>
+                    <label class="action-btn primary bouncy-btn" style="cursor:pointer; position:relative; overflow:hidden;">
+                        <i class="fas fa-upload"></i> Kendi Kelimelerini Yükle
+                        <input type="file" id="import-file" accept=".json" style="opacity:0; position:absolute; top:0; left:0; width:100%; height:100%; cursor:pointer;">
+                    </label>
+                </div>
+                <div class="danger-zone">
+                    <button id="reset-btn" class="action-btn danger bouncy-btn"><i class="fas fa-trash-alt"></i> Varsayılan Kelimelere Dön</button>
+                </div>
+            </div>
         </div>
     </div>
 
