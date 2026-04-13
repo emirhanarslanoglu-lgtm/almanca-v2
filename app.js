@@ -543,9 +543,25 @@ function renderQuizCard() {
                 const ok = btn.dataset.correct === 'true';
                 btn.classList.add(ok ? 'mcq-correct' : 'mcq-wrong');
                 if(!ok) document.querySelector('.mcq-choice-btn[data-correct="true"]').classList.add('mcq-correct');
-                document.getElementById('mcq-feedback').innerHTML = ok ? '<span style="color:#48bb78">Doğru! 🔥</span>' : `<span style="color:#f56565">Yanlış! Doğrusu: ${card.turkishWord}</span>`;
-                if(!ok) { quizWrongs[card.id] = (quizWrongs[card.id] || 0) + 1; localStorage.setItem('b2_quiz_wrongs', JSON.stringify(quizWrongs)); }
-                quizResults.push({card, ok}); quizNextBtn.disabled = false; logActivity();
+                
+                const feedbackEl = document.getElementById('mcq-feedback');
+                feedbackEl.innerHTML = ok ? '<span style="color:#48bb78">Doğru! 🔥</span>' : `<span style="color:#f56565">Yanlış! Doğrusu: ${card.turkishWord}</span>`;
+                
+                if(!ok) { 
+                    quizWrongs[card.id] = (quizWrongs[card.id] || 0) + 1; 
+                    localStorage.setItem('b2_quiz_wrongs', JSON.stringify(quizWrongs)); 
+                }
+                
+                quizResults.push({card, ok}); 
+                quizNextBtn.disabled = false; 
+                logActivity();
+
+                // Doğruysa 1.2 saniye sonra otomatik geç
+                if (ok) {
+                    setTimeout(() => {
+                        if (isQuizActive && mcqAnswered) handleQuizNext();
+                    }, 1200);
+                }
             };
         });
     }

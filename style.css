@@ -524,6 +524,13 @@ body.theme-dark .theme-btn.active {
 }
 }
 
+/* Specific sizing for Quiz Modal to prevent control hiding */
+.quiz-modal-content {
+    max-height: 85vh;
+    max-width: 450px;
+    height: auto;
+}
+
 .action-buttons {
     display: flex;
     flex-direction: column;
