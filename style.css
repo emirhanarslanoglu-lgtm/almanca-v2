@@ -233,8 +233,6 @@ body.theme-dark .theme-btn.active {
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.4);
     transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1), box-shadow 0.3s;
-    overflow-y: auto;
-    overflow-x: hidden;
 }
 
 .front {
@@ -255,18 +253,20 @@ body.theme-dark .theme-btn.active {
 /* Kategori Etiketi */
 .category-label {
     position: absolute;
-    top: -15px;
+    top: 14px;
     left: 50%;
     transform: translateX(-50%);
     background: #e2e8f0;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 0.75rem;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
     color: #4a5568;
     z-index: 10;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .flashcard[data-cat="isimler"] .category-label { background: var(--isimler-color); color: white; }
@@ -619,9 +619,15 @@ body.theme-dark .card-face {
     box-shadow: 0 15px 35px rgba(0,0,0,0.4);
 }
 
-body.theme-dark .word {
+/* Dark modda sadece artikeli olmayan .word için beyaz renk */
+body.theme-dark .word:not(.article-der):not(.article-die):not(.article-das) {
     color: #f7fafc;
 }
+
+/* Dark modda artikel renkleri korunur (daha parlak yapılır) */
+body.theme-dark .word-main.article-der { color: #60a5fa; text-shadow: 0 2px 12px rgba(96, 165, 250, 0.4); }
+body.theme-dark .word-main.article-die { color: #fb7185; text-shadow: 0 2px 12px rgba(251, 113, 133, 0.4); }
+body.theme-dark .word-main.article-das { color: #34d399; text-shadow: 0 2px 12px rgba(52, 211, 153, 0.4); }
 
 body.theme-dark .translation-word {
     color: #63b3ed;
