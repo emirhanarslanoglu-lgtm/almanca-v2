@@ -2,8 +2,8 @@
     --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     --card-bg: rgba(255, 255, 255, 0.92);
     --text-color: #2d3748;
-    --primary-color: #4a90e2;
-    --accent-color: #fc8181;
+    --primary-color: #ff2a5f;
+    --accent-color: #ff0055;
     
     /* Category Colors */
     --tümü-color: #a0aec0;
@@ -73,6 +73,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap; /* Allows the title and controls to wrap gracefully */
     margin-bottom: 15px;
 }
 
@@ -87,7 +88,9 @@ h1 {
 .header-controls {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 8px; /* Reduced gap from 15px to 8px */
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .theme-controls {
