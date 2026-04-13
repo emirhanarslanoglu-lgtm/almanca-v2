@@ -516,13 +516,14 @@ function setupSwipe() {
         
         isDragging = true;
         startX = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
+        currentX = startX; // fix for tap without drag
         currentCard.style.transition = 'none';
         currentCard.style.cursor = 'grabbing';
     };
 
     const dragMove = (e) => {
         if (!isDragging) return;
-        e.preventDefault();
+        // e.preventDefault(); // removed to allow scrolling or prevent click block if necessary, but keep it if it's card container
         currentX = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
         const diff = currentX - startX;
         const currentCard = document.getElementById('current-card');
@@ -559,7 +560,7 @@ function setupSwipe() {
     cardContainer.addEventListener('mouseleave', dragEnd);
 
     cardContainer.addEventListener('touchstart', dragStart, {passive: true});
-    cardContainer.addEventListener('touchmove', dragMove, {passive: false});
+    cardContainer.addEventListener('touchmove', dragMove, {passive: true}); // passive true lets page scroll if needed
     cardContainer.addEventListener('touchend', dragEnd);
 }
 
