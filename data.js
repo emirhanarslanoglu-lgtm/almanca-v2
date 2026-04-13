@@ -1104,3 +1104,4 @@ const flashcardsData = [
   { id: 999, category: 'bağlaçlar', germanWord: 'ebenso', pronunciation: 'ey-bın-zoo', germanSentence: 'Das ist ebenso wichtig wie alles andere.', turkishWord: 'aynı şekilde, keza', turkishSentence: 'Bu diğer her şey kadar önemlidir (aynı şekilde).' },
   { id: 1000, category: 'isimler', germanWord: 'das Ende', pronunciation: 'das en-dı', germanSentence: 'Das ist das Ende und ein neuer Anfang.', turkishWord: 'son, bitiş', turkishSentence: 'Bu sondur ve yepyeni bir başlangıçtır.' }
 ];
+export default flashcardsData;
