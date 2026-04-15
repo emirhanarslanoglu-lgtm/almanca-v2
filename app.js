@@ -693,24 +693,54 @@ function handleQuizNext() {
 }
 
 function finishQuiz() {
-    isQuizActive = false; quizPlayArea.style.display = 'none'; quizResultsArea.style.display = 'block';
-    let okCount = quizResults.filter(r => r.ok).length;
-    document.getElementById('quiz-res-correct').textContent = okCount;
-    document.getElementById('quiz-res-wrong').textContent = quizResults.length - okCount;
+    isQuizActive = false; 
+    quizPlayArea.style.display = 'none'; 
+    quizResultsArea.style.display = 'block';
     
-    // Quiz Result List Rendering
+    let okCount = 0;
+    let wrongCount = 0;
     const resList = document.getElementById('quiz-res-list');
-    resList.innerHTML = quizResults.map(r => `
-        <div style="padding:12px; border-radius:10px; background:${r.ok ? 'rgba(72,187,120,0.1)' : 'rgba(245,101,101,0.1)'}; border: 1px solid ${r.ok ? '#48bb78' : '#f56565'}; display:flex; justify-content:space-between; align-items:center;">
-             <div style="text-align:left;">
-                <div style="font-weight:bold; color:var(--text-color); font-size:1.05rem;">${r.card.germanWord}</div>
-                ${!r.ok && r.out ? `<div style="font-size:0.85rem; color:#f56565; margin-top:2px;">Senin cevabın: <span style="text-decoration:line-through;">${r.out}</span></div>` : ''}
-                <div style="font-size:0.9rem; color:#718096; margin-top:4px;"><i class="fas fa-check" style="color:#48bb78;"></i> ${r.card.turkishWord}</div>
-             </div>
-             <div style="font-size:1.5rem;">${r.ok ? '✅' : '❌'}</div>
-        </div>
-    `).join('');
+    resList.innerHTML = '';
 
+    if (quizResults.length === 0) {
+        resList.innerHTML = '<div style="padding:20px; text-align:center; color:#718096; font-style:italic;">Hiç soru yanıtlamadınız.</div>';
+    } else {
+        let htmlContent = '';
+        quizResults.forEach(r => {
+            if (r.ok) okCount++; else wrongCount++;
+            
+            const bgColor = r.ok ? '#f0fdf4' : '#fef2f2';
+            const borderColor = r.ok ? '#86efac' : '#fca5a5';
+            const iconColor = r.ok ? '#22c55e' : '#ef4444';
+            const iconHTML = r.ok ? '✅' : '❌';
+            
+            let userAnsHTML = '';
+            // Yalnızca yanlış cevaplarda ve kullanıcı bir şey yazmışsa (yazılı quiz modunda) göster
+            if (!r.ok && r.out !== undefined && r.out.trim() !== '') {
+                userAnsHTML = `<div style="font-size:0.85rem; color:#ef4444; margin-top:4px;">
+                                   Senin cevabın: <span style="text-decoration:line-through; font-weight:bold;">${r.out}</span>
+                               </div>`;
+            }
+
+            htmlContent += `
+            <div style="padding:15px; margin-bottom: 10px; border-radius:12px; background-color:${bgColor}; border: 1.5px solid ${borderColor}; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                 <div style="text-align:left; flex: 1;">
+                    <div style="font-weight:800; color:#1e293b; font-size:1.1rem; letter-spacing: -0.3px;">${r.card.germanWord}</div>
+                    ${userAnsHTML}
+                    <div style="font-size:0.95rem; color:#475569; margin-top:6px; background: rgba(255,255,255,0.6); display:inline-block; padding:3px 8px; border-radius:6px; border: 1px solid rgba(0,0,0,0.05);">
+                        <i class="fas fa-check-circle" style="color:${iconColor}; margin-right:4px;"></i> 
+                        <strong>Doğrusu:</strong> ${r.card.turkishWord}
+                    </div>
+                 </div>
+                 <div style="font-size:1.8rem; padding-left:15px;">${iconHTML}</div>
+            </div>`;
+        });
+        resList.innerHTML = htmlContent;
+    }
+
+    document.getElementById('quiz-res-correct').textContent = okCount;
+    document.getElementById('quiz-res-wrong').textContent = wrongCount;
+    
     renderWeakPointsUI();
 }
 
