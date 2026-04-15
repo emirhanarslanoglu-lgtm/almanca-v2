@@ -355,6 +355,7 @@ function setSidebar(show) {
 
 // ----- CARD RENDERING -----
 function filterCards(category) {
+    if (!category) return;
     currentCategory = category;
     
     const isSpecialView = ['learned', 'review', 'favoriler'].includes(category) || category.startsWith('folder:');
@@ -426,9 +427,12 @@ function loadFolders() {
 function setupCategoryListeners() {
     categoryBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            categoryBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            filterCards(btn.getAttribute('data-category'));
+            const cat = btn.getAttribute('data-category');
+            if (cat) {
+                categoryBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                filterCards(cat);
+            }
         });
     });
 }
