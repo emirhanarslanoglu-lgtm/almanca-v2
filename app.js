@@ -457,17 +457,76 @@ function toggleFavorite(id) {
 }
 
 function toggleStatus(id, type) {
+    let message = "";
+    let toastType = "";
+
     if (type === 'learned') {
-        if (learned.includes(id)) learned = learned.filter(i => i !== id);
-        else { learned.push(id); review = review.filter(i => i !== id); }
+        if (learned.includes(id)) {
+            learned = learned.filter(i => i !== id);
+            message = "Öğrenilenlerden çıkarıldı";
+            toastType = "info";
+        } else { 
+            learned.push(id); 
+            review = review.filter(i => i !== id); 
+            message = "Kelime kaydedildi! (Öğrenildi) ✨";
+            toastType = "success";
+        }
     } else {
-        if (review.includes(id)) review = review.filter(i => i !== id);
-        else { review.push(id); learned = learned.filter(i => i !== id); }
+        if (review.includes(id)) {
+            review = review.filter(i => i !== id);
+            message = "Tekrar listesinden çıkarıldı";
+            toastType = "info";
+        } else { 
+            review.push(id); 
+            learned = learned.filter(i => i !== id);
+            message = "Kelime kaydedildi! (Tekrar edilecek) 🔄";
+            toastType = "error";
+        }
     }
     localStorage.setItem('b2_german_learned', JSON.stringify(learned));
     localStorage.setItem('b2_german_review', JSON.stringify(review));
     logActivity();
     updateStatsUI();
+
+    // Dinamik UI Güncellemesi
+    const learnedBtn = document.querySelector(`.learned-btn[data-id="${id}"]`);
+    const reviewBtn = document.querySelector(`.review-btn[data-id="${id}"]`);
+    if(learnedBtn) learnedBtn.classList.toggle('active', learned.includes(id));
+    if(reviewBtn) reviewBtn.classList.toggle('active', review.includes(id));
+
+    // Toast ve Glow Efekti (Sadece kayıt edildiğinde)
+    if (message && toastType !== "info") {
+        showToast(message, toastType);
+        const targetBtn = type === 'learned' ? learnedBtn : reviewBtn;
+        if(targetBtn) {
+            targetBtn.classList.add('click-glow');
+            setTimeout(() => targetBtn.classList.remove('click-glow'), 400);
+        }
+    } else if (message && toastType === "info") {
+        // Çıkarıldığında da küçük bir bildirim ver
+        showToast(message, "info");
+    }
+}
+
+function showToast(message, type) {
+    let toast = document.getElementById('toast-notification');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast-notification';
+        document.body.appendChild(toast);
+    }
+    toast.innerHTML = message;
+    toast.className = `toast-notification toast-${type}`;
+    
+    // Force reflow
+    void toast.offsetWidth;
+    
+    toast.classList.add('show');
+    
+    if (toast.timeoutId) clearTimeout(toast.timeoutId);
+    toast.timeoutId = setTimeout(() => {
+        toast.classList.remove('show');
+    }, 1500);
 }
 
 function logActivity() {
