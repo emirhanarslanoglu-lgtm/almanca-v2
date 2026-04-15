@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Almanca Gramer Rehberi 🇩🇪</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #e0e7ff;
+            --a1: #10b981; --a1-light: #d1fae5;
+            --a2: #3b82f6; --a2-light: #dbeafe;
+            --b1: #f59e0b; --b1-light: #fef3c7;
+            --b2: #8b5cf6; --b2-light: #ede9fe;
+            --c1: #ef4444; --c1-light: #fee2e2;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ---- TOP BAR ---- */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+        .topbar a.back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 10px;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .topbar a.back-btn:hover { background: var(--primary); color: white; }
+        .topbar h1 { font-size: 1.2rem; font-weight: 800; color: var(--text); flex: 1; }
+        .xp-bar-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 6px 14px;
+            min-width: 220px;
+        }
+        .xp-bar-wrapper span { font-size: 0.8rem; font-weight: 700; color: var(--primary); white-space: nowrap; }
+        .xp-bar-track { flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+        .xp-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #f59e0b); border-radius: 4px; transition: width 0.5s ease; }
+        .xp-points { font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
+
+        /* ---- LEVEL FILTER TABS ---- */
+        .level-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 16px 20px 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .level-tabs::-webkit-scrollbar { display: none; }
+        .level-tab {
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: none;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            opacity: 0.5;
+        }
+        .level-tab.active { opacity: 1; transform: scale(1.05); }
+        .level-tab[data-level="all"] { background: #1e293b; color: white; }
+        .level-tab[data-level="A1"] { background: var(--a1); color: white; }
+        .level-tab[data-level="A2"] { background: var(--a2); color: white; }
+        .level-tab[data-level="B1"] { background: var(--b1); color: white; }
+        .level-tab[data-level="B2"] { background: var(--b2); color: white; }
+        .level-tab[data-level="C1"] { background: var(--c1); color: white; }
+
+        /* ---- CONTENT ---- */
+        .content { padding: 10px 20px 60px; max-width: 900px; margin: 0 auto; }
+
+        /* ---- LEVEL SECTION ---- */
+        .level-section { margin-bottom: 30px; }
+        .level-section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            font-size: 1.4rem;
+            font-weight: 800;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+        }
+        .level-section-header:hover { filter: brightness(0.95); }
+        .level-section-header[data-level="A1"] { background: var(--a1-light); color: var(--a1); }
+        .level-section-header[data-level="A2"] { background: var(--a2-light); color: var(--a2); }
+        .level-section-header[data-level="B1"] { background: var(--b1-light); color: var(--b1); }
+        .level-section-header[data-level="B2"] { background: var(--b2-light); color: var(--b2); }
+        .level-section-header[data-level="C1"] { background: var(--c1-light); color: var(--c1); }
+        .level-section-header .level-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: white;
+        }
+        .level-section-header[data-level="A1"] .level-badge { background: var(--a1); }
+        .level-section-header[data-level="A2"] .level-badge { background: var(--a2); }
+        .level-section-header[data-level="B1"] .level-badge { background: var(--b1); }
+        .level-section-header[data-level="B2"] .level-badge { background: var(--b2); }
+        .level-section-header[data-level="C1"] .level-badge { background: var(--c1); }
+        .level-section-header .chevron { margin-left: auto; transition: transform 0.3s; font-size: 1rem; }
+        .level-section-header.collapsed .chevron { transform: rotate(-90deg); }
+
+        /* ---- TOPIC CARD ---- */
+        .topic-card {
+            background: var(--card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            margin-bottom: 14px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: box-shadow 0.2s;
+        }
+        .topic-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+        .topic-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .topic-icon { font-size: 1.3rem; }
+        .topic-title { font-weight: 800; font-size: 1rem; flex: 1; }
+        .topic-xp {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background: #f1f5f9;
+            color: var(--muted);
+        }
+        .topic-status {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: transparent;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+        .topic-status.done { background: #10b981; border-color: #10b981; color: white; }
+        .topic-chevron { color: var(--muted); transition: transform 0.3s; font-size: 0.85rem; }
+        .topic-card.open .topic-chevron { transform: rotate(90deg); }
+
+        .topic-body { display: none; padding: 0 20px 20px; border-top: 1px solid var(--border); }
+        .topic-card.open .topic-body { display: block; }
+
+        .topic-desc {
+            margin-top: 14px;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #374151;
+        }
+
+        /* Rule box */
+        .rule-box {
+            background: #f8fafc;
+            border-left: 4px solid var(--primary);
+            border-radius: 0 10px 10px 0;
+            padding: 12px 16px;
+            margin: 14px 0;
+            font-size: 0.92rem;
+            line-height: 1.8;
+        }
+        .rule-box strong { color: var(--primary); }
+
+        /* Table */
+        .grammar-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 14px 0;
+            font-size: 0.88rem;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .grammar-table th {
+            background: var(--primary);
+            color: white;
+            padding: 10px 14px;
+            text-align: left;
+            font-weight: 700;
+        }
+        .grammar-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+        .grammar-table tr:nth-child(even) td { background: #f8fafc; }
+        .grammar-table tr:last-child td { border-bottom: none; }
+
+        /* Example sentences */
+        .examples { margin: 14px 0; }
+        .examples h4 { font-size: 0.85rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .example-item {
+            background: linear-gradient(135deg, #f0fdf4, #f8fafc);
+            border: 1px solid #bbf7d0;
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        .example-item .de { font-weight: 800; color: #1e293b; font-size: 0.95rem; }
+        .example-item .tr { color: var(--muted); margin-top: 2px; font-style: italic; font-size: 0.85rem; }
+        .example-item .note { color: #7c3aed; font-size: 0.8rem; margin-top: 4px; }
+
+        /* Mark done button */
+        .mark-done-btn {
+            margin-top: 16px;
+            padding: 10px 24px;
+            border-radius: 10px;
+            border: none;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            background: #10b981;
+            color: white;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .mark-done-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
+        .mark-done-btn.already-done { background: #e2e8f0; color: #64748b; }
+        .mark-done-btn.already-done:hover { transform: none; box-shadow: none; }
+
+        /* Highlight spans */
+        .hl-red { color: #ef4444; font-weight: 800; }
+        .hl-blue { color: #3b82f6; font-weight: 800; }
+        .hl-green { color: #10b981; font-weight: 800; }
+        .hl-purple { color: #8b5cf6; font-weight: 800; }
+        .hl-orange { color: #f59e0b; font-weight: 800; }
+
+        /* Toast */
+        #grammar-toast {
+            position: fixed; bottom: 25px; left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #1e293b; color: white;
+            padding: 12px 24px; border-radius: 30px;
+            font-weight: 700; font-size: 0.9rem;
+            z-index: 9999; opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);
+            pointer-events: none;
+        }
+        #grammar-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* Progress summary */
+        .progress-summary {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            padding: 14px 20px;
+            background: white;
+            border-bottom: 1px solid var(--border);
+        }
+        .progress-item {
+            text-align: center;
+            padding: 8px;
+            border-radius: 10px;
+        }
+        .progress-item .p-num { font-size: 1.3rem; font-weight: 800; }
+        .progress-item .p-label { font-size: 0.7rem; color: var(--muted); }
+        .progress-item[data-level="A1"] { background: var(--a1-light); }
+        .progress-item[data-level="A1"] .p-num { color: var(--a1); }
+        .progress-item[data-level="A2"] { background: var(--a2-light); }
+        .progress-item[data-level="A2"] .p-num { color: var(--a2); }
+        .progress-item[data-level="B1"] { background: var(--b1-light); }
+        .progress-item[data-level="B1"] .p-num { color: var(--b1); }
+        .progress-item[data-level="B2"] { background: var(--b2-light); }
+        .progress-item[data-level="B2"] .p-num { color: var(--b2); }
+        .progress-item[data-level="C1"] { background: var(--c1-light); }
+        .progress-item[data-level="C1"] .p-num { color: var(--c1); }
+
+        @media (max-width: 600px) {
+            .topbar h1 { font-size: 1rem; }
+            .xp-bar-wrapper { min-width: 160px; }
+            .progress-summary { grid-template-columns: repeat(3,1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+    <a class="back-btn" href="index.html"><i class="fas fa-arrow-left"></i> Uygulamaya Dön</a>
+    <h1>🇩🇪 Almanca Gramer Rehberi</h1>
+    <div class="xp-bar-wrapper">
+        <span>Lv.<span id="g-level">1</span></span>
+        <div class="xp-bar-track"><div class="xp-bar-fill" id="g-xp-fill" style="width:0%"></div></div>
+        <span class="xp-points" id="g-xp">0 XP</span>
+    </div>
+</div>
+
+<!-- PROGRESS SUMMARY -->
+<div class="progress-summary">
+    <div class="progress-item" data-level="A1"><div class="p-num" id="prog-a1">0/8</div><div class="p-label">A1</div></div>
+    <div class="progress-item" data-level="A2"><div class="p-num" id="prog-a2">0/8</div><div class="p-label">A2</div></div>
+    <div class="progress-item" data-level="B1"><div class="p-num" id="prog-b1">0/8</div><div class="p-label">B1</div></div>
+    <div class="progress-item" data-level="B2"><div class="p-num" id="prog-b2">0/8</div><div class="p-label">B2</div></div>
+    <div class="progress-item" data-level="C1"><div class="p-num" id="prog-c1">0/7</div><div class="p-label">C1</div></div>
+</div>
+
+<!-- LEVEL FILTER TABS -->
+<div class="level-tabs">
+    <button class="level-tab active" data-level="all">🌍 Tümü</button>
+    <button class="level-tab" data-level="A1">🟢 A1 Başlangıç</button>
+    <button class="level-tab" data-level="A2">🔵 A2 Temel</button>
+    <button class="level-tab" data-level="B1">🟡 B1 Orta</button>
+    <button class="level-tab" data-level="B2">🟣 B2 İleri</button>
+    <button class="level-tab" data-level="C1">🔴 C1 Ustalık</button>
+</div>
+
+<div class="content" id="grammar-content">
+
+<!-- ===== A1 ===== -->
+<div class="level-section" data-level="A1">
+<div class="level-section-header" data-level="A1">
+    <span class="level-badge">A1</span> Başlangıç Seviyesi
+    <span class="chevron"><i class="fas fa-chevron-down"></i></span>
+</div>
+
+<!-- A1-1: Artikel -->
+<div class="topic-card" data-id="a1-1" data-level="A1" data-xp="10">
+    <div class="topic-header">
+        <span class="topic-icon">📰</span>
+        <span class="topic-title">Der, Die, Das — Belirli Artikeller (Cinsiyetler)</span>
+        <span class="topic-xp">+10 XP</span>
+        <div class="topic-status" id="status-a1-1"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Almancada her ismin bir cinsi (Genus) vardır: <strong>maskulin (erkil)</strong>, <strong>feminin (dişil)</strong> veya <strong>nötr</strong>. Bu cinsler belirli artikellerle gösterilir ve ezberlenmelidir.</div>
+        <table class="grammar-table">
+            <tr><th>Cins</th><th>Artikel</th><th>Örnek</th><th>Türkçe</th></tr>
+            <tr><td>Maskulin (m)</td><td class="hl-blue">der</td><td>der Mann</td><td>adam</td></tr>
+            <tr><td>Feminin (f)</td><td class="hl-red">die</td><td>die Frau</td><td>kadın</td></tr>
+            <tr><td>Nötr (n)</td><td class="hl-green">das</td><td>das Kind</td><td>çocuk</td></tr>
+            <tr><td>Çoğul (pl)</td><td class="hl-red">die</td><td>die Männer</td><td>adamlar</td></tr>
+        </table>
+        <div class="rule-box">
+            💡 <strong>İpuçları:</strong><br>
+            • <strong>-ung, -heit, -keit, -schaft</strong> sonekli kelimeler → <span class="hl-red">die</span><br>
+            • <strong>-er, -ling, -ismus</strong> sonekli kelimeler → <span class="hl-blue">der</span><br>
+            • <strong>-chen, -lein, -um, -ment</strong> sonekli kelimeler → <span class="hl-green">das</span>
+        </div>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de"><span class="hl-blue">Der</span> Mann ist groß.</div>
+                <div class="tr">Adam uzundur.</div>
+            </div>
+            <div class="example-item">
+                <div class="de"><span class="hl-red">Die</span> Frau heißt Anna.</div>
+                <div class="tr">Kadının adı Anna'dır.</div>
+            </div>
+            <div class="example-item">
+                <div class="de"><span class="hl-green">Das</span> Kind spielt im Garten.</div>
+                <div class="tr">Çocuk bahçede oynuyor.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="a1-1"><i class="fas fa-check"></i> Konuyu Tamamladım (+10 XP)</button>
+    </div>
+</div>
+
+<!-- A1-2: Unbestimmte Artikel -->
+<div class="topic-card" data-id="a1-2" data-level="A1" data-xp="10">
+    <div class="topic-header">
+        <span class="topic-icon">🔠</span>
+        <span class="topic-title">Ein, Eine — Belirsiz Artikeller</span>
+        <span class="topic-xp">+10 XP</span>
+        <div class="topic-status" id="status-a1-2"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Belirsiz artikeller, ilk kez bahsedilen veya belirli olmayan nesneler için kullanılır. Türkçedeki "bir" anlamına gelir.</div>
+        <table class="grammar-table">
+            <tr><th>Cins</th><th>Nominativ</th><th>Akkusativ</th></tr>
+            <tr><td>Maskulin</td><td>ein Mann</td><td>einen Mann</td></tr>
+            <tr><td>Feminin</td><td>eine Frau</td><td>eine Frau</td></tr>
+            <tr><td>Nötr</td><td>ein Kind</td><td>ein Kind</td></tr>
+            <tr><td>Olumsuz</td><td>kein/keine</td><td>keinen/keine/kein</td></tr>
+        </table>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Ich habe <span class="hl-blue">einen</span> Hund.</div>
+                <div class="tr">Bir köpeğim var.</div>
+                <div class="note">→ Hund (maskulin) → Akkusativ → einen</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Das ist <span class="hl-red">eine</span> Katze.</div>
+                <div class="tr">Bu bir kedidir.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Ich habe <span class="hl-purple">kein</span> Auto.</div>
+                <div class="tr">Arabam yok.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="a1-2"><i class="fas fa-check"></i> Konuyu Tamamladım (+10 XP)</button>
+    </div>
+</div>
+
+<!-- A1-3: Personalpronomen -->
+<div class="topic-card" data-id="a1-3" data-level="A1" data-xp="10">
+    <div class="topic-header">
+        <span class="topic-icon">👤</span>
+        <span class="topic-title">Personalpronomen — Kişi Zamirleri</span>
+        <span class="topic-xp">+10 XP</span>
+        <div class="topic-status" id="status-a1-3"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Almancada 8 kişi zamiri vardır. Resmi konuşmalarda "Sie" (büyük S ile) kullanılır.</div>
+        <table class="grammar-table">
+            <tr><th>Zamir</th><th>Türkçe</th><th>Örnek</th></tr>
+            <tr><td>ich</td><td>ben</td><td>Ich lerne Deutsch.</td></tr>
+            <tr><td>du</td><td>sen</td><td>Du bist nett.</td></tr>
+            <tr><td>er / sie / es</td><td>o (eril/dişil/nötr)</td><td>Er schläft.</td></tr>
+            <tr><td>wir</td><td>biz</td><td>Wir gehen.</td></tr>
+            <tr><td>ihr</td><td>siz (informal)</td><td>Ihr seid müde.</td></tr>
+            <tr><td>sie / Sie</td><td>onlar / siz (formal)</td><td>Sie kommen.</td></tr>
+        </table>
+        <div class="rule-box">⚠️ <strong>Dikkat:</strong> "sie" (küçük) = onlar | "Sie" (büyük) = saygı zamiri (siz-formal). Yazıda büyüklük önemli!</div>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de"><span class="hl-blue">Ich</span> heiße Max. <span class="hl-blue">Du</span> heißt Anna.</div>
+                <div class="tr">Benim adım Max. Senin adın Anna.</div>
+            </div>
+            <div class="example-item">
+                <div class="de"><span class="hl-green">Er</span> ist Arzt. <span class="hl-red">Sie</span> ist Lehrerin.</div>
+                <div class="tr">O (erkek) doktordur. O (kadın) öğretmendir.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="a1-3"><i class="fas fa-check"></i> Konuyu Tamamladım (+10 XP)</button>
+    </div>
+</div>
+
+<!-- A1-4: sein und haben -->
+<div class="topic-card" data-id="a1-4" data-level="A1" data-xp="10">
+    <div class="topic-header">
+        <span class="topic-icon">⚡</span>
+        <span class="topic-title">sein ve haben — En Önemli Fiiller</span>
+        <span class="topic-xp">+10 XP</span>
+        <div class="topic-status" id="status-a1-4"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Bu iki yardımcı fiil Almanca'nın temel taşıdır. Mükemmel zamanlar için de kullanılırlar.</div>
+        <table class="grammar-table">
+            <tr><th>Kişi</th><th>sein (olmak)</th><th>haben (sahip olmak)</th></tr>
+            <tr><td>ich</td><td>bin</td><td>habe</td></tr>
+            <tr><td>du</td><td>bist</td><td>hast</td></tr>
+            <tr><td>er/sie/es</td><td>ist</td><td>hat</td></tr>
+            <tr><td>wir</td><td>sind</td><td>haben</td></tr>
+            <tr><td>ihr</td><td>seid</td><td>habt</td></tr>
+            <tr><td>sie/Sie</td><td>sind</td><td>haben</td></tr>
+        </table>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Ich <span class="hl-blue">bin</span> 25 Jahre alt. Ich <span class="hl-green">habe</span> ein Buch.</div>
+                <div class="tr">25 yaşındayım. Bir kitabım var.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Er <span class="hl-blue">ist</span> müde. Sie <span class="hl-green">hat</span> keine Zeit.</div>
+                <div class="tr">O yorgun. Onun vakti yok.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="a1-4"><i class="fas fa-check"></i> Konuyu Tamamladım (+10 XP)</button>
+    </div>
+</div>
+
+<!-- A1-5: Verbkonjugation -->
+<div class="topic-card" data-id="a1-5" data-level="A1" data-xp="10">
+    <div class="topic-header">
+        <span class="topic-icon">🔄</span>
+        <span class="topic-title">Fiil Çekimi — Präsens (Geniş/Şimdiki Zaman)</span>
+        <span class="topic-xp">+10 XP</span>
+        <div class="topic-status" id="status-a1-5"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Almancada fiiller, yöntem olarak gövdeye ek alırlar. Düzenli fiillerin gövdesi infinitiv'den -en takısı çıkartılarak bulunur.</div>
+        <div class="rule-box">
+            <strong>Kural:</strong> Infinitiv → Gövde → Kişi eki<br>
+            spielen → spiel → ich spiel<strong>e</strong>, du spiel<strong>st</strong>, er spiel<strong>t</strong>...
+        </div>
+        <table class="grammar-table">
+            <tr><th>Kişi</th><th>spielen</th><th>lernen</th><th>arbeiten</th></tr>
+            <tr><td>ich</td><td>spiele</td><td>lerne</td><td>arbeite</td></tr>
+            <tr><td>du</td><td>spielst</td><td>lernst</td><td>arbeitest</td></tr>
+            <tr><td>er/sie/es</td><td>spielt</td><td>lernt</td><td>arbeitet</td></tr>
+            <tr><td>wir</td><td>spielen</td><td>lernen</td><td>arbeiten</td></tr>
+            <tr><td>ihr</td><td>spielt</td><td>lernt</td><td>arbeitet</td></tr>
+            <tr><td>sie/Sie</td><td>spielen</td><td>lernen</td><td>arbeiten</td></tr>
+        </table>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Ich <span class="hl-blue">lerne</span> jeden Tag Deutsch.</div>
+                <div class="tr">Her gün Almanca öğreniyorum.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Er <span class="hl-green">arbeitet</span> in Berlin.</div>
+                <div class="tr">Berlin'de çalışıyor.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="a1-5"><i class="fas fa-check"></i> Konuyu Tamamladım (+10 XP)</button>
+    </div>
+</div>
+
+<!-- A1-6: Satzstellung -->
+<div class="topic-card" data-id="a1-6" data-level="A1" data-xp="10">
+    <div class="topic-header">
+        <span class="topic-icon">📐</span>
+        <span class="topic-title">Cümle Düzeni — Verb İkinci Pozisyonda (V2)</span>
+        <span class="topic-xp">+10 XP</span>
+        <div class="topic-status" id="status-a1-6"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Almancada temel kural: fiil her zaman ana cümlede <strong>ikinci pozisyonda</strong> bulunur. Cümlenin başına ne gelirse getsin bu kural değişmez.</div>
+        <div class="rule-box">
+            <strong>Konum 1</strong> → <strong>FİİL (2. konum)</strong> → Geri kalan<br><br>
+            Ich → <span class="hl-blue">lerne</span> → jeden Tag Deutsch.<br>
+            Jeden Tag → <span class="hl-blue">lerne</span> → ich Deutsch. (Özne sona geçti!)
+        </div>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Morgen <span class="hl-blue">fahre</span> ich nach Berlin.</div>
+                <div class="tr">Yarın Berlin'e gidiyorum.</div>
+                <div class="note">→ "Morgen" öne alındı, fiil yine 2. konumda.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Im Sommer <span class="hl-blue">reisen</span> wir nach Italien.</div>
+                <div class="tr">Yazın İtalya'ya seyahat ediyoruz.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="a1-6"><i class="fas fa-check"></i> Konuyu Tamamladım (+10 XP)</button>
+    </div>
+</div>
+
+<!-- A1-7: Negation -->
+<div class="topic-card" data-id="a1-7" data-level="A1" data-xp="10">
+    <div class="topic-header">
+        <span class="topic-icon">🚫</span>
+        <span class="topic-title">Olumsuzluk — nicht ve kein</span>
+        <span class="topic-xp">+10 XP</span>
+        <div class="topic-status" id="status-a1-7"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Almancada iki olumsuzluk biçimi vardır: <strong>nicht</strong> (fiil/sıfat olumsuzlaştırır) ve <strong>kein</strong> (isim önünde kullanılır).</div>
+        <div class="rule-box">
+            <strong>nicht</strong> → fiil, sıfat veya zarf olumsuzlaştırır<br>
+            <strong>kein/keine/keinen</strong> → isim önünde kullanılır (ein'in olumsuz hali)
+        </div>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Ich komme <span class="hl-red">nicht</span>.</div>
+                <div class="tr">Ben gelmiyorum.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Das ist <span class="hl-red">nicht</span> richtig.</div>
+                <div class="tr">Bu doğru değil.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Ich habe <span class="hl-red">kein</span> Geld.</div>
+                <div class="tr">Param yok.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Ich habe <span class="hl-red">keine</span> Zeit.</div>
+                <div class="tr">Vaktim yok. (Zeit → feminin → keine)</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="a1-7"><i class="fas fa-check"></i> Konuyu Tamamladım (+10 XP)</button>
+    </div>
+</div>
+
+<!-- A1-8: W-Fragen -->
+<div class="topic-card" data-id="a1-8" data-level="A1" data-xp="10">
+    <div class="topic-header">
+        <span class="topic-icon">❓</span>
+        <span class="topic-title">W-Fragen — Soru Kelimeleri</span>
+        <span class="topic-xp">+10 XP</span>
+        <div class="topic-status" id="status-a1-8"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <table class="grammar-table">
+            <tr><th>Soru Kelimesi</th><th>Türkçe</th><th>Örnek</th></tr>
+            <tr><td>Wer</td><td>Kim</td><td>Wer bist du?</td></tr>
+            <tr><td>Was</td><td>Ne</td><td>Was machst du?</td></tr>
+            <tr><td>Wo</td><td>Nerede</td><td>Wo wohnst du?</td></tr>
+            <tr><td>Woher</td><td>Nereden</td><td>Woher kommst du?</td></tr>
+            <tr><td>Wohin</td><td>Nereye</td><td>Wohin gehst du?</td></tr>
+            <tr><td>Wann</td><td>Ne zaman</td><td>Wann kommst du?</td></tr>
+            <tr><td>Wie</td><td>Nasıl</td><td>Wie geht es dir?</td></tr>
+            <tr><td>Warum</td><td>Neden</td><td>Warum lernst du Deutsch?</td></tr>
+            <tr><td>Wie viel(e)</td><td>Kaç / Ne kadar</td><td>Wie viel kostet das?</td></tr>
+        </table>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de"><span class="hl-blue">Wo</span> wohnst du? — Ich wohne in München.</div>
+                <div class="tr">Nerede yaşıyorsun? — Münih'te yaşıyorum.</div>
+            </div>
+            <div class="example-item">
+                <div class="de"><span class="hl-blue">Warum</span> lernst du Deutsch? — Weil ich es interessant finde.</div>
+                <div class="tr">Neden Almanca öğreniyorsun? — Çünkü ilginç buluyorum.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="a1-8"><i class="fas fa-check"></i> Konuyu Tamamladım (+10 XP)</button>
+    </div>
+</div>
+</div><!-- end A1 -->
+
+<!-- ===== A2 ===== -->
+<div class="level-section" data-level="A2">
+<div class="level-section-header" data-level="A2">
+    <span class="level-badge">A2</span> Temel Seviye
+    <span class="chevron"><i class="fas fa-chevron-down"></i></span>
+</div>
+
+<!-- A2-1: Perfekt -->
+<div class="topic-card" data-id="a2-1" data-level="A2" data-xp="15">
+    <div class="topic-header">
+        <span class="topic-icon">⏰</span>
+        <span class="topic-title">Perfekt — Geçmiş Zaman (Konuşmada)</span>
+        <span class="topic-xp">+15 XP</span>
+        <div class="topic-status" id="status-a2-1"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Almancada günlük konuşmada geçmiş zaman için <strong>Perfekt</strong> kullanılır. Yardımcı fiil (haben/sein) + Partizip II ile oluşturulur.</div>
+        <div class="rule-box">
+            <strong>Kural:</strong> haben/sein (2. konum) + ... + Partizip II (cümle sonu)<br><br>
+            Düzenli: ge- + gövde + -t → <span class="hl-blue">gemacht, gespielt</span><br>
+            Düzensiz: ge- + değişen gövde + -en → <span class="hl-red">geschrieben, gelesen</span>
+        </div>
+        <table class="grammar-table">
+            <tr><th>haben ile</th><th>sein ile (hareket/değişim)</th></tr>
+            <tr><td>Ich habe gespielt.</td><td>Ich bin gefahren.</td></tr>
+            <tr><td>Er hat gegessen.</td><td>Sie ist gekommen.</td></tr>
+            <tr><td>Wir haben gearbeitet.</td><td>Wir sind gereist.</td></tr>
+        </table>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Ich <span class="hl-blue">habe</span> gestern einen Film <span class="hl-blue">gesehen</span>.</div>
+                <div class="tr">Dün bir film izledim.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Sie <span class="hl-green">ist</span> nach Berlin <span class="hl-green">gefahren</span>.</div>
+                <div class="tr">Berlin'e gitti. (fahren → hareket → sein)</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="a2-1"><i class="fas fa-check"></i> Konuyu Tamamladım (+15 XP)</button>
+    </div>
+</div>
+
+<!-- A2-2: Modalverben -->
+<div class="topic-card" data-id="a2-2" data-level="A2" data-xp="15">
+    <div class="topic-header">
+        <span class="topic-icon">🎯</span>
+        <span class="topic-title">Modalverben — Yardımcı Kiplik Fiilleri</span>
+        <span class="topic-xp">+15 XP</span>
+        <div class="topic-status" id="status-a2-2"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">6 modal fiil Almancada olasılık, izin, zorunluluk ve istek ifade eder. Asıl fiil cümlenin sonuna infinitiv olarak gider.</div>
+        <table class="grammar-table">
+            <tr><th>Modal</th><th>Anlam</th><th>ich</th><th>er/sie/es</th></tr>
+            <tr><td>können</td><td>-ebilmek</td><td>kann</td><td>kann</td></tr>
+            <tr><td>müssen</td><td>-mek zorunda olmak</td><td>muss</td><td>muss</td></tr>
+            <tr><td>dürfen</td><td>-ebilmek (izin)</td><td>darf</td><td>darf</td></tr>
+            <tr><td>sollen</td><td>-meli (görev)</td><td>soll</td><td>soll</td></tr>
+            <tr><td>wollen</td><td>istemek</td><td>will</td><td>will</td></tr>
+            <tr><td>mögen/möchten</td><td>sevmek/hoşlanmak</td><td>mag/möchte</td><td>mag/möchte</td></tr>
+        </table>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Ich <span class="hl-blue">kann</span> gut Deutsch <span class="hl-blue">sprechen</span>.</div>
+                <div class="tr">İyi Almanca konuşabiliyorum.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Du <span class="hl-red">musst</span> jetzt <span class="hl-red">schlafen</span>.</div>
+                <div class="tr">Şimdi uyuman gerekiyor.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Ich <span class="hl-green">möchte</span> einen Kaffee <span class="hl-green">trinken</span>.</div>
+                <div class="tr">Bir kahve içmek istiyorum.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="a2-2"><i class="fas fa-check"></i> Konuyu Tamamladım (+15 XP)</button>
+    </div>
+</div>
+
+<!-- A2-3: Akkusativ -->
+<div class="topic-card" data-id="a2-3" data-level="A2" data-xp="15">
+    <div class="topic-header">
+        <span class="topic-icon">🎯</span>
+        <span class="topic-title">Akkusativ — Yükleme Hali (4. Durum)</span>
+        <span class="topic-xp">+15 XP</span>
+        <div class="topic-status" id="status-a2-3"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Akkusativ, cümlenin doğrudan nesnesini (Wen? Was? / Kimi? Neyi?) ifade eder. Sadece maskulin artikelde değişim olur.</div>
+        <table class="grammar-table">
+            <tr><th>Cins</th><th>Nominativ</th><th>Akkusativ</th></tr>
+            <tr><td>Maskulin</td><td>der / ein</td><td><span class="hl-red">den / einen</span></td></tr>
+            <tr><td>Feminin</td><td>die / eine</td><td>die / eine</td></tr>
+            <tr><td>Nötr</td><td>das / ein</td><td>das / ein</td></tr>
+            <tr><td>Çoğul</td><td>die</td><td>die</td></tr>
+        </table>
+        <div class="rule-box">
+            <strong>Akkusativ gerektiren fiiller:</strong> haben, sehen, brauchen, kaufen, lieben, nehmen, essen, trinken, finden, kennen
+        </div>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Ich sehe <span class="hl-red">den</span> Mann. (der Mann → den Mann)</div>
+                <div class="tr">Adamı görüyorum.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Er kauft <span class="hl-red">einen</span> Computer.</div>
+                <div class="tr">Bir bilgisayar satın alıyor.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="a2-3"><i class="fas fa-check"></i> Konuyu Tamamladım (+15 XP)</button>
+    </div>
+</div>
+
+<!-- A2-4: Dativ -->
+<div class="topic-card" data-id="a2-4" data-level="A2" data-xp="15">
+    <div class="topic-header">
+        <span class="topic-icon">📦</span>
+        <span class="topic-title">Dativ — Dolaylı Nesne Hali (3. Durum)</span>
+        <span class="topic-xp">+15 XP</span>
+        <div class="topic-status" id="status-a2-4"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Dativ, eylemi kimin için yapıldığını (Wem? / Kime?) söyler. Maskulin ve Nötr'de <strong>dem</strong>, Feminin'de <strong>der</strong> olur.</div>
+        <table class="grammar-table">
+            <tr><th>Cins</th><th>Nominativ</th><th>Dativ</th></tr>
+            <tr><td>Maskulin</td><td>der / ein</td><td><span class="hl-blue">dem / einem</span></td></tr>
+            <tr><td>Feminin</td><td>die / eine</td><td><span class="hl-blue">der / einer</span></td></tr>
+            <tr><td>Nötr</td><td>das / ein</td><td><span class="hl-blue">dem / einem</span></td></tr>
+            <tr><td>Çoğul</td><td>die</td><td><span class="hl-blue">den + isim +(e)n</span></td></tr>
+        </table>
+        <div class="rule-box">
+            <strong>Dativ gerektiren fiiller:</strong> geben, helfen, danken, gehören, gefallen, glauben, empfehlen
+        </div>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Ich gebe <span class="hl-blue">dem</span> Kind ein Buch.</div>
+                <div class="tr">Çocuğa bir kitap veriyorum.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Er hilft <span class="hl-blue">seiner</span> Mutter.</div>
+                <div class="tr">Annesine yardım ediyor.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="a2-4"><i class="fas fa-check"></i> Konuyu Tamamladım (+15 XP)</button>
+    </div>
+</div>
+
+<!-- A2-5: Trennbare Verben -->
+<div class="topic-card" data-id="a2-5" data-level="A2" data-xp="15">
+    <div class="topic-header">
+        <span class="topic-icon">✂️</span>
+        <span class="topic-title">Trennbare Verben — Ayrılabilen Fiiller</span>
+        <span class="topic-xp">+15 XP</span>
+        <div class="topic-status" id="status-a2-5"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Bazı fiillerin önüne ön ek (Präfix) gelir. Bu önekler cümlede fiilin sonuna gider. Infinitiv'de bir bütündür.</div>
+        <div class="rule-box">
+            <strong>Ayrılabilen önekler:</strong> ab-, an-, auf-, aus-, ein-, mit-, vor-, zu-, nach-, weg-<br><br>
+            aufmachen → Ich <span class="hl-blue">mache</span> die Tür <span class="hl-blue">auf</span>. (önek sona gitti)
+        </div>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Ich <span class="hl-blue">stehe</span> um 7 Uhr <span class="hl-blue">auf</span>. (aufstehen)</div>
+                <div class="tr">Saat 7'de kalkıyorum.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Er <span class="hl-green">ruft</span> seine Mutter <span class="hl-green">an</span>. (anrufen)</div>
+                <div class="tr">Annesini arıyor.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Wir <span class="hl-red">kaufen</span> im Supermarkt <span class="hl-red">ein</span>. (einkaufen)</div>
+                <div class="tr">Süpermarkette alışveriş yapıyoruz.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="a2-5"><i class="fas fa-check"></i> Konuyu Tamamladım (+15 XP)</button>
+    </div>
+</div>
+
+<!-- A2-6: Präpositionen -->
+<div class="topic-card" data-id="a2-6" data-level="A2" data-xp="15">
+    <div class="topic-header">
+        <span class="topic-icon">🗺️</span>
+        <span class="topic-title">Präpositionen — Edatlar (Akkusativ & Dativ)</span>
+        <span class="topic-xp">+15 XP</span>
+        <div class="topic-status" id="status-a2-6"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <table class="grammar-table">
+            <tr><th>Akkusativ Edatları</th><th>Dativ Edatları</th><th>İkisi de (Wo?/Wohin?)</th></tr>
+            <tr><td>durch, für, gegen, ohne, um, bis, entlang</td><td>aus, bei, mit, nach, seit, von, zu, außer, gegenüber</td><td>an, auf, hinter, in, neben, über, unter, vor, zwischen</td></tr>
+        </table>
+        <div class="rule-box">
+            <strong>İki halli edatlar:</strong><br>
+            🔹 <strong>Wo?</strong> (Nerede?) → Dativ: Das Buch liegt <span class="hl-blue">auf dem</span> Tisch.<br>
+            🔹 <strong>Wohin?</strong> (Nereye?) → Akkusativ: Ich lege das Buch <span class="hl-red">auf den</span> Tisch.
+        </div>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Ich fahre <span class="hl-red">durch</span> den Tunnel.</div>
+                <div class="tr">Tünelden geçiyorum. (durch → Akkusativ)</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Er kommt <span class="hl-blue">aus</span> der Türkei.</div>
+                <div class="tr">Türkiye'den geliyor. (aus → Dativ)</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="a2-6"><i class="fas fa-check"></i> Konuyu Tamamladım (+15 XP)</button>
+    </div>
+</div>
+
+<!-- A2-7: Komparativ Superlativ -->
+<div class="topic-card" data-id="a2-7" data-level="A2" data-xp="15">
+    <div class="topic-header">
+        <span class="topic-icon">📊</span>
+        <span class="topic-title">Komparativ & Superlativ — Karşılaştırma</span>
+        <span class="topic-xp">+15 XP</span>
+        <div class="topic-status" id="status-a2-7"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <table class="grammar-table">
+            <tr><th>Pozitiv</th><th>Komparativ (+er)</th><th>Superlativ (am ...sten)</th></tr>
+            <tr><td>groß (büyük)</td><td>größer</td><td>am größten</td></tr>
+            <tr><td>schnell (hızlı)</td><td>schneller</td><td>am schnellsten</td></tr>
+            <tr><td>gut (iyi)</td><td>besser</td><td>am besten</td></tr>
+            <tr><td>viel (çok)</td><td>mehr</td><td>am meisten</td></tr>
+            <tr><td>gern (memnuniyetle)</td><td>lieber</td><td>am liebsten</td></tr>
+        </table>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Berlin ist <span class="hl-blue">größer</span> als München.</div>
+                <div class="tr">Berlin, Münih'ten büyüktür.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Das ist <span class="hl-green">das beste</span> Essen der Welt.</div>
+                <div class="tr">Bu dünyanın en iyi yemeğidir.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="a2-7"><i class="fas fa-check"></i> Konuyu Tamamladım (+15 XP)</button>
+    </div>
+</div>
+
+<!-- A2-8: Imperativ -->
+<div class="topic-card" data-id="a2-8" data-level="A2" data-xp="15">
+    <div class="topic-header">
+        <span class="topic-icon">📢</span>
+        <span class="topic-title">Imperativ — Emir Kipi</span>
+        <span class="topic-xp">+15 XP</span>
+        <div class="topic-status" id="status-a2-8"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <table class="grammar-table">
+            <tr><th>Kişi</th><th>Kural</th><th>kommen</th><th>gehen</th></tr>
+            <tr><td>du (tekil sen)</td><td>gövde + (e)</td><td>Komm!</td><td>Geh!</td></tr>
+            <tr><td>ihr (çoğul siz)</td><td>gövde + t</td><td>Kommt!</td><td>Geht!</td></tr>
+            <tr><td>Sie (resmi siz)</td><td>infinitiv + Sie</td><td>Kommen Sie!</td><td>Gehen Sie!</td></tr>
+        </table>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de"><span class="hl-blue">Komm</span> bitte her!</div>
+                <div class="tr">Lütfen buraya gel! (du)</div>
+            </div>
+            <div class="example-item">
+                <div class="de"><span class="hl-blue">Öffnen Sie</span> bitte das Fenster!</div>
+                <div class="tr">Lütfen pencereyi açın! (Sie)</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="a2-8"><i class="fas fa-check"></i> Konuyu Tamamladım (+15 XP)</button>
+    </div>
+</div>
+</div><!-- end A2 -->
+
+<!-- ===== B1 ===== -->
+<div class="level-section" data-level="B1">
+<div class="level-section-header" data-level="B1">
+    <span class="level-badge">B1</span> Orta Seviye
+    <span class="chevron"><i class="fas fa-chevron-down"></i></span>
+</div>
+
+<!-- B1-1: Nebensätze -->
+<div class="topic-card" data-id="b1-1" data-level="B1" data-xp="20">
+    <div class="topic-header">
+        <span class="topic-icon">🔗</span>
+        <span class="topic-title">Nebensätze — Yan Cümleler (weil, dass, wenn, ob...)</span>
+        <span class="topic-xp">+20 XP</span>
+        <div class="topic-status" id="status-b1-1"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Yan cümlede fiil her zaman sona gider! Bu Almancada en kritik kurallardan biridir.</div>
+        <div class="rule-box">
+            Ana cümle: Ich lerne Deutsch. Ich will in Deutschland leben.<br>
+            Yan cümle: Ich lerne Deutsch, <span class="hl-blue">weil ich in Deutschland leben <strong>will</strong></span>.
+        </div>
+        <table class="grammar-table">
+            <tr><th>Bağlaç</th><th>Anlam</th><th>Örnek</th></tr>
+            <tr><td>weil</td><td>çünkü</td><td>...weil er krank ist.</td></tr>
+            <tr><td>dass</td><td>-dığı(-ki)</td><td>Ich denke, dass es richtig ist.</td></tr>
+            <tr><td>wenn</td><td>eğer/ne zaman</td><td>Wenn ich Zeit habe, komme ich.</td></tr>
+            <tr><td>ob</td><td>-ip olmadığı</td><td>Ich weiß nicht, ob er kommt.</td></tr>
+            <tr><td>obwohl</td><td>karşın/rağmen</td><td>Obwohl es regnet, gehe ich.</td></tr>
+            <tr><td>damit</td><td>amacıyla/için</td><td>Ich lerne, damit ich Erfolg habe.</td></tr>
+        </table>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Ich bin müde, <span class="hl-blue">weil</span> ich gestern nicht geschlafen <span class="hl-blue">habe</span>.</div>
+                <div class="tr">Dün uyumadığım için yorgunum.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Er fragt, <span class="hl-green">ob</span> du morgen kommen <span class="hl-green">kannst</span>.</div>
+                <div class="tr">Yarın gelip gelemeyeceğini soruyor.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="b1-1"><i class="fas fa-check"></i> Konuyu Tamamladım (+20 XP)</button>
+    </div>
+</div>
+
+<!-- B1-2: Relativsätze -->
+<div class="topic-card" data-id="b1-2" data-level="B1" data-xp="20">
+    <div class="topic-header">
+        <span class="topic-icon">🔁</span>
+        <span class="topic-title">Relativsätze — Sıfat Cümleleri</span>
+        <span class="topic-xp">+20 XP</span>
+        <div class="topic-status" id="status-b1-2"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">İsmi niteleyen yan cümlelerdir. "der/die/das" relatif zamiri olarak kullanılır, duruma ve cinse göre değişir.</div>
+        <table class="grammar-table">
+            <tr><th></th><th>Maskulin</th><th>Feminin</th><th>Nötr</th><th>Çoğul</th></tr>
+            <tr><td>Nom.</td><td>der</td><td>die</td><td>das</td><td>die</td></tr>
+            <tr><td>Akk.</td><td>den</td><td>die</td><td>das</td><td>die</td></tr>
+            <tr><td>Dat.</td><td>dem</td><td>der</td><td>dem</td><td>denen</td></tr>
+        </table>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Der Mann, <span class="hl-blue">der</span> dort steht, ist mein Vater.</div>
+                <div class="tr">Orada duran adam benim babam. (Mann = maskulin, Nom.)</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Das Buch, <span class="hl-green">das</span> ich lese, ist sehr interessant.</div>
+                <div class="tr">Okuduğum kitap çok ilginç. (Buch = nötr, Akk.)</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Die Frau, <span class="hl-red">der</span> ich helfe, ist meine Nachbarin.</div>
+                <div class="tr">Yardım ettiğim kadın komşum. (Frau = feminin, Dat.)</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="b1-2"><i class="fas fa-check"></i> Konuyu Tamamladım (+20 XP)</button>
+    </div>
+</div>
+
+<!-- B1-3: Präteritum -->
+<div class="topic-card" data-id="b1-3" data-level="B1" data-xp="20">
+    <div class="topic-header">
+        <span class="topic-icon">📖</span>
+        <span class="topic-title">Präteritum — Yazılı Geçmiş Zaman</span>
+        <span class="topic-xp">+20 XP</span>
+        <div class="topic-status" id="status-b1-3"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Yazı dilinde ve hikaye anlatımında kullanılan geçmiş zaman. sein, haben ve modal fiiller günlük konuşmada da Präteritum ile kullanılır.</div>
+        <table class="grammar-table">
+            <tr><th>Kişi</th><th>machen (düz.)</th><th>kommen (düz.sz.)</th><th>sein</th><th>haben</th></tr>
+            <tr><td>ich</td><td>machte</td><td>kam</td><td>war</td><td>hatte</td></tr>
+            <tr><td>du</td><td>machtest</td><td>kamst</td><td>warst</td><td>hattest</td></tr>
+            <tr><td>er/sie/es</td><td>machte</td><td>kam</td><td>war</td><td>hatte</td></tr>
+            <tr><td>wir</td><td>machten</td><td>kamen</td><td>waren</td><td>hatten</td></tr>
+        </table>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Gestern <span class="hl-blue">war</span> ich sehr müde.</div>
+                <div class="tr">Dün çok yorgundum.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Sie <span class="hl-green">arbeitete</span> bis 22 Uhr.</div>
+                <div class="tr">Saat 22'ye kadar çalıştı.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="b1-3"><i class="fas fa-check"></i> Konuyu Tamamladım (+20 XP)</button>
+    </div>
+</div>
+
+<!-- B1-4: Passiv -->
+<div class="topic-card" data-id="b1-4" data-level="B1" data-xp="20">
+    <div class="topic-header">
+        <span class="topic-icon">🔃</span>
+        <span class="topic-title">Passiv — Edilgen Çatı</span>
+        <span class="topic-xp">+20 XP</span>
+        <div class="topic-status" id="status-b1-4"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Eylemin yapanı değil, yapılanı önemseyen çatı. <strong>werden + Partizip II</strong> ile oluşturulur.</div>
+        <div class="rule-box">
+            Aktif: Man <span class="hl-blue">baut</span> hier eine Schule. (Burada okul inşa ediyorlar.)<br>
+            Passiv: Hier <span class="hl-red">wird</span> eine Schule <span class="hl-red">gebaut</span>. (Burada okul inşa edilmektedir.)
+        </div>
+        <table class="grammar-table">
+            <tr><th>Zaman</th><th>Yapı</th><th>Örnek</th></tr>
+            <tr><td>Präsens</td><td>wird + P.II</td><td>Das Buch wird gelesen.</td></tr>
+            <tr><td>Präteritum</td><td>wurde + P.II</td><td>Das Buch wurde gelesen.</td></tr>
+            <tr><td>Perfekt</td><td>ist + P.II + worden</td><td>Das Buch ist gelesen worden.</td></tr>
+        </table>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Das Auto <span class="hl-red">wird</span> repariert.</div>
+                <div class="tr">Araba tamir ediliyor.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Das Haus <span class="hl-red">wurde</span> 1990 <span class="hl-red">gebaut</span>.</div>
+                <div class="tr">Ev 1990'da inşa edildi.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="b1-4"><i class="fas fa-check"></i> Konuyu Tamamladım (+20 XP)</button>
+    </div>
+</div>
+
+<!-- B1-5: Konjunktiv II -->
+<div class="topic-card" data-id="b1-5" data-level="B1" data-xp="20">
+    <div class="topic-header">
+        <span class="topic-icon">💭</span>
+        <span class="topic-title">Konjunktiv II — Dilek/Varsayım Kipi</span>
+        <span class="topic-xp">+20 XP</span>
+        <div class="topic-status" id="status-b1-5"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Gerçekleşmesi zor veya imkansız dilekler, nezaket ifadeleri ve varsayımlar için kullanılır.</div>
+        <div class="rule-box">
+            <strong>Oluşumu:</strong> Präteritum gövdesi + <strong>Umlaut (ä/ö/ü)</strong> + Konjunktiv II ekleri<br>
+            war → <span class="hl-blue">wäre</span> | hatte → <span class="hl-blue">hätte</span> | konnte → <span class="hl-blue">könnte</span><br><br>
+            sagen üzere: sagte → würde sagen (<strong>würde + infinitiv</strong> daha yaygın)
+        </div>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Wenn ich Geld <span class="hl-blue">hätte</span>, <span class="hl-blue">würde</span> ich reisen.</div>
+                <div class="tr">Param olsaydı seyahat ederdim.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Ich <span class="hl-blue">würde</span> gern ein Bier trinken.</div>
+                <div class="tr">Bir bira içmek isterdim. (Nezaket)</div>
+            </div>
+            <div class="example-item">
+                <div class="de"><span class="hl-blue">Könnten</span> Sie mir bitte helfen?</div>
+                <div class="tr">Bana yardım edebilir misiniz? (Kibar rica)</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="b1-5"><i class="fas fa-check"></i> Konuyu Tamamladım (+20 XP)</button>
+    </div>
+</div>
+
+<!-- B1-6: Genitiv -->
+<div class="topic-card" data-id="b1-6" data-level="B1" data-xp="20">
+    <div class="topic-header">
+        <span class="topic-icon">🔑</span>
+        <span class="topic-title">Genitiv — İyelik (Sahiplik) Hali</span>
+        <span class="topic-xp">+20 XP</span>
+        <div class="topic-status" id="status-b1-6"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Genitiv, bir şeyin kime ait olduğunu gösterir. Maskulin ve Nötr'de isme <strong>-(e)s</strong> eki gelir.</div>
+        <table class="grammar-table">
+            <tr><th>Cins</th><th>Bestimmt</th><th>Unbestimmt</th></tr>
+            <tr><td>Maskulin</td><td>des Mannes</td><td>eines Mannes</td></tr>
+            <tr><td>Feminin</td><td>der Frau</td><td>einer Frau</td></tr>
+            <tr><td>Nötr</td><td>des Kindes</td><td>eines Kindes</td></tr>
+        </table>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Das ist das Auto <span class="hl-blue">des Mannes</span>.</div>
+                <div class="tr">Bu adamın arabası.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Die Tasche <span class="hl-red">meiner Mutter</span> ist teuer.</div>
+                <div class="tr">Annemin çantası pahalı.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="b1-6"><i class="fas fa-check"></i> Konuyu Tamamladım (+20 XP)</button>
+    </div>
+</div>
+
+<!-- B1-7: Infinitivkonstruktionen -->
+<div class="topic-card" data-id="b1-7" data-level="B1" data-xp="20">
+    <div class="topic-header">
+        <span class="topic-icon">📌</span>
+        <span class="topic-title">Infinitivkonstruktionen — um...zu, ohne...zu, statt...zu</span>
+        <span class="topic-xp">+20 XP</span>
+        <div class="topic-status" id="status-b1-7"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="rule-box">
+            <strong>um...zu</strong> = -mak için (amaç)<br>
+            <strong>ohne...zu</strong> = -meden (olmaksızın)<br>
+            <strong>statt...zu / anstatt...zu</strong> = -mek yerine<br><br>
+            Ayrılabilen fiillerde "zu" ortaya girer: aufzumachen
+        </div>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Ich lerne Deutsch, <span class="hl-blue">um</span> in Deutschland <span class="hl-blue">zu</span> arbeiten.</div>
+                <div class="tr">Almanya'da çalışmak için Almanca öğreniyorum.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Er ging, <span class="hl-red">ohne</span> Auf Wiedersehen <span class="hl-red">zu</span> sagen.</div>
+                <div class="tr">Hoşça kal demeden gitti.</div>
+            </div>
+            <div class="example-item">
+                <div class="de"><span class="hl-green">Statt</span> zu lernen, spielt er Videospiele.</div>
+                <div class="tr">Ders çalışmak yerine video oyunu oynuyor.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="b1-7"><i class="fas fa-check"></i> Konuyu Tamamladım (+20 XP)</button>
+    </div>
+</div>
+
+<!-- B1-8: Reflexive Verben -->
+<div class="topic-card" data-id="b1-8" data-level="B1" data-xp="20">
+    <div class="topic-header">
+        <span class="topic-icon">♻️</span>
+        <span class="topic-title">Reflexive Verben — Dönüşlü Fiiller</span>
+        <span class="topic-xp">+20 XP</span>
+        <div class="topic-status" id="status-b1-8"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Öznenin kendi üzerine yaptığı eylemler. "sich" dönüşlü zamiriyle kullanılır.</div>
+        <table class="grammar-table">
+            <tr><th>Kişi</th><th>Akkusativ (sich)</th><th>Dativ (sich)</th></tr>
+            <tr><td>ich</td><td>mich</td><td>mir</td></tr>
+            <tr><td>du</td><td>dich</td><td>dir</td></tr>
+            <tr><td>er/sie/es</td><td>sich</td><td>sich</td></tr>
+            <tr><td>wir</td><td>uns</td><td>uns</td></tr>
+            <tr><td>ihr</td><td>euch</td><td>euch</td></tr>
+            <tr><td>sie/Sie</td><td>sich</td><td>sich</td></tr>
+        </table>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Ich <span class="hl-blue">wasche mich</span> jeden Morgen. (sich waschen)</div>
+                <div class="tr">Her sabah yıkanıyorum.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Ich <span class="hl-green">freue mich</span> auf den Urlaub. (sich freuen auf)</div>
+                <div class="tr">Tatili sabırsızlıkla bekliyorum.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="b1-8"><i class="fas fa-check"></i> Konuyu Tamamladım (+20 XP)</button>
+    </div>
+</div>
+</div><!-- end B1 -->
+
+<!-- ===== B2 ===== -->
+<div class="level-section" data-level="B2">
+<div class="level-section-header" data-level="B2">
+    <span class="level-badge">B2</span> İleri Seviye
+    <span class="chevron"><i class="fas fa-chevron-down"></i></span>
+</div>
+
+<!-- B2-1: Konjunktiv I -->
+<div class="topic-card" data-id="b2-1" data-level="B2" data-xp="25">
+    <div class="topic-header">
+        <span class="topic-icon">📰</span>
+        <span class="topic-title">Konjunktiv I — Dolaylı Anlatım Kipi</span>
+        <span class="topic-xp">+25 XP</span>
+        <div class="topic-status" id="status-b2-1"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Başkasının söylediklerini aktarırken kullanılır. Özellikle gazetecilik ve resmi metinlerde yaygındır.</div>
+        <div class="rule-box">
+            <strong>Oluşumu:</strong> İnfinitiv gövdesi + Konj.I eki<br>
+            sagen → er <span class="hl-blue">sage</span> | kommen → er <span class="hl-blue">komme</span> | sein → er <span class="hl-blue">sei</span>
+        </div>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Er sagt, er <span class="hl-blue">sei</span> krank. (= Er sagt: "Ich bin krank.")</div>
+                <div class="tr">Hasta olduğunu söylüyor.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Die Zeitung berichtet, das Unternehmen <span class="hl-blue">habe</span> Verluste <span class="hl-blue">gemacht</span>.</div>
+                <div class="tr">Gazete, şirketin zarar ettiğini bildiriyor.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="b2-1"><i class="fas fa-check"></i> Konuyu Tamamladım (+25 XP)</button>
+    </div>
+</div>
+
+<!-- B2-2: Partizipialkonstruktionen -->
+<div class="topic-card" data-id="b2-2" data-level="B2" data-xp="25">
+    <div class="topic-header">
+        <span class="topic-icon">🏗️</span>
+        <span class="topic-title">Partizipialkonstruktionen — Katılım Öbekleri</span>
+        <span class="topic-xp">+25 XP</span>
+        <div class="topic-status" id="status-b2-2"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Relativsätze yerine daha kısa ve şık yazı dili yapısı. Partizip I (aktif, devam eden) ve Partizip II (pasif, tamamlanmış) kullanılır.</div>
+        <div class="rule-box">
+            Relativsatz: der Mann, <span class="hl-red">der auf der Straße läuft</span><br>
+            Partizip I: der <span class="hl-blue">auf der Straße laufende</span> Mann<br><br>
+            Relativsatz: das Buch, <span class="hl-red">das gestern gekauft wurde</span><br>
+            Partizip II: das <span class="hl-blue">gestern gekaufte</span> Buch
+        </div>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Die <span class="hl-blue">singende</span> Frau ist meine Schwester.</div>
+                <div class="tr">Şarkı söyleyen kadın benim kız kardeşim. (P.I → aktif, devam)</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Das <span class="hl-green">gekaufte</span> Buch liegt auf dem Tisch.</div>
+                <div class="tr">Satın alınan kitap masanın üzerinde. (P.II → pasif, tamamlanmış)</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="b2-2"><i class="fas fa-check"></i> Konuyu Tamamladım (+25 XP)</button>
+    </div>
+</div>
+
+<!-- B2-3: Konzessivsätze -->
+<div class="topic-card" data-id="b2-3" data-level="B2" data-xp="25">
+    <div class="topic-header">
+        <span class="topic-icon">⚖️</span>
+        <span class="topic-title">Konzessiv-, Kausal-, Konsekutivsätze</span>
+        <span class="topic-xp">+25 XP</span>
+        <div class="topic-status" id="status-b2-3"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <table class="grammar-table">
+            <tr><th>Tür</th><th>Bağlaçlar</th><th>Örnek</th></tr>
+            <tr><td>Konzessiv (rağmen)</td><td>obwohl, obgleich, trotzdem, dennoch</td><td>Obwohl er krank war, arbeitete er.</td></tr>
+            <tr><td>Kausal (çünkü)</td><td>weil, da, denn, nämlich</td><td>Da er krank war, blieb er zuhause.</td></tr>
+            <tr><td>Konsekutiv (öyle ki)</td><td>so...dass, sodass</td><td>Es war so kalt, dass ich fror.</td></tr>
+            <tr><td>Konditional (eğer)</td><td>wenn, falls, sofern</td><td>Falls es regnet, bleibe ich.</td></tr>
+            <tr><td>Temporal (zaman)</td><td>als, wenn, während, bevor, nachdem, seitdem</td><td>Als ich jung war...</td></tr>
+        </table>
+        <div class="rule-box">
+            ⚠️ <strong>als</strong> vs <strong>wenn</strong>:<br>
+            <span class="hl-blue">als</span> = tek seferlik geçmiş olay: Als ich 10 war...<br>
+            <span class="hl-green">wenn</span> = tekrarlayan + gelecek: Wenn ich Zeit habe...
+        </div>
+        <button class="mark-done-btn" data-id="b2-3"><i class="fas fa-check"></i> Konuyu Tamamladım (+25 XP)</button>
+    </div>
+</div>
+
+<!-- B2-4: Zweigliedriger Passiv -->
+<div class="topic-card" data-id="b2-4" data-level="B2" data-xp="25">
+    <div class="topic-header">
+        <span class="topic-icon">🌊</span>
+        <span class="topic-title">Zustandspassiv & Passiv mit Modalverben</span>
+        <span class="topic-xp">+25 XP</span>
+        <div class="topic-status" id="status-b2-4"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="rule-box">
+            <strong>Vorgangspassiv</strong> (eylem): werden + P.II → Das Buch <span class="hl-blue">wird gelesen</span>.<br>
+            <strong>Zustandspassiv</strong> (durum): sein + P.II → Das Buch <span class="hl-red">ist gelesen</span>.<br>
+            <strong>Passiv + Modal</strong>: modal + P.II + werden → Das muss <span class="hl-green">gemacht werden</span>.
+        </div>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Das Geschäft <span class="hl-red">ist</span> geschlossen. (Zustandspassiv)</div>
+                <div class="tr">Dükkan kapalı. (durum)</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Das Problem <span class="hl-green">muss</span> sofort gelöst <span class="hl-green">werden</span>.</div>
+                <div class="tr">Sorun hemen çözülmeli.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="b2-4"><i class="fas fa-check"></i> Konuyu Tamamladım (+25 XP)</button>
+    </div>
+</div>
+
+<!-- B2-5: Nominalisierung -->
+<div class="topic-card" data-id="b2-5" data-level="B2" data-xp="25">
+    <div class="topic-header">
+        <span class="topic-icon">📝</span>
+        <span class="topic-title">Nominalisierung — Fiil ve Sıfatların İsimleşmesi</span>
+        <span class="topic-xp">+25 XP</span>
+        <div class="topic-status" id="status-b2-5"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Yazı dilinde fiil ve sıfatlar sık sık isim olarak kullanılır. Bu yapı metni daha resmi ve özlü kılar.</div>
+        <table class="grammar-table">
+            <tr><th>Fiil → İsim</th><th>Sıfat → İsim</th></tr>
+            <tr><td>fahren → die Fahrt</td><td>krank → die Krankheit</td></tr>
+            <tr><td>entscheiden → die Entscheidung</td><td>frei → die Freiheit</td></tr>
+            <tr><td>laufen → das Laufen (gerundium)</td><td>schön → die Schönheit</td></tr>
+        </table>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Statt: "Weil man die Tür öffnet, ..." → <span class="hl-blue">Beim Öffnen der Tür...</span></div>
+                <div class="tr">Kapı açılırken... (nominalisiert)</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="b2-5"><i class="fas fa-check"></i> Konuyu Tamamladım (+25 XP)</button>
+    </div>
+</div>
+
+<!-- B2-6 Doppelter Infinitiv -->
+<div class="topic-card" data-id="b2-6" data-level="B2" data-xp="25">
+    <div class="topic-header">
+        <span class="topic-icon">∞</span>
+        <span class="topic-title">Doppelter Infinitiv — Çift Mastar</span>
+        <span class="topic-xp">+25 XP</span>
+        <div class="topic-status" id="status-b2-6"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Modal fiil + asıl fiil Perfekt'te kullanıldığında Partizip II yerine iki infinitiv yan yana gelir.</div>
+        <div class="rule-box">
+            Normal: Ich habe das Buch <span class="hl-blue">gelesen</span>.<br>
+            Modal ile: Ich habe das Buch lesen <span class="hl-red">müssen</span>. (NOT: gemusst)<br>
+            → haben + infinitiv + modal infinitiv (sona gider)
+        </div>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Er hat lange warten <span class="hl-red">müssen</span>.</div>
+                <div class="tr">Uzun süre beklemek zorunda kaldı.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Ich habe es nicht machen <span class="hl-red">wollen</span>.</div>
+                <div class="tr">Bunu yapmak istemedim.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="b2-6"><i class="fas fa-check"></i> Konuyu Tamamladım (+25 XP)</button>
+    </div>
+</div>
+
+<!-- B2-7: Modalpartikeln -->
+<div class="topic-card" data-id="b2-7" data-level="B2" data-xp="25">
+    <div class="topic-header">
+        <span class="topic-icon">🎭</span>
+        <span class="topic-title">Modalpartikeln — Ton ve Nüans Partikülleri</span>
+        <span class="topic-xp">+25 XP</span>
+        <div class="topic-status" id="status-b2-7"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Cümlenin tonu, duygu ve nüansını belirleyen, çevrilmesi çok zor olan partiküller. Almanca konuşucuların en çok kullandığı özelliklerden biri.</div>
+        <table class="grammar-table">
+            <tr><th>Partikül</th><th>Kullanım / Nüans</th><th>Örnek</th></tr>
+            <tr><td>doch</td><td>zıtlık, hatırlatma</td><td>Das ist doch klar! (Bu zaten açık!)</td></tr>
+            <tr><td>ja</td><td>ortak bilgi vurgulama</td><td>Du weißt ja, wie er ist. (Biliyorsun ya...)</td></tr>
+            <tr><td>mal</td><td>yumuşatma, rica</td><td>Komm mal her! (Bir gel bakalım!)</td></tr>
+            <tr><td>halt / eben</td><td>çaresizlik, kabul</td><td>Das ist halt so. (Böyle işte.)</td></tr>
+            <tr><td>eigentlich</td><td>aslında, gerçekte</td><td>Was willst du eigentlich? (Aslında ne istiyorsun?)</td></tr>
+            <tr><td>wohl</td><td>tahmin, galiba</td><td>Er ist wohl krank. (Herhalde hasta.)</td></tr>
+        </table>
+        <button class="mark-done-btn" data-id="b2-7"><i class="fas fa-check"></i> Konuyu Tamamladım (+25 XP)</button>
+    </div>
+</div>
+
+<!-- B2-8: Gradpartikeln und Fokuspartikeln -->
+<div class="topic-card" data-id="b2-8" data-level="B2" data-xp="25">
+    <div class="topic-header">
+        <span class="topic-icon">🎚️</span>
+        <span class="topic-title">Zweiteilige Konnektoren — İkili Bağlayıcılar</span>
+        <span class="topic-xp">+25 XP</span>
+        <div class="topic-status" id="status-b2-8"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <table class="grammar-table">
+            <tr><th>İkili Bağlayıcı</th><th>Anlam</th><th>Örnek</th></tr>
+            <tr><td>sowohl...als auch</td><td>hem...hem de</td><td>Sowohl Deutsch als auch Englisch</td></tr>
+            <tr><td>weder...noch</td><td>ne...ne de</td><td>Weder Deutsch noch Englisch</td></tr>
+            <tr><td>entweder...oder</td><td>ya...ya da</td><td>Entweder du kommst oder nicht.</td></tr>
+            <tr><td>nicht nur...sondern auch</td><td>sadece...değil aynı zamanda</td><td>Nicht nur müde, sondern auch krank.</td></tr>
+            <tr><td>zwar...aber</td><td>gerçi...ama</td><td>Zwar teuer, aber qualitativ hochwertig.</td></tr>
+        </table>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de"><span class="hl-blue">Sowohl</span> mein Bruder <span class="hl-blue">als auch</span> meine Schwester kommen.</div>
+                <div class="tr">Hem erkek kardaşım hem de kız kardeşim geliyor.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="b2-8"><i class="fas fa-check"></i> Konuyu Tamamladım (+25 XP)</button>
+    </div>
+</div>
+</div><!-- end B2 -->
+
+<!-- ===== C1 ===== -->
+<div class="level-section" data-level="C1">
+<div class="level-section-header" data-level="C1">
+    <span class="level-badge">C1</span> Ustalık Seviyesi
+    <span class="chevron"><i class="fas fa-chevron-down"></i></span>
+</div>
+
+<!-- C1-1: Nominalstil -->
+<div class="topic-card" data-id="c1-1" data-level="C1" data-xp="30">
+    <div class="topic-header">
+        <span class="topic-icon">🎩</span>
+        <span class="topic-title">Nominalstil — İsim Ağırlıklı Yazı Üslubu</span>
+        <span class="topic-xp">+30 XP</span>
+        <div class="topic-status" id="status-c1-1"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Akademik ve resmi metinlerde fiil cümleleri yerine isim grupları kullanılır. Bu üslup metni daha otoriter ve biçimsel kılar.</div>
+        <div class="rule-box">
+            Verbalstil: <span class="hl-red">Weil die Temperatur sinkt</span>, gefriert das Wasser.<br>
+            Nominalstil: <span class="hl-blue">Aufgrund des Temperatursinkens</span> gefriert das Wasser.<br><br>
+            Önemli isim+edatlar: aufgrund (+ Gen.), infolge, wegen, trotz, trotz, innerhalb, außerhalb
+        </div>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de"><span class="hl-blue">Aufgrund der steigenden Nachfrage</span> erhöhte das Unternehmen die Preise.</div>
+                <div class="tr">Artan talep nedeniyle şirket fiyatları artırdı.</div>
+            </div>
+            <div class="example-item">
+                <div class="de"><span class="hl-blue">Zur Verbesserung der Qualität</span> wurden neue Maßnahmen ergriffen.</div>
+                <div class="tr">Kaliteyi iyileştirmek için yeni önlemler alındı.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="c1-1"><i class="fas fa-check"></i> Konuyu Tamamladım (+30 XP)</button>
+    </div>
+</div>
+
+<!-- C1-2: Erweiterte Partizipialkonstruktionen -->
+<div class="topic-card" data-id="c1-2" data-level="C1" data-xp="30">
+    <div class="topic-header">
+        <span class="topic-icon">🧩</span>
+        <span class="topic-title">Erweiterte Partizipialkonstruktionen — Genişletilmiş Katılım Öbekleri</span>
+        <span class="topic-xp">+30 XP</span>
+        <div class="topic-status" id="status-c1-2"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">C1 düzeyinde relativsatz yerine çok uzun ve genişletilmiş katılım öbekleri kullanılabilir.</div>
+        <div class="rule-box">
+            Relativsatz: ein Bericht, <span class="hl-red">der von der Regierung im Jahr 2020 veröffentlicht wurde</span><br>
+            Partizip: ein <span class="hl-blue">von der Regierung im Jahr 2020 veröffentlichter</span> Bericht
+        </div>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Die <span class="hl-blue">von allen Ländern unterzeichnete</span> Vereinbarung trat in Kraft.</div>
+                <div class="tr">Tüm ülkeler tarafından imzalanan anlaşma yürürlüğe girdi.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="c1-2"><i class="fas fa-check"></i> Konuyu Tamamladım (+30 XP)</button>
+    </div>
+</div>
+
+<!-- C1-3: Passiversatzformen -->
+<div class="topic-card" data-id="c1-3" data-level="C1" data-xp="30">
+    <div class="topic-header">
+        <span class="topic-icon">🔀</span>
+        <span class="topic-title">Passivumschreibungen — Edilgen Yerine Geçen Yapılar</span>
+        <span class="topic-xp">+30 XP</span>
+        <div class="topic-status" id="status-c1-3"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <table class="grammar-table">
+            <tr><th>Yapı</th><th>Passiv karşılığı</th><th>Örnek</th></tr>
+            <tr><td>sein + zu + Infinitiv</td><td>gereklilik/olasılık Passiv</td><td>Das ist zu beachten. (= muss beachtet werden)</td></tr>
+            <tr><td>sich lassen + Infinitiv</td><td>Passiv + können</td><td>Das lässt sich lösen. (= kann gelöst werden)</td></tr>
+            <tr><td>Adjektiv auf -bar/-lich</td><td>können Passiv</td><td>Das ist lösbar. (= kann gelöst werden)</td></tr>
+            <tr><td>man + Aktiv</td><td>Vorgangspassiv</td><td>Man sieht ihn selten. (= Er wird selten gesehen)</td></tr>
+        </table>
+        <div class="examples">
+            <h4>Örnek Cümleler</h4>
+            <div class="example-item">
+                <div class="de">Diese Frage <span class="hl-blue">lässt sich</span> nicht einfach beantworten.</div>
+                <div class="tr">Bu soru kolayca yanıtlanamaz.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Der Fehler <span class="hl-green">ist zu vermeiden</span>.</div>
+                <div class="tr">Bu hata kaçınılmalıdır.</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="c1-3"><i class="fas fa-check"></i> Konuyu Tamamladım (+30 XP)</button>
+    </div>
+</div>
+
+<!-- C1-4: Konzessive und adversative Strukturen -->
+<div class="topic-card" data-id="c1-4" data-level="C1" data-xp="30">
+    <div class="topic-header">
+        <span class="topic-icon">⚡</span>
+        <span class="topic-title">Konzessive Strukturen — Gelişmiş Karşıtlık Yapıları</span>
+        <span class="topic-xp">+30 XP</span>
+        <div class="topic-status" id="status-c1-4"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <table class="grammar-table">
+            <tr><th>Yapı</th><th>Anlam</th><th>Örnek</th></tr>
+            <tr><td>obwohl + Nebensatz</td><td>...olmasına rağmen</td><td>Obwohl er müde war, arbeitete er.</td></tr>
+            <tr><td>trotz + Genitiv</td><td>...a rağmen (isim)</td><td>Trotz der Müdigkeit arbeitete er.</td></tr>
+            <tr><td>wenngleich/wennschon</td><td>her ne kadar...olsa da</td><td>Wenngleich es schwer war, schaffte er es.</td></tr>
+            <tr><td>ungeachtet + Gen.</td><td>gözetmeksizin</td><td>Ungeachtet der Konsequenzen...</td></tr>
+            <tr><td>wie...auch (immer)</td><td>her ne kadar</td><td>Wie schwer es auch ist, wir machen weiter.</td></tr>
+        </table>
+        <button class="mark-done-btn" data-id="c1-4"><i class="fas fa-check"></i> Konuyu Tamamladım (+30 XP)</button>
+    </div>
+</div>
+
+<!-- C1-5: Subjektiver Gebrauch der Modalverben -->
+<div class="topic-card" data-id="c1-5" data-level="C1" data-xp="30">
+    <div class="topic-header">
+        <span class="topic-icon">🔮</span>
+        <span class="topic-title">Modal Fiillerin Öznel Kullanımı — Tahmin ve Olasılık</span>
+        <span class="topic-xp">+30 XP</span>
+        <div class="topic-status" id="status-c1-5"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Modal fiiller nesnel (zorunluluk/izin) dışında öznel (tahmin/olasılık) anlamda da kullanılır.</div>
+        <table class="grammar-table">
+            <tr><th>Modal</th><th>Öznel Anlam</th><th>Örnek</th></tr>
+            <tr><td>muss</td><td>kesinlikle olmalı</td><td>Er muss zu Hause sein. (Kesinlikle evdedir.)</td></tr>
+            <tr><td>dürfte</td><td>büyük olasılıkla</td><td>Das dürfte schwierig sein. (Büyük ihtimalle zor.)</td></tr>
+            <tr><td>könnte</td><td>mümkün, belki</td><td>Er könnte krank sein. (Hasta olabilir.)</td></tr>
+            <tr><td>müsste</td><td>olması gerekir</td><td>Er müsste schon da sein. (Artık orada olmalı.)</td></tr>
+            <tr><td>soll</td><td>duyuma göre</td><td>Er soll sehr reich sein. (Çok zengin olduğu söyleniyor.)</td></tr>
+            <tr><td>will</td><td>iddiaya göre</td><td>Er will alles gesehen haben. (Her şeyi gördüğünü iddia ediyor.)</td></tr>
+        </table>
+        <button class="mark-done-btn" data-id="c1-5"><i class="fas fa-check"></i> Konuyu Tamamladım (+30 XP)</button>
+    </div>
+</div>
+
+<!-- C1-6: Referenzsysteme -->
+<div class="topic-card" data-id="c1-6" data-level="C1" data-xp="30">
+    <div class="topic-header">
+        <span class="topic-icon">🔭</span>
+        <span class="topic-title">Textgrammatik — Cohäsion und Referenz</span>
+        <span class="topic-xp">+30 XP</span>
+        <div class="topic-status" id="status-c1-6"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Metin düzeyinde bütünlük sağlayan referans sistemleri. İyi yazı; tekrardan kaçınmak için çeşitli araçlar kullanır.</div>
+        <table class="grammar-table">
+            <tr><th>Araç</th><th>İşlev</th><th>Örnek</th></tr>
+            <tr><td>Pronomen</td><td>İsim yerine geçme</td><td>Der Mann kam. Er war müde.</td></tr>
+            <tr><td>Demonstrativpronomen</td><td>Vurgulama</td><td>Dieser/Das ist wichtig.</td></tr>
+            <tr><td>da(r)+Präposition</td><td>İsim grubuna gönderme</td><td>Ich denke daran. (= an die Sache)</td></tr>
+            <tr><td>Synonyme</td><td>Tekrarı önleme</td><td>das Fahrzeug → das Auto → der Wagen</td></tr>
+            <tr><td>Oberbegriffe</td><td>Üst kavram</td><td>Rose, Tulip → die Blumen</td></tr>
+        </table>
+        <button class="mark-done-btn" data-id="c1-6"><i class="fas fa-check"></i> Konuyu Tamamladım (+30 XP)</button>
+    </div>
+</div>
+
+<!-- C1-7: Wissenschaftlicher Stil -->
+<div class="topic-card" data-id="c1-7" data-level="C1" data-xp="30">
+    <div class="topic-header">
+        <span class="topic-icon">🔬</span>
+        <span class="topic-title">Wissenschaftlicher Schreibstil — Akademik Yazım</span>
+        <span class="topic-xp">+30 XP</span>
+        <div class="topic-status" id="status-c1-7"></div>
+        <i class="fas fa-chevron-right topic-chevron"></i>
+    </div>
+    <div class="topic-body">
+        <div class="topic-desc">Akademik Almanca; kesinlik, tarafsızlık ve resmiyet gerektiren çok özel bir üsluptur.</div>
+        <div class="rule-box">
+            ✅ <strong>Kullanılır:</strong><br>
+            • Passiv ve Nominalstil<br>
+            • "Es ist festzustellen, dass..." gibi kalıplar<br>
+            • "Im Rahmen dieser Untersuchung..." (Bu çalışma kapsamında...)<br>
+            • "Daraus folgt, dass..." (Bundan şu çıkar ki...)<br><br>
+            ❌ <strong>Kullanılmaz:</strong><br>
+            • "ich" zamiri (mümkünse)<br>
+            • Günlük/argo ifadeler<br>
+            • Kısaltmalar (z.B. hariç)
+        </div>
+        <div class="examples">
+            <h4>Akademik Kalıplar</h4>
+            <div class="example-item">
+                <div class="de">Es lässt sich feststellen, dass...</div>
+                <div class="tr">...olduğu saptanabilir.</div>
+            </div>
+            <div class="example-item">
+                <div class="de">Im Hinblick auf die Ergebnisse ist zu betonen, dass...</div>
+                <div class="tr">Sonuçlar göz önünde bulundurulduğunda vurgulanmalıdır ki...</div>
+            </div>
+        </div>
+        <button class="mark-done-btn" data-id="c1-7"><i class="fas fa-check"></i> Konuyu Tamamladım (+30 XP)</button>
+    </div>
+</div>
+</div><!-- end C1 -->
+
+</div><!-- .content -->
+
+<div id="grammar-toast"></div>
+
+<script>
+// ---- State ----
+const DONE_KEY = 'grammar_done_topics';
+const XP_PER_LEVEL = 100;
+const LEVEL_TITLES = ['Anfänger','Lernender','Schüler','Geselle','Kämpfer','Meister','Experte','Champion','Legende','Wortgott'];
+let doneTopic = JSON.parse(localStorage.getItem(DONE_KEY)) || [];
+
+// Shared XP with main app
+let stats = JSON.parse(localStorage.getItem('b2_german_stats')) || { xp: 0, level: 1 };
+if (!stats.xp) stats.xp = 0;
+if (!stats.level) stats.level = 1;
+
+function saveStatsGlobal() { localStorage.setItem('b2_german_stats', JSON.stringify(stats)); }
+
+// ---- XP UI ----
+function updateXpUI() {
+    const lvl = Math.min(stats.level || 1, 10);
+    const xpInLevel = (stats.xp || 0) % XP_PER_LEVEL;
+    const pct = (xpInLevel / XP_PER_LEVEL) * 100;
+    document.getElementById('g-level').textContent = lvl;
+    document.getElementById('g-xp').textContent = (stats.xp || 0) + ' XP';
+    document.getElementById('g-xp-fill').style.width = pct + '%';
+}
+
+function addXP(amount, levelHints) {
+    const prev = stats.level;
+    stats.xp = (stats.xp || 0) + amount;
+    stats.level = Math.floor(stats.xp / XP_PER_LEVEL) + 1;
+    if (stats.level > 10) stats.level = 10;
+    saveStatsGlobal();
+    updateXpUI();
+    if (stats.level > prev) {
+        showToast('🎉 Seviye atladın! Seviye ' + stats.level + ' — ' + LEVEL_TITLES[stats.level - 1], '#4f46e5');
+    }
+}
+
+// ---- Progress ----
+const topicsPerLevel = { A1: 8, A2: 8, B1: 8, B2: 8, C1: 7 };
+function updateProgress() {
+    ['A1','A2','B1','B2','C1'].forEach(lvl => {
+        const key = lvl.toLowerCase();
+        const total = topicsPerLevel[lvl];
+        const done = doneTopic.filter(id => id.startsWith(key + '-')).length;
+        const el = document.getElementById('prog-' + key);
+        if (el) el.textContent = done + '/' + total;
+    });
+}
+
+// ---- Mark Done ----
+function markDone(id, xp) {
+    const already = doneTopic.includes(id);
+    const btn = document.querySelector('.mark-done-btn[data-id="' + id + '"]');
+    const statusEl = document.getElementById('status-' + id);
+    if (already) {
+        doneTopic = doneTopic.filter(d => d !== id);
+        if (btn) { btn.classList.remove('already-done'); btn.innerHTML = '<i class="fas fa-check"></i> Konuyu Tamamladım (+' + xp + ' XP)'; }
+        if (statusEl) { statusEl.classList.remove('done'); statusEl.innerHTML = ''; }
+        showToast('↩ Tamamlanmamış olarak işaretlendi.', '#64748b');
+    } else {
+        doneTopic.push(id);
+        if (btn) { btn.classList.add('already-done'); btn.innerHTML = '<i class="fas fa-check-double"></i> Tamamlandı ✓'; }
+        if (statusEl) { statusEl.classList.add('done'); statusEl.innerHTML = '<i class="fas fa-check"></i>'; }
+        addXP(xp);
+        showToast('✅ Tebrikler! +' + xp + ' XP kazandın!', '#10b981');
+    }
+    localStorage.setItem(DONE_KEY, JSON.stringify(doneTopic));
+    updateProgress();
+}
+
+// ---- Restore state on load ----
+function restoreState() {
+    document.querySelectorAll('.topic-card').forEach(card => {
+        const id = card.dataset.id;
+        const xp = parseInt(card.dataset.xp);
+        if (doneTopic.includes(id)) {
+            const btn = card.querySelector('.mark-done-btn');
+            const statusEl = document.getElementById('status-' + id);
+            if (btn) { btn.classList.add('already-done'); btn.innerHTML = '<i class="fas fa-check-double"></i> Tamamlandı ✓'; }
+            if (statusEl) { statusEl.classList.add('done'); statusEl.innerHTML = '<i class="fas fa-check"></i>'; }
+        }
+    });
+    updateProgress();
+    updateXpUI();
+}
+
+// ---- Topic accordion ----
+document.querySelectorAll('.topic-header').forEach(header => {
+    header.addEventListener('click', (e) => {
+        if (e.target.closest('.topic-status')) return;
+        const card = header.closest('.topic-card');
+        const isOpen = card.classList.contains('open');
+        document.querySelectorAll('.topic-card.open').forEach(c => c.classList.remove('open'));
+        if (!isOpen) card.classList.add('open');
+    });
+});
+
+// ---- Mark done buttons ----
+document.querySelectorAll('.mark-done-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.id;
+        const card = document.querySelector('.topic-card[data-id="' + id + '"]');
+        const xp = parseInt(card ? card.dataset.xp : 10);
+        markDone(id, xp);
+    });
+});
+
+// ---- Level section accordion ----
+document.querySelectorAll('.level-section-header').forEach(header => {
+    header.addEventListener('click', () => {
+        header.classList.toggle('collapsed');
+        const section = header.closest('.level-section');
+        const cards = section.querySelectorAll('.topic-card');
+        cards.forEach(c => c.style.display = header.classList.contains('collapsed') ? 'none' : '');
+    });
+});
+
+// ---- Level filter tabs ----
+document.querySelectorAll('.level-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.level-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const level = tab.dataset.level;
+        document.querySelectorAll('.level-section').forEach(section => {
+            section.style.display = (level === 'all' || section.dataset.level === level) ? '' : 'none';
+        });
+    });
+});
+
+// ---- Toast ----
+function showToast(msg, color) {
+    const toast = document.getElementById('grammar-toast');
+    toast.textContent = msg;
+    toast.style.background = color || '#1e293b';
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// ---- Init ----
+restoreState();
+</script>
+</body>
+</html>
