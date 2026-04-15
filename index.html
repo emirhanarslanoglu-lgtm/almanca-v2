@@ -169,12 +169,18 @@
 
             <!-- Special Header for Learned/Review modes -->
             <div id="special-header" style="display:none;">
-                <div class="header-top" style="justify-content: space-between; border-bottom: 2px dashed rgba(0,0,0,0.1); padding-bottom: 10px; margin-bottom: 5px;">
-                    <button id="special-back-btn" class="action-btn secondary bouncy-btn" style="width:auto; padding: 10px 15px;"><i class="fas fa-arrow-left"></i> Geri</button>
-                    <h2 id="special-title" style="font-size: 1.4rem; color: var(--primary-color); margin:0;">Başlık</h2>
-                    <button id="special-home-btn" class="action-btn secondary bouncy-btn" style="width:auto; padding: 10px 15px;"><i class="fas fa-home"></i> Menü</button>
+                <div class="header-top" style="justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 10px; margin-bottom: 10px;">
+                    <button id="special-back-btn" class="action-btn secondary bouncy-btn" style="width:auto; padding: 8px 12px; font-size: 0.9rem;"><i class="fas fa-arrow-left"></i> Geri</button>
+                    <h2 id="special-title" style="font-size: 1.3rem; color: var(--primary-color); margin:0;">Başlık</h2>
+                    <button id="special-home-btn" class="action-btn secondary bouncy-btn" style="width:auto; padding: 8px 12px; font-size: 0.9rem;"><i class="fas fa-home"></i> Menü</button>
                 </div>
-                <p id="special-desc" style="font-size: 0.9rem; color: #718096; margin-bottom: 10px;">Açıklama</p>
+                <p id="special-desc" style="font-size: 0.85rem; color: #718096; margin-bottom: 10px;">Açıklama</p>
+                
+                <nav class="categories" style="justify-content: center; margin-bottom: 15px;">
+                    <button class="category-btn special-nav-btn" data-target="learned"><i class="fas fa-check-double"></i> Öğrendiklerim</button>
+                    <button class="category-btn special-nav-btn" data-target="review"><i class="fas fa-list-ul"></i> Tekrar Edilecekler</button>
+                    <button class="category-btn special-nav-btn" data-target="favoriler"><i class="fas fa-heart"></i> Favoriler</button>
+                </nav>
             </div>
         </header>
 

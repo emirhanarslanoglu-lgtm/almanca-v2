@@ -245,6 +245,12 @@ function init() {
     const specialHomeBtn = document.getElementById('special-home-btn');
     if (specialBackBtn) specialBackBtn.addEventListener('click', () => filterCards('tümü'));
     if (specialHomeBtn) specialHomeBtn.addEventListener('click', () => filterCards('tümü'));
+    
+    document.querySelectorAll('.special-nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterCards(btn.getAttribute('data-target'));
+        });
+    });
 }
 
 function initTheme() {
@@ -368,10 +374,22 @@ function filterCards(category) {
             
             document.getElementById('special-title').textContent = title;
             document.getElementById('special-desc').textContent = desc;
+            
+            // Highlight special nav button
+            document.querySelectorAll('.special-nav-btn').forEach(btn => {
+                if(btn.getAttribute('data-target') === category) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
         }
     } else {
         if(mainHeader) mainHeader.style.display = 'block';
         if(specialHeader) specialHeader.style.display = 'none';
+        
+        // Highlight main nav button
+        document.querySelectorAll('#categories-nav .category-btn').forEach(btn => {
+            if(btn.getAttribute('data-category') === category) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
     }
 
     if (category === 'tümü') filteredCards = [...activeDeck];
