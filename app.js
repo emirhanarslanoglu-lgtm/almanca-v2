@@ -10,8 +10,11 @@ let favorites = JSON.parse(localStorage.getItem('b2_german_favorites')) || [];
 let learned = JSON.parse(localStorage.getItem('b2_german_learned')) || [];
 let review = JSON.parse(localStorage.getItem('b2_german_review')) || [];
 let customFolders = JSON.parse(localStorage.getItem('b2_german_folders')) || {};
-let stats = JSON.parse(localStorage.getItem('b2_german_stats')) || { flipped: 0, timeSpentSec: 0 };
-let quizWrongs = JSON.parse(localStorage.getItem('b2_quiz_wrongs')) || {}; 
+let stats = JSON.parse(localStorage.getItem('b2_german_stats')) || { flipped: 0, timeSpentSec: 0, xp: 0, level: 1 };
+if (!stats.xp) stats.xp = 0;
+if (!stats.level) stats.level = 1;
+let quizWrongs = JSON.parse(localStorage.getItem('b2_quiz_wrongs')) || {};
+let srsData = JSON.parse(localStorage.getItem('b2_german_srs')) || {}; // { wordId: { interval: N, nextReview: 'YYYY-MM-DD' } }
 
 // DOM Elements
 const cardContainer = document.getElementById('card-container');
@@ -251,6 +254,308 @@ function init() {
             filterCards(btn.getAttribute('data-target'));
         });
     });
+
+    // Mindmap listeners
+    const closeMindmapBtn = document.getElementById('close-mindmap-btn');
+    const mindmapRefreshBtn = document.getElementById('mindmap-refresh-btn');
+    if (closeMindmapBtn) closeMindmapBtn.addEventListener('click', closeMindmap);
+    if (mindmapRefreshBtn) mindmapRefreshBtn.addEventListener('click', renderMindmap);
+
+    updateXpUI();
+}
+
+// ==========================================
+// XP & LEVEL SYSTEM
+// ==========================================
+const LEVEL_TITLES = [
+    'Anfänger', 'Lernender', 'Schüler', 'Geselle', 'Kämpfer',
+    'Meister', 'Experte', 'Champion', 'Legende', 'Wortgott'
+];
+const XP_PER_LEVEL = 100;
+
+function addXP(amount) {
+    const prevLevel = stats.level;
+    stats.xp = (stats.xp || 0) + amount;
+    stats.level = Math.floor(stats.xp / XP_PER_LEVEL) + 1;
+    if (stats.level > 10) stats.level = 10;
+    saveStats();
+    updateXpUI();
+    if (stats.level > prevLevel) {
+        showToast(`🎉 Seviye atladın! Seviye ${stats.level} — ${LEVEL_TITLES[stats.level - 1]}`, 'success');
+    }
+}
+
+function updateXpUI() {
+    const levelEl = document.getElementById('user-level');
+    const titleEl = document.getElementById('user-title');
+    const xpEl = document.getElementById('user-xp');
+    const barEl = document.getElementById('xp-bar-fill');
+    if (!levelEl) return;
+    const lvl = Math.min(stats.level || 1, 10);
+    const xpInLevel = (stats.xp || 0) % XP_PER_LEVEL;
+    const pct = (xpInLevel / XP_PER_LEVEL) * 100;
+    levelEl.textContent = lvl;
+    if (titleEl) titleEl.textContent = LEVEL_TITLES[lvl - 1];
+    if (xpEl) xpEl.textContent = stats.xp || 0;
+    if (barEl) barEl.style.width = pct + '%';
+}
+
+// ==========================================
+// TTS - SESLI OKUMA
+// ==========================================
+function speakWord(word) {
+    if (!window.speechSynthesis) { showToast('Tarayıcınız sesi desteklemiyor.', 'info'); return; }
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(word);
+    utt.lang = 'de-DE';
+    utt.rate = 0.9;
+    utt.pitch = 1;
+    window.speechSynthesis.speak(utt);
+}
+
+// ==========================================
+// SRS - ARALIKAL TEKRAR
+// ==========================================
+function updateSRS(id, correct) {
+    const today = new Date().toISOString().split('T')[0];
+    const entry = srsData[id] || { interval: 1 };
+    if (correct) {
+        entry.interval = Math.min((entry.interval || 1) * 2, 30);
+    } else {
+        entry.interval = 1;
+    }
+    const nextDate = new Date();
+    nextDate.setDate(nextDate.getDate() + entry.interval);
+    entry.nextReview = nextDate.toISOString().split('T')[0];
+    srsData[id] = entry;
+    localStorage.setItem('b2_german_srs', JSON.stringify(srsData));
+}
+
+function isDueSRS(id) {
+    if (!srsData[id]) return true;
+    const today = new Date().toISOString().split('T')[0];
+    return srsData[id].nextReview <= today;
+}
+
+// ==========================================
+// MINDMAP
+// ==========================================
+function openMindmap() {
+    const modal = document.getElementById('mindmap-modal');
+    if (!modal) return;
+    modal.classList.add('active');
+    const select = document.getElementById('mindmap-category-select');
+    if (select) {
+        const cats = [...new Set(activeDeck.map(c => c.category))].filter(Boolean);
+        select.innerHTML = [
+            '<option value="tümü">Tümü (Max 60)</option>',
+            ...cats.map(c => `<option value="${c}">${capitalize(c)}</option>`)
+        ].join('');
+    }
+    renderMindmap();
+}
+
+function closeMindmap() {
+    const modal = document.getElementById('mindmap-modal');
+    if (modal) modal.classList.remove('active');
+}
+
+function renderMindmap() {
+    const canvas = document.getElementById('mindmap-canvas');
+    if (!canvas) return;
+    canvas.innerHTML = '';
+
+    const select = document.getElementById('mindmap-category-select');
+    const cat = select ? select.value : 'tümü';
+    let pool = cat === 'tümü' ? activeDeck : activeDeck.filter(c => c.category === cat);
+    if (pool.length > 60) pool = pool.slice(0, 60); // performans limiti
+
+    const centerX = 1000, centerY = 1000;
+    const radius = Math.min(600, 100 + pool.length * 12);
+
+    // Center node
+    const centerNode = document.createElement('div');
+    centerNode.className = 'mindmap-center';
+    centerNode.textContent = cat === 'tümü' ? '🇩🇪 Almanca' : capitalize(cat);
+    centerNode.style.cssText = `position:absolute; left:${centerX}px; top:${centerY}px; transform:translate(-50%,-50%); background:var(--primary-color); color:white; padding:15px 25px; border-radius:50px; font-weight:800; font-size:1.1rem; box-shadow:0 8px 25px rgba(0,0,0,0.2); z-index:10; white-space:nowrap;`;
+    canvas.appendChild(centerNode);
+
+    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; overflow:visible;';
+    canvas.appendChild(svg);
+
+    const colorMap = { isimler:'#3b82f6', fiiller:'#10b981', sıfatlar:'#f59e0b', bağlaçlar:'#8b5cf6' };
+
+    pool.forEach((card, i) => {
+        const angle = (2 * Math.PI * i) / pool.length - Math.PI / 2;
+        const r = radius + (i % 3) * 30; // slight variance
+        const x = centerX + r * Math.cos(angle);
+        const y = centerY + r * Math.sin(angle);
+
+        // Line
+        const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+        line.setAttribute('x1', centerX); line.setAttribute('y1', centerY);
+        line.setAttribute('x2', x); line.setAttribute('y2', y);
+        line.setAttribute('stroke', colorMap[card.category] || '#cbd5e0');
+        line.setAttribute('stroke-width', '1.5');
+        line.setAttribute('stroke-opacity', '0.5');
+        svg.appendChild(line);
+
+        // Word node
+        const node = document.createElement('div');
+        const isLearned = learned.includes(card.id);
+        const isReview = review.includes(card.id);
+        const nodeColor = isLearned ? '#22c55e' : isReview ? '#ef4444' : (colorMap[card.category] || '#64748b');
+        node.style.cssText = `position:absolute; left:${x}px; top:${y}px; transform:translate(-50%,-50%); background:white; border:2px solid ${nodeColor}; color:${nodeColor}; padding:5px 10px; border-radius:20px; font-weight:700; font-size:0.78rem; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.08); white-space:nowrap; z-index:5; max-width:130px; overflow:hidden; text-overflow:ellipsis; transition: transform 0.2s;`;
+        node.title = `${card.germanWord} = ${card.turkishWord}`;
+        node.textContent = card.germanWord;
+        node.addEventListener('mouseenter', () => { node.style.transform = 'translate(-50%,-50%) scale(1.15)'; node.title = `${card.germanWord} = ${card.turkishWord}`; });
+        node.addEventListener('mouseleave', () => { node.style.transform = 'translate(-50%,-50%) scale(1)'; });
+        node.addEventListener('click', () => { speakWord(card.germanWord); showToast(`${card.germanWord} = ${card.turkishWord}`, 'info'); });
+        canvas.appendChild(node);
+    });
+
+    // Pan support
+    let isDragging = false, startX2 = 0, startY2 = 0, scrollLeft = 0, scrollTop = 0;
+    const container = document.getElementById('mindmap-canvas-container');
+    if (container) {
+        container.scrollLeft = centerX - container.clientWidth / 2;
+        container.scrollTop = centerY - container.clientHeight / 2;
+        container.onmousedown = (e) => { isDragging = true; startX2 = e.pageX - container.offsetLeft; startY2 = e.pageY - container.offsetTop; scrollLeft = container.scrollLeft; scrollTop = container.scrollTop; container.style.cursor = 'grabbing'; };
+        container.onmouseup = () => { isDragging = false; container.style.cursor = 'grab'; };
+        container.onmousemove = (e) => { if (!isDragging) return; e.preventDefault(); const x = e.pageX - container.offsetLeft; const y = e.pageY - container.offsetTop; container.scrollLeft = scrollLeft - (x - startX2); container.scrollTop = scrollTop - (y - startY2); };
+    }
+}
+
+// ==========================================
+// QUIZ MODE 5 - VOICE (KONUSMA)
+// ==========================================
+function startVoiceQuiz(pool) {
+    quizCardWrapper.innerHTML = '';
+    const card = quizCards[currentQuizIdx];
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        quizCardWrapper.innerHTML = `<div style="text-align:center; padding:30px;"><p style="color:#f56565; font-size:1.1rem;">👎 Tarayıcınız ses tanımayı desteklemiyor.</p><p style="color:#718096; margin-top:10px;">Lütfen Google Chrome kullanın.</p></div>`;
+        quizNextBtn.disabled = false;
+        quizNextBtn.textContent = 'Atla';
+        return;
+    }
+    let recognized = false;
+    quizCardWrapper.innerHTML = `
+        <div style="text-align:center; width:100%;">
+            <p style="color:#718096; font-size:0.9rem; margin-bottom:5px;">Türkce anlamını görüyorsunuz:</p>
+            <div style="font-size:1.8rem; font-weight:800; color:var(--primary-color); margin-bottom:20px; padding:15px; background:rgba(0,0,0,0.03); border-radius:12px;">${card.turkishWord}</div>
+            <p style="margin-bottom:15px; color:#718096;">Almancasını mikrofona söyleyin...</p>
+            <button id="voice-listen-btn" class="action-btn primary" style="width:80px; height:80px; border-radius:50%; font-size:1.8rem; padding:0; display:inline-flex; align-items:center; justify-content:center;">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <div id="voice-result" style="margin-top:15px; font-size:1rem; color:#4a5568; min-height:40px;"></div>
+        </div>`;
+    quizNextBtn.disabled = true;
+    quizNextBtn.textContent = 'İleri';
+
+    document.getElementById('voice-listen-btn').addEventListener('click', () => {
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'de-DE';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 3;
+        const btn = document.getElementById('voice-listen-btn');
+        if (btn) { btn.style.background = '#ef4444'; btn.innerHTML = '<i class="fas fa-circle" style="animation:pulse 0.8s infinite;"></i>'; }
+        recognition.start();
+        recognition.onresult = (e) => {
+            const transcript = e.results[0][0].transcript.toLowerCase().trim();
+            const target = card.germanWord.toLowerCase().replace(/der |die |das /, '').trim();
+            const ok = transcript.includes(target) || target.includes(transcript.split(' ').pop());
+            recognized = true;
+            const resultEl = document.getElementById('voice-result');
+            if (resultEl) resultEl.innerHTML = ok
+                ? `<span style="color:#22c55e; font-weight:bold;">✅ Duydum: "${transcript}" — Doğru!</span>`
+                : `<span style="color:#ef4444;">❌ Duydum: "${transcript}" — Yanlış. Doğrusu: <strong>${card.germanWord}</strong></span>`;
+            quizResults.push({ card, ok, out: transcript });
+            if (!ok) { quizWrongs[card.id] = (quizWrongs[card.id] || 0) + 1; localStorage.setItem('b2_quiz_wrongs', JSON.stringify(quizWrongs)); }
+            if (ok) addXP(5);
+            logActivity();
+            updateSRS(card.id, ok);
+            quizNextBtn.disabled = false;
+            if (ok) setTimeout(() => { if (isQuizActive) { currentQuizIdx++; renderQuizCard(); } }, 1500);
+        };
+        recognition.onerror = () => {
+            const resultEl = document.getElementById('voice-result');
+            if (resultEl) resultEl.innerHTML = '<span style="color:#f59e0b;">Ses alınamadı, tekrar deneyin.</span>';
+            if (btn) { btn.style.background = ''; btn.innerHTML = '<i class="fas fa-microphone"></i>'; }
+            quizNextBtn.disabled = false;
+        };
+        recognition.onend = () => {
+            if (btn) { btn.style.background = ''; btn.innerHTML = '<i class="fas fa-microphone"></i>'; }
+            if (!recognized) { quizNextBtn.disabled = false; }
+        };
+    });
+}
+
+// ==========================================
+// QUIZ MODE 6 - DRAG & DROP
+// ==========================================
+let matchGameData = [];
+let matchedCount = 0;
+let matchPairs = [];
+
+function startMatchGame() {
+    quizCardWrapper.innerHTML = '';
+    quizNextBtn.style.display = 'none';
+    quizFinishEarlyBtn.style.display = 'none';
+    matchPairs = quizCards.slice(0, Math.min(5, quizCards.length));
+    matchedCount = 0;
+    const shuffledRight = [...matchPairs].sort(() => 0.5 - Math.random());
+
+    let leftHTML = '', rightHTML = '';
+    matchPairs.forEach(c => {
+        leftHTML += `<div class="match-card draggable" draggable="true" data-id="${c.id}" id="drag-${c.id}">${c.germanWord}</div>`;
+    });
+    shuffledRight.forEach(c => {
+        rightHTML += `<div class="match-card dropzone" data-id="${c.id}" id="drop-${c.id}">${c.turkishWord}</div>`;
+    });
+    quizCardWrapper.innerHTML = `
+        <div style="width:100%;">
+            <p style="text-align:center; color:#718096; margin-bottom:15px; font-size:0.9rem;">Almancayı Türkçesinin üstune sürükleyin</p>
+            <div style="display:flex; gap:10px; justify-content:space-between;">
+                <div id="match-left" style="flex:1; display:flex; flex-direction:column; gap:8px;">${leftHTML}</div>
+                <div id="match-right" style="flex:1; display:flex; flex-direction:column; gap:8px;">${rightHTML}</div>
+            </div>
+            <div id="match-result" style="text-align:center; margin-top:15px; font-weight:bold; min-height:30px;"></div>
+        </div>`;
+
+    document.querySelectorAll('.draggable').forEach(el => {
+        el.addEventListener('dragstart', (e) => { e.dataTransfer.setData('text/plain', el.dataset.id); el.style.opacity = '0.5'; });
+        el.addEventListener('dragend', (e) => { el.style.opacity = '1'; });
+    });
+    document.querySelectorAll('.dropzone').forEach(zone => {
+        zone.addEventListener('dragover', e => e.preventDefault());
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const draggedId = e.dataTransfer.getData('text/plain');
+            const targetId = zone.dataset.id;
+            const ok = draggedId === targetId;
+            if (ok) {
+                zone.style.background = '#dcfce7'; zone.style.borderColor = '#22c55e'; zone.style.color = '#15803d';
+                const dragEl = document.getElementById(`drag-${draggedId}`);
+                if (dragEl) { dragEl.style.background = '#dcfce7'; dragEl.style.borderColor = '#22c55e'; dragEl.draggable = false; dragEl.style.opacity = '0.6'; }
+                zone.ondragover = null; zone.ondrop = null;
+                matchedCount++;
+                quizResults.push({ card: matchPairs.find(c => c.id == draggedId), ok: true });
+                addXP(5); logActivity();
+                if (matchedCount === matchPairs.length) {
+                    document.getElementById('match-result').innerHTML = '<span style="color:#22c55e; font-size:1.3rem;">🎉 Tüm eşleştirmeler tamamlandı!</span>';
+                    setTimeout(() => { currentQuizIdx += matchPairs.length; if (currentQuizIdx >= quizCards.length) finishQuiz(); else { quizNextBtn.style.display = ''; quizFinishEarlyBtn.style.display = ''; startMatchGame(); } }, 1500);
+                }
+            } else {
+                zone.style.animation = 'shake 0.4s ease';
+                setTimeout(() => { zone.style.animation = ''; }, 400);
+                quizResults.push({ card: matchPairs.find(c => c.id == draggedId), ok: false, out: 'Yanlış eşleştirme' });
+                quizWrongs[draggedId] = (quizWrongs[draggedId] || 0) + 1;
+                localStorage.setItem('b2_quiz_wrongs', JSON.stringify(quizWrongs));
+            }
+        });
+    });
 }
 
 function initTheme() {
@@ -337,6 +642,7 @@ function setupSidebar() {
             if (view === 'learned') { filterCards('learned'); setSidebar(false); }
             else if (view === 'review') { filterCards('review'); setSidebar(false); }
             else if (view === 'quiz') { openQuizModal(); setSidebar(false); }
+            else if (view === 'mindmap') { openMindmap(); setSidebar(false); }
             else if (view === 'zen') { startZenMode(); setSidebar(false); }
         });
     });
@@ -459,6 +765,7 @@ function renderCard(cardData, animationClass = '') {
             <div class="card-face front">
                 <div class="category-label">${capitalize(cardData.category)}</div>
                 <button class="favorite-btn ${isFavorite ? 'active' : ''}" data-id="${cardData.id}"><i class="fas fa-heart"></i></button>
+                <button class="tts-btn bouncy-btn" data-word="${cardData.germanWord}" title="Seslendır"><i class="fas fa-volume-up"></i></button>
                 <div class="pronunciation">${cardData.pronunciation || ''}</div>
                 <div class="word word-main ${articleClass}">${cardData.germanWord}</div>
                 <div class="sentence">${cardData.germanSentence || ''}</div>
@@ -489,6 +796,8 @@ function renderCard(cardData, animationClass = '') {
     cardEl.querySelector('.favorite-btn').onclick = (e) => {
         e.stopPropagation(); toggleFavorite(cardData.id);
     };
+    const ttsBtn = cardEl.querySelector('.tts-btn');
+    if (ttsBtn) ttsBtn.onclick = (e) => { e.stopPropagation(); speakWord(cardData.germanWord); };
     cardEl.querySelector('.learned-btn').onclick = (e) => {
         e.stopPropagation(); toggleStatus(cardData.id, 'learned');
     };
@@ -540,6 +849,10 @@ function toggleStatus(id, type) {
     logActivity();
     updateStatsUI();
 
+    // SRS + XP
+    const isAdding = (type === 'learned' && learned.includes(id)) || (type === 'review' && review.includes(id));
+    if (isAdding) { updateSRS(id, type === 'learned'); addXP(type === 'learned' ? 3 : 1); }
+
     // Dinamik UI Güncellemesi
     const learnedBtn = document.querySelector(`.learned-btn[data-id="${id}"]`);
     const reviewBtn = document.querySelector(`.review-btn[data-id="${id}"]`);
@@ -555,7 +868,6 @@ function toggleStatus(id, type) {
             setTimeout(() => targetBtn.classList.remove('click-glow'), 400);
         }
     } else if (message && toastType === "info") {
-        // Çıkarıldığında da küçük bir bildirim ver
         showToast(message, "info");
     }
 }
@@ -630,6 +942,11 @@ function renderQuizCard() {
     quizIdxEl.textContent = currentQuizIdx + 1;
     const card = quizCards[currentQuizIdx];
     quizCardWrapper.innerHTML = ''; mcqAnswered = false;
+    quizNextBtn.style.display = '';
+    quizFinishEarlyBtn.style.display = '';
+
+    if (quizMode === 5) { startVoiceQuiz(); return; }
+    if (quizMode === 6) { startMatchGame(); return; }
 
     if (quizMode <= 2) {
         quizNextBtn.innerHTML = 'İleri'; quizNextBtn.disabled = false;
