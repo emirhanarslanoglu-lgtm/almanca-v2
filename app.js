@@ -239,6 +239,12 @@ function init() {
             }
         });
     }
+
+    // Special Header Listeners
+    const specialBackBtn = document.getElementById('special-back-btn');
+    const specialHomeBtn = document.getElementById('special-home-btn');
+    if (specialBackBtn) specialBackBtn.addEventListener('click', () => filterCards('tümü'));
+    if (specialHomeBtn) specialHomeBtn.addEventListener('click', () => filterCards('tümü'));
 }
 
 function initTheme() {
@@ -344,6 +350,30 @@ function setSidebar(show) {
 // ----- CARD RENDERING -----
 function filterCards(category) {
     currentCategory = category;
+    
+    const isSpecialView = ['learned', 'review', 'favoriler'].includes(category) || category.startsWith('folder:');
+    const mainHeader = document.getElementById('main-header');
+    const specialHeader = document.getElementById('special-header');
+    
+    if (isSpecialView) {
+        if(mainHeader) mainHeader.style.display = 'none';
+        if(specialHeader) {
+            specialHeader.style.display = 'block';
+            let title = '';
+            let desc = '';
+            if(category === 'learned') { title = 'Öğrendiğim Kelimeler'; desc = 'Tamamen öğrendiğin ve artık karşına daha az çıkacak kelimeler listesi.'; }
+            else if(category === 'review') { title = 'Tekrar Edilecekler'; desc = 'Sık hata yaptığın ve daha çok odaklanman gereken kelimeler.'; }
+            else if(category === 'favoriler') { title = 'Favorilerim'; desc = 'Özel olarak kaydettiğin favori kelimelerin.'; }
+            else if(category.startsWith('folder:')) { title = category.split(':')[1]; desc = 'Kendi oluşturduğun özel klasör.'; }
+            
+            document.getElementById('special-title').textContent = title;
+            document.getElementById('special-desc').textContent = desc;
+        }
+    } else {
+        if(mainHeader) mainHeader.style.display = 'block';
+        if(specialHeader) specialHeader.style.display = 'none';
+    }
+
     if (category === 'tümü') filteredCards = [...activeDeck];
     else if (category === 'favoriler') filteredCards = activeDeck.filter(card => favorites.includes(card.id));
     else if (category === 'learned') filteredCards = activeDeck.filter(card => learned.includes(card.id));
@@ -645,6 +675,20 @@ function finishQuiz() {
     let okCount = quizResults.filter(r => r.ok).length;
     document.getElementById('quiz-res-correct').textContent = okCount;
     document.getElementById('quiz-res-wrong').textContent = quizResults.length - okCount;
+    
+    // Quiz Result List Rendering
+    const resList = document.getElementById('quiz-res-list');
+    resList.innerHTML = quizResults.map(r => `
+        <div style="padding:12px; border-radius:10px; background:${r.ok ? 'rgba(72,187,120,0.1)' : 'rgba(245,101,101,0.1)'}; border: 1px solid ${r.ok ? '#48bb78' : '#f56565'}; display:flex; justify-content:space-between; align-items:center;">
+             <div style="text-align:left;">
+                <div style="font-weight:bold; color:var(--text-color); font-size:1.05rem;">${r.card.germanWord}</div>
+                ${!r.ok && r.out ? `<div style="font-size:0.85rem; color:#f56565; margin-top:2px;">Senin cevabın: <span style="text-decoration:line-through;">${r.out}</span></div>` : ''}
+                <div style="font-size:0.9rem; color:#718096; margin-top:4px;"><i class="fas fa-check" style="color:#48bb78;"></i> ${r.card.turkishWord}</div>
+             </div>
+             <div style="font-size:1.5rem;">${r.ok ? '✅' : '❌'}</div>
+        </div>
+    `).join('');
+
     renderWeakPointsUI();
 }
 

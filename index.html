@@ -137,33 +137,45 @@
 
     <div class="app-container">
         <header>
-            <div class="header-top">
-                <button id="sidebar-toggle-btn" class="icon-btn bouncy-btn" title="Menü"><i class="fas fa-bars"></i></button>
-                <h1>Almanca B2 🇩🇪</h1>
-                <div class="header-controls">
-                    <div class="theme-controls" title="Renk Temaları">
-                        <button class="theme-btn" data-theme="white" style="background:#f8fafc; border:1.5px solid #e2e8f0; color:#64748b;" title="Sade Beyaz"><i class="fas fa-circle" style="font-size:0.6rem;"></i></button>
-                        <button class="theme-btn active" data-theme="pastel-blue" style="background:#dbeafe; color:#3b82f6;" title="Tatlı Mavi"></button>
-                        <button class="theme-btn" data-theme="mint-green" style="background:#d1fae5; color:#10b981;" title="Nane Yeşili"></button>
-                        <button class="theme-btn" data-theme="pastel-purple" style="background:#ede9fe; color:#8b5cf6;" title="Pastel Mor"></button>
-                        <button class="theme-btn" data-theme="peach-pink" style="background:#ffe4e6; color:#f43f5e;" title="Şeftali Pembe"></button>
-                        <button class="theme-btn" data-theme="sun-yellow" style="background:#fef9c3; color:#f59e0b;" title="Güneş Sarısı"></button>
-                        <button class="theme-btn" data-theme="dark" style="background:#1e293b; color:#94a3b8;" title="Gece Modu"><i class="fas fa-moon" style="font-size:0.7rem;"></i></button>
-                        <button class="theme-btn" data-theme="system" style="background:linear-gradient(135deg,#f8fafc 50%,#1e293b 50%); color:#64748b; border:1.5px solid #e2e8f0;" title="Sistem Teması"><i class="fas fa-adjust" style="font-size:0.7rem; color:#64748b;"></i></button>
+            <div id="main-header">
+                <div class="header-top">
+                    <button id="sidebar-toggle-btn" class="icon-btn bouncy-btn" title="Menü"><i class="fas fa-bars"></i></button>
+                    <h1>Almanca B2 🇩🇪</h1>
+                    <div class="header-controls">
+                        <div class="theme-controls" title="Renk Temaları">
+                            <button class="theme-btn" data-theme="white" style="background:#f8fafc; border:1.5px solid #e2e8f0; color:#64748b;" title="Sade Beyaz"><i class="fas fa-circle" style="font-size:0.6rem;"></i></button>
+                            <button class="theme-btn active" data-theme="pastel-blue" style="background:#dbeafe; color:#3b82f6;" title="Tatlı Mavi"></button>
+                            <button class="theme-btn" data-theme="mint-green" style="background:#d1fae5; color:#10b981;" title="Nane Yeşili"></button>
+                            <button class="theme-btn" data-theme="pastel-purple" style="background:#ede9fe; color:#8b5cf6;" title="Pastel Mor"></button>
+                            <button class="theme-btn" data-theme="peach-pink" style="background:#ffe4e6; color:#f43f5e;" title="Şeftali Pembe"></button>
+                            <button class="theme-btn" data-theme="sun-yellow" style="background:#fef9c3; color:#f59e0b;" title="Güneş Sarısı"></button>
+                            <button class="theme-btn" data-theme="dark" style="background:#1e293b; color:#94a3b8;" title="Gece Modu"><i class="fas fa-moon" style="font-size:0.7rem;"></i></button>
+                            <button class="theme-btn" data-theme="system" style="background:linear-gradient(135deg,#f8fafc 50%,#1e293b 50%); color:#64748b; border:1.5px solid #e2e8f0;" title="Sistem Teması"><i class="fas fa-adjust" style="font-size:0.7rem; color:#64748b;"></i></button>
+                        </div>
+                        <button id="guide-btn" class="icon-btn bouncy-btn" title="Nasıl Kullanılır?"><i class="fas fa-question-circle"></i></button>
+                        <button id="settings-btn" class="icon-btn bouncy-btn" title="Ayarlar ve Veri Yönetimi"><i class="fas fa-cog"></i></button>
                     </div>
-                    <button id="guide-btn" class="icon-btn bouncy-btn" title="Nasıl Kullanılır?"><i class="fas fa-question-circle"></i></button>
-                    <button id="settings-btn" class="icon-btn bouncy-btn" title="Ayarlar ve Veri Yönetimi"><i class="fas fa-cog"></i></button>
                 </div>
+                <nav class="categories" id="categories-nav">
+                    <button class="category-btn active" data-category="tümü">Tümü</button>
+                    <button class="category-btn" data-category="isimler">İsimler</button>
+                    <button class="category-btn" data-category="fiiller">Fiiller</button>
+                    <button class="category-btn" data-category="sıfatlar">Sıfatlar</button>
+                    <button class="category-btn" data-category="bağlaçlar">Bağlaçlar</button>
+                    <button class="category-btn" data-category="favoriler"><i class="fas fa-heart"></i> Favoriler</button>
+                    <button class="category-btn" id="add-folder-btn" title="Yeni Özel Klasör Ekle" style="background:var(--primary-color);color:white;"><i class="fas fa-plus"></i></button>
+                </nav>
             </div>
-            <nav class="categories" id="categories-nav">
-                <button class="category-btn active" data-category="tümü">Tümü</button>
-                <button class="category-btn" data-category="isimler">İsimler</button>
-                <button class="category-btn" data-category="fiiller">Fiiller</button>
-                <button class="category-btn" data-category="sıfatlar">Sıfatlar</button>
-                <button class="category-btn" data-category="bağlaçlar">Bağlaçlar</button>
-                <button class="category-btn" data-category="favoriler"><i class="fas fa-heart"></i> Favoriler</button>
-                <button class="category-btn" id="add-folder-btn" title="Yeni Özel Klasör Ekle" style="background:var(--primary-color);color:white;"><i class="fas fa-plus"></i></button>
-            </nav>
+
+            <!-- Special Header for Learned/Review modes -->
+            <div id="special-header" style="display:none;">
+                <div class="header-top" style="justify-content: space-between; border-bottom: 2px dashed rgba(0,0,0,0.1); padding-bottom: 10px; margin-bottom: 5px;">
+                    <button id="special-back-btn" class="action-btn secondary bouncy-btn" style="width:auto; padding: 10px 15px;"><i class="fas fa-arrow-left"></i> Geri</button>
+                    <h2 id="special-title" style="font-size: 1.4rem; color: var(--primary-color); margin:0;">Başlık</h2>
+                    <button id="special-home-btn" class="action-btn secondary bouncy-btn" style="width:auto; padding: 10px 15px;"><i class="fas fa-home"></i> Menü</button>
+                </div>
+                <p id="special-desc" style="font-size: 0.9rem; color: #718096; margin-bottom: 10px;">Açıklama</p>
+            </div>
         </header>
 
         <main class="flashcard-container" id="card-container">
