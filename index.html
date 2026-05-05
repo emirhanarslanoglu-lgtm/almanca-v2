@@ -156,23 +156,11 @@
     <button id="exit-zen-btn"><i class="fas fa-times"></i> Zen Modundan Çık</button>
 
     <!-- Mindmap Modal / Overlay -->
-    <div id="mindmap-modal" class="modal-overlay" style="z-index: 10000; background: rgba(0,0,0,0.9);">
-        <div class="modal-content" style="width: 95%; height: 90vh; max-width: 1200px; display:flex; flex-direction:column; padding:0; overflow:hidden;">
-            <div class="modal-header" style="padding: 15px 20px;">
-                <h2 style="color: var(--primary-color);"><i class="fas fa-network-wired"></i> Kelime Ağı (Mindmap)</h2>
-                <button id="close-mindmap-btn" class="icon-btn bouncy-btn">&times;</button>
-            </div>
-            <div id="mindmap-controls" style="padding: 10px 20px; background: rgba(0,0,0,0.02); display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-                <span style="font-size: 0.9rem; font-weight: bold;">Kategori Seç:</span>
-                <select id="mindmap-category-select" style="padding:5px 10px; border-radius:5px; border:1px solid #ccc; outline:none; cursor:pointer;">
-                    <!-- Ortak kategoriler JS ile eklenecek -->
-                </select>
-                <button id="mindmap-refresh-btn" class="action-btn primary" style="width:auto; padding:5px 15px; font-size:0.85rem;"><i class="fas fa-sync-alt"></i> Çiz</button>
-                <span style="font-size: 0.8rem; color: #718096; margin-left:auto;">Çok fazla kelime varsa çizim yavaşlayabilir.</span>
-            </div>
-            <div id="mindmap-canvas-container" style="flex:1; position:relative; overflow:auto; background: #f8fafc; cursor: grab;">
-                <div id="mindmap-canvas" style="position:relative; width: 2000px; height: 2000px; transform-origin: 0 0;"></div>
-            </div>
+    <div id="mindmap-modal" class="modal-overlay" style="z-index: 10000;">
+        <div id="mindmap-container">
+            <button id="close-mindmap-btn" class="mindmap-close-btn"><i class="fas fa-times"></i></button>
+            <div id="mindmap-area"></div>
+            <button id="mindmap-refresh-btn" class="mindmap-fab"><i class="fas fa-sync-alt"></i></button>
         </div>
     </div>
 

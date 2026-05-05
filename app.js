@@ -340,18 +340,13 @@ function isDueSRS(id) {
 // ==========================================
 // MINDMAP
 // ==========================================
+let mmUsedCenterIds = [];
+
 function openMindmap() {
     const modal = document.getElementById('mindmap-modal');
     if (!modal) return;
     modal.classList.add('active');
-    const select = document.getElementById('mindmap-category-select');
-    if (select) {
-        const cats = [...new Set(activeDeck.map(c => c.category))].filter(Boolean);
-        select.innerHTML = [
-            '<option value="tümü">Tümü (Max 60)</option>',
-            ...cats.map(c => `<option value="${c}">${capitalize(c)}</option>`)
-        ].join('');
-    }
+    mmUsedCenterIds = [];
     renderMindmap();
 }
 
@@ -361,70 +356,103 @@ function closeMindmap() {
 }
 
 function renderMindmap() {
-    const canvas = document.getElementById('mindmap-canvas');
-    if (!canvas) return;
-    canvas.innerHTML = '';
+    const area = document.getElementById('mindmap-area');
+    if (!area) return;
+    area.innerHTML = '';
 
-    const select = document.getElementById('mindmap-category-select');
-    const cat = select ? select.value : 'tümü';
-    let pool = cat === 'tümü' ? activeDeck : activeDeck.filter(c => c.category === cat);
-    if (pool.length > 60) pool = pool.slice(0, 60); // performans limiti
+    // Pick a random center word
+    const pool = [...activeDeck];
+    if (pool.length === 0) return;
 
-    const centerX = 1000, centerY = 1000;
-    const radius = Math.min(600, 100 + pool.length * 12);
+    // Avoid repeating center words until we exhaust the list
+    let available = pool.filter(c => !mmUsedCenterIds.includes(c.id));
+    if (available.length === 0) { mmUsedCenterIds = []; available = pool; }
+
+    const centerCard = available[Math.floor(Math.random() * available.length)];
+    mmUsedCenterIds.push(centerCard.id);
+
+    // Gather related words: same category first, then fill from others
+    const TOTAL = Math.min(18, pool.length - 1);
+    const sameCategory = pool.filter(c => c.id !== centerCard.id && c.category === centerCard.category);
+    const otherCategory = pool.filter(c => c.id !== centerCard.id && c.category !== centerCard.category);
+    
+    // Shuffle helpers
+    const shuffle = arr => { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+    
+    let satellites = shuffle(sameCategory).slice(0, TOTAL);
+    if (satellites.length < TOTAL) {
+        satellites = satellites.concat(shuffle(otherCategory).slice(0, TOTAL - satellites.length));
+    }
+
+    const count = satellites.length;
+    const areaRect = area.getBoundingClientRect();
+    const W = area.offsetWidth;
+    const H = area.offsetHeight;
+    const cx = W / 2;
+    const cy = H / 2;
+
+    // Radius calculation
+    const isMobile = W < 400;
+    const R = isMobile ? W * 0.38 : W * 0.38;
+
+    // SVG for connecting lines
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '100%');
+    svg.setAttribute('height', '100%');
+    svg.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;overflow:visible;';
+    area.appendChild(svg);
 
     // Center node
-    const centerNode = document.createElement('div');
-    centerNode.className = 'mindmap-center';
-    centerNode.textContent = cat === 'tümü' ? '🇩🇪 Almanca' : capitalize(cat);
-    centerNode.style.cssText = `position:absolute; left:${centerX}px; top:${centerY}px; transform:translate(-50%,-50%); background:var(--primary-color); color:white; padding:15px 25px; border-radius:50px; font-weight:800; font-size:1.1rem; box-shadow:0 8px 25px rgba(0,0,0,0.2); z-index:10; white-space:nowrap;`;
-    canvas.appendChild(centerNode);
+    const centerDiv = document.createElement('div');
+    centerDiv.className = 'mm-center';
+    const cleanGerman = centerCard.germanWord.replace(/\s*\/.*$/, '').replace(/\s*\(.*\)/, '');
+    centerDiv.innerHTML = `
+        <div class="mm-center-inner">
+            ${cleanGerman}
+            <span class="mm-center-tr">${centerCard.turkishWord}</span>
+        </div>
+    `;
+    centerDiv.addEventListener('click', () => speakWord(centerCard.germanWord));
+    area.appendChild(centerDiv);
 
-    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; overflow:visible;';
-    canvas.appendChild(svg);
+    // Place satellite nodes
+    satellites.forEach((card, i) => {
+        const angle = (2 * Math.PI * i) / count - Math.PI / 2;
+        const x = cx + R * Math.cos(angle);
+        const y = cy + R * Math.sin(angle);
 
-    const colorMap = { isimler:'#3b82f6', fiiller:'#10b981', sıfatlar:'#f59e0b', bağlaçlar:'#8b5cf6' };
-
-    pool.forEach((card, i) => {
-        const angle = (2 * Math.PI * i) / pool.length - Math.PI / 2;
-        const r = radius + (i % 3) * 30; // slight variance
-        const x = centerX + r * Math.cos(angle);
-        const y = centerY + r * Math.sin(angle);
-
-        // Line
-        const line = document.createElementNS('http://www.w3.org/2000/svg','line');
-        line.setAttribute('x1', centerX); line.setAttribute('y1', centerY);
-        line.setAttribute('x2', x); line.setAttribute('y2', y);
-        line.setAttribute('stroke', colorMap[card.category] || '#cbd5e0');
-        line.setAttribute('stroke-width', '1.5');
-        line.setAttribute('stroke-opacity', '0.5');
+        // SVG line
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', cx);
+        line.setAttribute('y1', cy);
+        line.setAttribute('x2', x);
+        line.setAttribute('y2', y);
+        line.classList.add('mm-line');
         svg.appendChild(line);
 
-        // Word node
+        // Node element
         const node = document.createElement('div');
-        const isLearned = learned.includes(card.id);
-        const isReview = review.includes(card.id);
-        const nodeColor = isLearned ? '#22c55e' : isReview ? '#ef4444' : (colorMap[card.category] || '#64748b');
-        node.style.cssText = `position:absolute; left:${x}px; top:${y}px; transform:translate(-50%,-50%); background:white; border:2px solid ${nodeColor}; color:${nodeColor}; padding:5px 10px; border-radius:20px; font-weight:700; font-size:0.78rem; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.08); white-space:nowrap; z-index:5; max-width:130px; overflow:hidden; text-overflow:ellipsis; transition: transform 0.2s;`;
-        node.title = `${card.germanWord} = ${card.turkishWord}`;
-        node.textContent = card.germanWord;
-        node.addEventListener('mouseenter', () => { node.style.transform = 'translate(-50%,-50%) scale(1.15)'; node.title = `${card.germanWord} = ${card.turkishWord}`; });
-        node.addEventListener('mouseleave', () => { node.style.transform = 'translate(-50%,-50%) scale(1)'; });
-        node.addEventListener('click', () => { speakWord(card.germanWord); showToast(`${card.germanWord} = ${card.turkishWord}`, 'info'); });
-        canvas.appendChild(node);
-    });
+        node.className = 'mm-node';
+        node.setAttribute('data-cat', card.category);
+        node.style.left = x + 'px';
+        node.style.top = y + 'px';
+        node.style.animationDelay = (i * 0.03) + 's';
 
-    // Pan support
-    let isDragging = false, startX2 = 0, startY2 = 0, scrollLeft = 0, scrollTop = 0;
-    const container = document.getElementById('mindmap-canvas-container');
-    if (container) {
-        container.scrollLeft = centerX - container.clientWidth / 2;
-        container.scrollTop = centerY - container.clientHeight / 2;
-        container.onmousedown = (e) => { isDragging = true; startX2 = e.pageX - container.offsetLeft; startY2 = e.pageY - container.offsetTop; scrollLeft = container.scrollLeft; scrollTop = container.scrollTop; container.style.cursor = 'grabbing'; };
-        container.onmouseup = () => { isDragging = false; container.style.cursor = 'grab'; };
-        container.onmousemove = (e) => { if (!isDragging) return; e.preventDefault(); const x = e.pageX - container.offsetLeft; const y = e.pageY - container.offsetTop; container.scrollLeft = scrollLeft - (x - startX2); container.scrollTop = scrollTop - (y - startY2); };
-    }
+        const cleanWord = card.germanWord.replace(/\s*\/.*$/, '').replace(/\s*\(.*\)/, '');
+        node.innerHTML = `
+            <div class="mm-node-inner">
+                <div class="mm-node-de" title="${card.germanWord}">${cleanWord}</div>
+                <div class="mm-node-tr" title="${card.turkishWord}">${card.turkishWord}</div>
+            </div>
+        `;
+
+        node.addEventListener('click', () => {
+            speakWord(card.germanWord);
+            showToast(`${card.germanWord} = ${card.turkishWord}`, 'info');
+        });
+
+        area.appendChild(node);
+    });
 }
 
 // ==========================================
