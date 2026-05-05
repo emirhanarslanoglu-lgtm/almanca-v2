@@ -1076,31 +1076,45 @@ function renderProgressChart() {
     }
 }
 
-// ----- SEARCH -----
+// ----- SEARCH (INLINE) -----
 function setupSearch() {
-    const searchBtn = document.getElementById('search-btn');
-    const closeBtn = document.getElementById('search-close-btn');
-    const overlay = document.getElementById('search-overlay');
-    const input = document.getElementById('search-input');
-    const resultsContainer = document.getElementById('search-results');
+    const input = document.getElementById('inline-search-input');
+    const clearBtn = document.getElementById('inline-search-clear');
+    const resultsContainer = document.getElementById('inline-search-results');
     
-    if(!searchBtn || !overlay) return;
+    if(!input || !resultsContainer) return;
     
-    searchBtn.onclick = () => {
-        overlay.classList.add('active');
+    // Dışarı tıklanınca arama kutusunu kapat
+    document.addEventListener('click', (e) => {
+        if (!input.contains(e.target) && !resultsContainer.contains(e.target) && !clearBtn.contains(e.target)) {
+            resultsContainer.style.display = 'none';
+        }
+    });
+
+    input.addEventListener('focus', () => {
+        if (input.value.trim().length >= 2) {
+            resultsContainer.style.display = 'flex';
+        }
+    });
+    
+    clearBtn.addEventListener('click', () => {
         input.value = '';
-        resultsContainer.innerHTML = '';
+        resultsContainer.style.display = 'none';
+        clearBtn.style.display = 'none';
         input.focus();
-    };
-    
-    closeBtn.onclick = () => overlay.classList.remove('active');
-    overlay.onclick = (e) => {
-        if(e.target === overlay) overlay.classList.remove('active');
-    };
-    
+    });
+
     input.oninput = (e) => {
         const query = e.target.value.trim().toLowerCase();
+        
+        if(query.length > 0) {
+            clearBtn.style.display = 'block';
+        } else {
+            clearBtn.style.display = 'none';
+        }
+
         if(query.length < 2) {
+            resultsContainer.style.display = 'none';
             resultsContainer.innerHTML = '';
             return;
         }
@@ -1108,10 +1122,12 @@ function setupSearch() {
         const results = activeDeck.filter(card => 
             card.germanWord.toLowerCase().includes(query) || 
             card.turkishWord.toLowerCase().includes(query)
-        ).slice(0, 15); // max 15 results
+        ).slice(0, 10); // max 10 results for dropdown
         
+        resultsContainer.style.display = 'flex';
+
         if(results.length === 0) {
-            resultsContainer.innerHTML = '<div class="search-empty">Sonuç bulunamadı</div>';
+            resultsContainer.innerHTML = '<div style="padding:15px; color:#a0aec0; text-align:center;">Sonuç bulunamadı</div>';
             return;
         }
         
@@ -1120,10 +1136,10 @@ function setupSearch() {
             html += `
             <div class="search-result-item" data-id="${card.id}">
                 <div>
-                    <div class="search-result-de">${card.germanWord}</div>
-                    <div class="search-result-tr">${card.turkishWord}</div>
+                    <div style="font-weight:700; color:var(--primary-color);">${card.germanWord}</div>
+                    <div style="font-size:0.85rem; color:#718096;">${card.turkishWord}</div>
                 </div>
-                <div class="search-result-cat">${card.category.toUpperCase()}</div>
+                <div style="font-size:0.7rem; background:#edf2f7; padding:3px 8px; border-radius:10px; color:#4a5568;">${card.category.toUpperCase()}</div>
             </div>`;
         });
         resultsContainer.innerHTML = html;
@@ -1131,10 +1147,16 @@ function setupSearch() {
         document.querySelectorAll('.search-result-item').forEach(item => {
             item.onclick = () => {
                 const id = item.dataset.id;
-                overlay.classList.remove('active');
+                resultsContainer.style.display = 'none';
+                input.value = '';
+                clearBtn.style.display = 'none';
+                
+                // Kategori ayarını tümü yap
                 categoryBtns.forEach(b => b.classList.remove('active'));
-                document.querySelector('.category-btn[data-category="tümü"]').classList.add('active');
+                const allBtn = document.querySelector('.category-btn[data-category="tümü"]');
+                if(allBtn) allBtn.classList.add('active');
                 filterCards('tümü');
+                
                 const idx = filteredCards.findIndex(c => c.id == id);
                 if(idx !== -1) {
                     currentIndex = idx;

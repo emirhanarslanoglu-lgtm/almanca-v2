@@ -25,79 +25,92 @@
             <button id="close-sidebar" class="icon-btn">&times;</button>
         </div>
         
-        <!-- STREAK KUTUSU -->
-        <div id="streak-display"></div>
-
-        <!-- XP & LEVEL BAR -->
-        <div style="padding: 0 15px 10px 15px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-                <span style="font-size:0.85rem; font-weight:700; color:var(--primary-color);">⭐ Seviye <span id="user-level">1</span> &mdash; <span id="user-title" style="color:#ed8936;">Anfänger</span></span>
-                <span style="font-size:0.75rem; color:#718096;"><span id="user-xp">0</span> XP</span>
+        <!-- Kullanıcı Profili (Yeni Tasarım) -->
+        <div class="sidebar-profile">
+            <div class="profile-avatar">
+                <i class="fas fa-user-graduate"></i>
             </div>
-            <div style="width:100%; height:10px; background:#e2e8f0; border-radius:5px; overflow:hidden;">
-                <div id="xp-bar-fill" style="width:0%; height:100%; background: linear-gradient(90deg, var(--primary-color), #ed8936); border-radius:5px; transition: width 0.6s ease;"></div>
+            <div class="profile-info">
+                <div class="profile-level">Seviye <span id="user-level">1</span></div>
+                <div class="profile-title" id="user-title">Anfänger</div>
+                <div class="profile-xp"><span id="user-xp">0</span> XP</div>
+            </div>
+        </div>
+        
+        <!-- XP Bar -->
+        <div class="xp-progress-wrapper">
+            <div class="xp-bar-container">
+                <div id="xp-bar-fill" class="xp-bar-fill"></div>
             </div>
         </div>
 
+        <div class="sidebar-divider"></div>
 
-        <div class="stats-container">
-            <div class="stat-box">
-                <i class="fas fa-layer-group"></i>
+        <!-- İstatistik Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <i class="fas fa-layer-group text-blue"></i>
                 <div class="stat-value" id="stat-flipped">0</div>
                 <div class="stat-label">Kart Çevrildi</div>
             </div>
-            <div class="stat-box">
-                <i class="fas fa-heart" style="color:var(--accent-color)"></i>
+            <div class="stat-card">
+                <i class="fas fa-heart text-pink"></i>
                 <div class="stat-value" id="stat-favorites">0</div>
                 <div class="stat-label">Favoriler</div>
             </div>
-            <div class="stat-box">
-                <i class="fas fa-check-circle" style="color:#48bb78"></i>
+            <div class="stat-card">
+                <i class="fas fa-check-circle text-green"></i>
                 <div class="stat-value" id="stat-learned">0</div>
                 <div class="stat-label">Öğrenilen</div>
             </div>
-            <div class="stat-box">
-                <i class="fas fa-times-circle" style="color:#f56565"></i>
+            <div class="stat-card">
+                <i class="fas fa-times-circle text-red"></i>
                 <div class="stat-value" id="stat-review">0</div>
-                <div class="stat-label">Tekrarlanacak</div>
+                <div class="stat-label">Tekrar</div>
             </div>
-            <div class="stat-box wide">
-                <i class="fas fa-clock"></i>
+            <div class="stat-card wide">
+                <i class="fas fa-clock text-purple"></i>
                 <div class="stat-value" id="stat-time">0m 0s</div>
-                <div class="stat-label">Uygulamada Geçen Süre</div>
+                <div class="stat-label">Çalışma Süresi</div>
             </div>
         </div>
 
+        <div class="sidebar-divider"></div>
+
         <!-- GÜNLÜK HEDEF -->
-        <div class="daily-goal-container" style="margin: 0 15px 10px 15px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 12px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <h3 style="font-size: 0.9rem; color: #4a5568; margin:0;"><i class="fas fa-bullseye" style="color:#f43f5e;"></i> Günlük Hedef</h3>
-                <span id="daily-goal-text" style="font-size:0.78rem; color:#718096; font-weight:600;">0 / 20</span>
+        <div class="sidebar-module">
+            <div class="module-header">
+                <h3><i class="fas fa-bullseye text-orange"></i> Günlük Hedef</h3>
+                <span id="daily-goal-text" class="goal-text">0 / 20</span>
             </div>
-            <div style="width:100%; height:12px; background:#e2e8f0; border-radius:6px; overflow:hidden;">
-                <div id="daily-goal-bar" style="width:0%; height:100%; background: linear-gradient(90deg, #f43f5e, #f97316); border-radius:6px; transition: width 0.6s ease;"></div>
+            <div class="goal-bar-container">
+                <div id="daily-goal-bar" class="goal-bar-fill"></div>
             </div>
-            <div id="daily-goal-status" style="font-size:0.72rem; color:#a0aec0; margin-top:5px;"></div>
+            <div id="daily-goal-status" class="module-footer"></div>
         </div>
 
         <!-- İLERLEME GRAFİĞİ -->
-        <div style="margin: 0 15px 10px 15px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 12px;">
-            <h3 style="font-size: 0.9rem; margin-bottom: 10px; color: #4a5568;"><i class="fas fa-chart-pie" style="color:#8b5cf6;"></i> İlerleme Grafiği</h3>
-            <canvas id="progress-chart" width="260" height="180" style="width:100%; max-width:260px; display:block; margin:0 auto;"></canvas>
-            <div id="progress-legend" style="display:flex; justify-content:center; gap:12px; margin-top:8px; font-size:0.72rem; flex-wrap:wrap;"></div>
+        <div class="sidebar-module">
+            <div class="module-header">
+                <h3><i class="fas fa-chart-pie text-purple"></i> İlerleme</h3>
+            </div>
+            <canvas id="progress-chart" width="240" height="160" style="width:100%; max-width:240px; display:block; margin:0 auto;"></canvas>
+            <div id="progress-legend" class="chart-legend"></div>
         </div>
 
         <!-- HEATMAP -->
-        <div class="heatmap-container" style="margin: 0 15px 10px 15px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 12px;">
-            <h3 style="font-size: 0.9rem; margin-bottom: 10px; color: #4a5568;"><i class="fas fa-fire" style="color:#ed8936;"></i> Çalışma Haritası (Son 30 Gün)</h3>
-            <div id="heatmap-grid" style="display: flex; gap: 3px; flex-wrap: wrap; height: 60px; align-content: flex-start;"></div>
-            <div style="font-size:0.72rem; color:#a0aec0; margin-top:6px;">
+        <div class="sidebar-module">
+            <div class="module-header">
+                <h3><i class="fas fa-fire text-orange"></i> Çalışma Isı Haritası</h3>
+            </div>
+            <div id="heatmap-grid" class="heatmap-grid"></div>
+            <div class="heatmap-legend">
                 ⬜ Boş &nbsp; 🟩 Az &nbsp; 🟨 Orta &nbsp; 🟧 İyi &nbsp; 🟥 Harika
             </div>
         </div>
 
         <!-- ZAYIF NOKTA ANALİZİ -->
-        <div style="margin: 0 15px 15px 15px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 12px;">
+        <div class="sidebar-module">
             <h3 style="font-size: 0.9rem; margin-bottom: 10px; color: #4a5568;"><i class="fas fa-exclamation-triangle" style="color:#ed8936;"></i> Zayıf Nokta Analizi</h3>
             <div id="weak-points-panel"></div>
         </div>
@@ -185,9 +198,24 @@
         <header>
             <div id="main-header">
                 <div class="header-top">
-                    <button id="sidebar-toggle-btn" class="icon-btn bouncy-btn" title="Menü"><i class="fas fa-bars"></i></button>
-                    <h1>Almanca B2 🇩🇪</h1>
-                    <div class="header-controls">
+                    <!-- Sol Taraf: Menü ve Logo -->
+                    <div class="header-left">
+                        <button id="sidebar-toggle-btn" class="icon-btn bouncy-btn" title="Menü"><i class="fas fa-bars"></i></button>
+                        <h1>Almanca B2 🇩🇪</h1>
+                    </div>
+
+                    <!-- Orta Kısım: Arama Kutusu -->
+                    <div class="header-center">
+                        <div class="inline-search-wrapper">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="inline-search-input" placeholder="Kelime ara..." autocomplete="off">
+                            <button id="inline-search-clear" class="icon-btn" style="display:none;"><i class="fas fa-times"></i></button>
+                            <div id="inline-search-results" class="inline-search-dropdown"></div>
+                        </div>
+                    </div>
+
+                    <!-- Sağ Taraf: Kontroller -->
+                    <div class="header-right header-controls">
                         <div class="theme-controls" title="Renk Temaları">
                             <button class="theme-btn" data-theme="white" style="background:#f8fafc; border:1.5px solid #e2e8f0; color:#64748b;" title="Sade Beyaz"><i class="fas fa-circle" style="font-size:0.6rem;"></i></button>
                             <button class="theme-btn active" data-theme="pastel-blue" style="background:#dbeafe; color:#3b82f6;" title="Tatlı Mavi"></button>
@@ -198,7 +226,6 @@
                             <button class="theme-btn" data-theme="dark" style="background:#1e293b; color:#94a3b8;" title="Gece Modu"><i class="fas fa-moon" style="font-size:0.7rem;"></i></button>
                             <button class="theme-btn" data-theme="system" style="background:linear-gradient(135deg,#f8fafc 50%,#1e293b 50%); color:#64748b; border:1.5px solid #e2e8f0;" title="Sistem Teması"><i class="fas fa-adjust" style="font-size:0.7rem; color:#64748b;"></i></button>
                         </div>
-                        <button id="search-btn" class="icon-btn bouncy-btn" title="Kelime Ara"><i class="fas fa-search"></i></button>
                         <button id="guide-btn" class="icon-btn bouncy-btn" title="Nasıl Kullanılır?"><i class="fas fa-question-circle"></i></button>
                         <button id="settings-btn" class="icon-btn bouncy-btn" title="Ayarlar ve Veri Yönetimi"><i class="fas fa-cog"></i></button>
                     </div>
@@ -276,56 +303,52 @@
                 <h2>📖 Nasıl Kullanılır?</h2>
                 <button id="close-guide-btn" class="icon-btn bouncy-btn">&times;</button>
             </div>
-            <div class="modal-body" style="font-size:0.95rem; line-height:1.6;">
-                <p><strong>1. Kart Çevirme:</strong> Almanca kelimenin anlamını görmek için karta bir kez tıklayın veya dokunun.</p>
-                <p><strong>2. Kaydırma (Swipe):</strong> Sonraki kelimeye geçmek için ekranı (kartı) hafifçe sola kaydırın. Önceki için sağa kaydırın.</p>
-                <p><strong>3. Butonlar:</strong></p>
-                <ul style="padding-left: 20px; text-align: left; margin-bottom:15px; color:#4a5568;">
-                    <li><i class="fas fa-heart" style="color:var(--accent-color)"></i> Favorilere Ekle</li>
-                    <li><i class="fas fa-check"></i> Öğrendiğim kelimeler listesine at</li>
-                    <li><i class="fas fa-times"></i> Tekrar edilecek kelimeler (Zorlandıklarım)</li>
-                </ul>
-                <p><strong>4. Temalar:</strong> Sağ üst köşedeki yuvarlak renk tonlarına basarak uygulamanın ambiyansını ruh halinize göre değiştirebilirsiniz.</p>
+            <div class="modal-body guide-body">
+                <div class="guide-section">
+                    <div class="guide-icon bg-blue"><i class="fas fa-exchange-alt"></i></div>
+                    <div class="guide-text">
+                        <h3>Kartları Kaydır</h3>
+                        <p>Karta tıklayarak yüzünü çevirin (anlamını görün). Sağa ve sola kaydırarak (swipe) kelimeler arasında gezinebilirsiniz.</p>
+                    </div>
+                </div>
 
-                <hr style="margin: 12px 0; border-color:#edf2f7;">
+                <div class="guide-section">
+                    <div class="guide-icon bg-green"><i class="fas fa-brain"></i></div>
+                    <div class="guide-text">
+                        <h3>Akıllı Algoritma (SM-2)</h3>
+                        <p>Kelimeyi doğru bilirseniz (<i class="fas fa-check text-green"></i>) veya tekrara bırakırsanız (<i class="fas fa-times text-red"></i>), gelişmiş SM-2 algoritması o kelimeyi ne zaman tekrar görmeniz gerektiğini otomatik hesaplar.</p>
+                    </div>
+                </div>
 
-                <p><strong>🔥 Streak (Çalışma Serisi):</strong> Her gün uygulamaya girip en az bir kelimeyi öğrenildi veya tekrar olarak işaretlediğinizde seriniz artar. Arka arkaya 3+ gün çalışırsan alev 🔥 emojisi büyür! Bir gün kaçırırsan seri sıfırlanır ve buz 🧊 emojisine döner.</p>
+                <div class="guide-section">
+                    <div class="guide-icon bg-orange"><i class="fas fa-bullseye"></i></div>
+                    <div class="guide-text">
+                        <h3>Günlük Hedef & XP</h3>
+                        <p>Her gün 20 kelimelik hedef barını doldurarak Bonus XP kazanın! XP kazandıkça seviye atlar ve yeni rütbelere <em>(Anfänger, Meister vb.)</em> ulaşırsınız.</p>
+                    </div>
+                </div>
 
-                <hr style="margin: 12px 0; border-color:#edf2f7;">
+                <div class="guide-section">
+                    <div class="guide-icon bg-purple"><i class="fas fa-gamepad"></i></div>
+                    <div class="guide-text">
+                        <h3>7 Farklı Oyun Modu</h3>
+                        <p>Sol menüdeki <strong>Quiz Modu</strong> ile Sürükle-Bırak, Boşluk Doldurma, Çoktan Seçmeli ve Konuşma sınavı (mikrofon) gibi çeşitli pratikler yapabilirsiniz.</p>
+                    </div>
+                </div>
 
-                <p><strong>📅 Çalışma Haritası (Heatmap):</strong> Sol menüdeki renkli kareler son 30 günlük çalışma yoğunluğunu gösterir.</p>
-                <ul style="padding-left: 20px; text-align: left; margin-bottom:10px; color:#4a5568; font-size:0.9rem;">
-                    <li>⬜ <strong>Gri:</strong> O gün çalışılmadı</li>
-                    <li>🟩 <strong>Açık Yeşil:</strong> Az çalışıldı (1–5 kelime)</li>
-                    <li>🟨 <strong>Sarı:</strong> Orta düzey (6–20 kelime)</li>
-                    <li>🟧 <strong>Turuncu:</strong> İyi çalışıldı (21–50 kelime)</li>
-                    <li>🟥 <strong>Kırmızı:</strong> Yoğun çalışma! (50+ kelime)</li>
-                </ul>
-                <p style="font-size:0.88rem; color:#718096;">💡 <em>Heatmap, öğrenildi veya tekrar butonu tıklandığında güncellenir.</em></p>
-
-                <hr style="margin: 12px 0; border-color:#edf2f7;">
-
-                <p><strong>🎯 Çoktan Seçmeli Quiz:</strong> Sol menüden Quiz → "4. Çoktan Seçmeli" seçin. Her soruda Almanca kelimeyi görür, 4 Türkçe seçenek arasından doğruyu bulursunuz. Yanlışlar otomatik olarak "Zayıf Nokta Analizi"ne kaydedilir!</p>
-
-                <hr style="margin: 12px 0; border-color:#edf2f7;">
-
-                <p><strong>📊 Zayıf Nokta Analizi:</strong> Sol menünün altında "Zayıf Nokta Analizi" bölümü yer alır. Quiz'de en çok yanlış yaptığınız kelimeler ve hangi kategorilerde zorlandığınız burada gösterilir. Odaklanmak için bu kelimeleri önce çalışın!</p>
+                <div class="guide-section">
+                    <div class="guide-icon bg-pink"><i class="fas fa-paint-roller"></i></div>
+                    <div class="guide-text">
+                        <h3>Arayüzü Özelleştir</h3>
+                        <p>Üst paneldeki renk butonlarıyla veya "Ayarlar" menüsünden sistemi kendinize göre özelleştirin, gece moduna geçin ve kendi kelime listenizi yükleyin.</p>
+                    </div>
+                </div>
             </div>
             <button id="guide-ok-btn" class="action-btn primary bouncy-btn" style="margin-top:10px;">Anladım, Teşekkürler!</button>
         </div>
     </div>
 
-    <!-- Arama Overlay -->
-    <div id="search-overlay" class="search-overlay">
-        <div class="search-box">
-            <div class="search-input-wrap">
-                <i class="fas fa-search"></i>
-                <input type="text" id="search-input" placeholder="Almanca veya Türkçe kelime ara..." autocomplete="off">
-                <button id="search-close-btn" class="icon-btn"><i class="fas fa-times"></i></button>
-            </div>
-            <div id="search-results" class="search-results"></div>
-        </div>
-    </div>
+    <!-- Eski Search Overlay (Silindi) -->
 
     <!-- PWA Service Worker -->
     <script>
