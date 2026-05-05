@@ -228,8 +228,6 @@ function init() {
     renderStreakUI();
     renderWeakPointsUI();
     loadFolders();
-    setupSearch();
-    updateDailyGoalUI();
     
     const addFolderBtn = document.getElementById('add-folder-btn');
     if(addFolderBtn) {
@@ -318,32 +316,17 @@ function speakWord(word) {
 // ==========================================
 // SRS - ARALIKAL TEKRAR
 // ==========================================
-// SM-2 Algorithm
-function updateSRS(id, quality) {
-    const q = typeof quality === 'boolean' ? (quality ? 4 : 1) : quality;
-    const entry = srsData[id] || { interval: 0, repetitions: 0, easeFactor: 2.5 };
-    
-    if (q >= 3) {
-        if (entry.repetitions === 0) {
-            entry.interval = 1;
-        } else if (entry.repetitions === 1) {
-            entry.interval = 6;
-        } else {
-            entry.interval = Math.round(entry.interval * entry.easeFactor);
-        }
-        entry.repetitions += 1;
+function updateSRS(id, correct) {
+    const today = new Date().toISOString().split('T')[0];
+    const entry = srsData[id] || { interval: 1 };
+    if (correct) {
+        entry.interval = Math.min((entry.interval || 1) * 2, 30);
     } else {
-        entry.repetitions = 0;
         entry.interval = 1;
     }
-    
-    entry.easeFactor = entry.easeFactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));
-    if (entry.easeFactor < 1.3) entry.easeFactor = 1.3;
-    
     const nextDate = new Date();
     nextDate.setDate(nextDate.getDate() + entry.interval);
     entry.nextReview = nextDate.toISOString().split('T')[0];
-    
     srsData[id] = entry;
     localStorage.setItem('b2_german_srs', JSON.stringify(srsData));
 }
@@ -544,31 +527,6 @@ let matchGameData = [];
 let matchedCount = 0;
 let matchPairs = [];
 
-function handleMatchCheck(draggedId, zone) {
-    if(zone.style.pointerEvents === 'none') return;
-    const targetId = zone.dataset.id;
-    const ok = draggedId === targetId;
-    if (ok) {
-        zone.style.background = '#dcfce7'; zone.style.borderColor = '#22c55e'; zone.style.color = '#15803d';
-        const dragEl = document.getElementById(`drag-${draggedId}`);
-        if (dragEl) { dragEl.style.background = '#dcfce7'; dragEl.style.borderColor = '#22c55e'; dragEl.draggable = false; dragEl.style.opacity = '0.6'; dragEl.style.pointerEvents = 'none'; }
-        zone.ondragover = null; zone.ondrop = null; zone.style.pointerEvents = 'none';
-        matchedCount++;
-        quizResults.push({ card: matchPairs.find(c => c.id == draggedId), ok: true });
-        addXP(5); logActivity();
-        if (matchedCount === matchPairs.length) {
-            document.getElementById('match-result').innerHTML = '<span style="color:#22c55e; font-size:1.3rem;">🎉 Tüm eşleştirmeler tamamlandı!</span>';
-            setTimeout(() => { currentQuizIdx += matchPairs.length; if (currentQuizIdx >= quizCards.length) finishQuiz(); else { quizNextBtn.style.display = ''; quizFinishEarlyBtn.style.display = ''; startMatchGame(); } }, 1500);
-        }
-    } else {
-        zone.style.animation = 'shake 0.4s ease';
-        setTimeout(() => { zone.style.animation = ''; }, 400);
-        quizResults.push({ card: matchPairs.find(c => c.id == draggedId), ok: false, out: 'Yanlış eşleştirme' });
-        quizWrongs[draggedId] = (quizWrongs[draggedId] || 0) + 1;
-        localStorage.setItem('b2_quiz_wrongs', JSON.stringify(quizWrongs));
-    }
-}
-
 function startMatchGame() {
     quizCardWrapper.innerHTML = '';
     quizNextBtn.style.display = 'none';
@@ -587,67 +545,43 @@ function startMatchGame() {
     quizCardWrapper.innerHTML = `
         <div style="width:100%;">
             <p style="text-align:center; color:#718096; margin-bottom:15px; font-size:0.9rem;">Almancayı Türkçesinin üstune sürükleyin</p>
-            <div style="display:flex; gap:10px; justify-content:space-between; position:relative;">
+            <div style="display:flex; gap:10px; justify-content:space-between;">
                 <div id="match-left" style="flex:1; display:flex; flex-direction:column; gap:8px;">${leftHTML}</div>
                 <div id="match-right" style="flex:1; display:flex; flex-direction:column; gap:8px;">${rightHTML}</div>
             </div>
             <div id="match-result" style="text-align:center; margin-top:15px; font-weight:bold; min-height:30px;"></div>
         </div>`;
 
-    let activeDragId = null;
-    let initialX, initialY;
-
     document.querySelectorAll('.draggable').forEach(el => {
-        // Desktop Events
         el.addEventListener('dragstart', (e) => { e.dataTransfer.setData('text/plain', el.dataset.id); el.style.opacity = '0.5'; });
         el.addEventListener('dragend', (e) => { el.style.opacity = '1'; });
-        
-        // Touch Events for Mobile
-        el.addEventListener('touchstart', (e) => {
-            if(el.style.pointerEvents === 'none') return;
-            activeDragId = el.dataset.id;
-            el.style.opacity = '0.5';
-            initialX = e.touches[0].clientX;
-            initialY = e.touches[0].clientY;
-        }, {passive: true});
-        
-        el.addEventListener('touchmove', (e) => {
-            if(!activeDragId || el.dataset.id !== activeDragId) return;
-            e.preventDefault(); // prevent scrolling
-            const touch = e.touches[0];
-            el.style.position = 'fixed';
-            el.style.left = (touch.clientX - el.offsetWidth/2) + 'px';
-            el.style.top = (touch.clientY - el.offsetHeight/2) + 'px';
-            el.style.zIndex = '1000';
-            el.style.width = el.offsetWidth + 'px'; // keep width fixed
-        }, {passive: false});
-        
-        el.addEventListener('touchend', (e) => {
-            if(!activeDragId || el.dataset.id !== activeDragId) return;
-            el.style.position = '';
-            el.style.left = '';
-            el.style.top = '';
-            el.style.zIndex = '';
-            el.style.width = '';
-            el.style.opacity = '1';
-            
-            const touch = e.changedTouches[0];
-            const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
-            const zone = dropTarget ? dropTarget.closest('.dropzone') : null;
-            
-            if(zone) {
-                handleMatchCheck(activeDragId, zone);
-            }
-            activeDragId = null;
-        });
     });
-    
     document.querySelectorAll('.dropzone').forEach(zone => {
         zone.addEventListener('dragover', e => e.preventDefault());
         zone.addEventListener('drop', (e) => {
             e.preventDefault();
             const draggedId = e.dataTransfer.getData('text/plain');
-            handleMatchCheck(draggedId, zone);
+            const targetId = zone.dataset.id;
+            const ok = draggedId === targetId;
+            if (ok) {
+                zone.style.background = '#dcfce7'; zone.style.borderColor = '#22c55e'; zone.style.color = '#15803d';
+                const dragEl = document.getElementById(`drag-${draggedId}`);
+                if (dragEl) { dragEl.style.background = '#dcfce7'; dragEl.style.borderColor = '#22c55e'; dragEl.draggable = false; dragEl.style.opacity = '0.6'; }
+                zone.ondragover = null; zone.ondrop = null;
+                matchedCount++;
+                quizResults.push({ card: matchPairs.find(c => c.id == draggedId), ok: true });
+                addXP(5); logActivity();
+                if (matchedCount === matchPairs.length) {
+                    document.getElementById('match-result').innerHTML = '<span style="color:#22c55e; font-size:1.3rem;">🎉 Tüm eşleştirmeler tamamlandı!</span>';
+                    setTimeout(() => { currentQuizIdx += matchPairs.length; if (currentQuizIdx >= quizCards.length) finishQuiz(); else { quizNextBtn.style.display = ''; quizFinishEarlyBtn.style.display = ''; startMatchGame(); } }, 1500);
+                }
+            } else {
+                zone.style.animation = 'shake 0.4s ease';
+                setTimeout(() => { zone.style.animation = ''; }, 400);
+                quizResults.push({ card: matchPairs.find(c => c.id == draggedId), ok: false, out: 'Yanlış eşleştirme' });
+                quizWrongs[draggedId] = (quizWrongs[draggedId] || 0) + 1;
+                localStorage.setItem('b2_quiz_wrongs', JSON.stringify(quizWrongs));
+            }
         });
     });
 }
@@ -706,7 +640,6 @@ function updateStatsUI() {
     updateTimeUI();
     renderStreakUI();
     renderWeakPointsUI();
-    renderProgressChart();
 }
 
 function updateTimeUI() {
@@ -993,178 +926,8 @@ function logActivity() {
     let activityLog = JSON.parse(localStorage.getItem('b2_activity_log')) || {};
     activityLog[today] = (activityLog[today] || 0) + 1;
     localStorage.setItem('b2_activity_log', JSON.stringify(activityLog));
-    incrementDailyGoal();
     renderHeatmap();
     renderStreakUI();
-}
-
-// ----- DAILY GOAL -----
-let dailyGoal = JSON.parse(localStorage.getItem('b2_german_daily_goal')) || { date: '', count: 0 };
-function checkDailyGoal() {
-    const today = new Date().toISOString().split('T')[0];
-    if (dailyGoal.date !== today) {
-        dailyGoal = { date: today, count: 0 };
-    }
-}
-function incrementDailyGoal() {
-    checkDailyGoal();
-    if (dailyGoal.count < 20) {
-        dailyGoal.count++;
-        localStorage.setItem('b2_german_daily_goal', JSON.stringify(dailyGoal));
-        updateDailyGoalUI();
-        if (dailyGoal.count === 20) {
-            addXP(20);
-            showToast("Günlük hedef tamamlandı! +20 XP 🔥", "success");
-            const icon = document.querySelector('.daily-goal-container i');
-            if(icon) icon.classList.add('daily-goal-complete');
-        }
-    }
-}
-function updateDailyGoalUI() {
-    checkDailyGoal();
-    const textEl = document.getElementById('daily-goal-text');
-    const barEl = document.getElementById('daily-goal-bar');
-    const statusEl = document.getElementById('daily-goal-status');
-    if(textEl) textEl.textContent = `${dailyGoal.count} / 20`;
-    if(barEl) barEl.style.width = `${Math.min(100, (dailyGoal.count / 20) * 100)}%`;
-    if(statusEl) {
-        if(dailyGoal.count >= 20) statusEl.innerHTML = "Harika! Hedefini tamamladın 🏆";
-        else statusEl.innerHTML = `${20 - dailyGoal.count} kelime kaldı...`;
-    }
-}
-
-// ----- PROGRESS CHART -----
-function renderProgressChart() {
-    const canvas = document.getElementById('progress-chart');
-    if(!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const total = activeDeck.length;
-    const l = learned.length;
-    const r = review.length;
-    const u = Math.max(0, total - l - r);
-    
-    ctx.clearRect(0,0, canvas.width, canvas.height);
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
-    const radius = Math.min(cx, cy) - 10;
-    
-    let startAngle = -0.5 * Math.PI;
-    
-    const drawSlice = (value, color) => {
-        if(value === 0) return;
-        const sliceAngle = (value / total) * 2 * Math.PI;
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.arc(cx, cy, radius, startAngle, startAngle + sliceAngle);
-        ctx.closePath();
-        ctx.fillStyle = color;
-        ctx.fill();
-        startAngle += sliceAngle;
-    };
-    
-    drawSlice(l, '#48bb78'); // Green
-    drawSlice(r, '#f56565'); // Red
-    drawSlice(u, '#e2e8f0'); // Gray
-    
-    const legend = document.getElementById('progress-legend');
-    if(legend) {
-        legend.innerHTML = `
-            <div><span style="display:inline-block;width:10px;height:10px;background:#48bb78;border-radius:50%;"></span> Öğrenilen (${l})</div>
-            <div><span style="display:inline-block;width:10px;height:10px;background:#f56565;border-radius:50%;"></span> Tekrar (${r})</div>
-            <div><span style="display:inline-block;width:10px;height:10px;background:#e2e8f0;border-radius:50%;"></span> Öğrenilmedi (${u})</div>
-        `;
-    }
-}
-
-// ----- SEARCH (INLINE) -----
-function setupSearch() {
-    const input = document.getElementById('inline-search-input');
-    const clearBtn = document.getElementById('inline-search-clear');
-    const resultsContainer = document.getElementById('inline-search-results');
-    
-    if(!input || !resultsContainer) return;
-    
-    // Dışarı tıklanınca arama kutusunu kapat
-    document.addEventListener('click', (e) => {
-        if (!input.contains(e.target) && !resultsContainer.contains(e.target) && !clearBtn.contains(e.target)) {
-            resultsContainer.style.display = 'none';
-        }
-    });
-
-    input.addEventListener('focus', () => {
-        if (input.value.trim().length >= 2) {
-            resultsContainer.style.display = 'flex';
-        }
-    });
-    
-    clearBtn.addEventListener('click', () => {
-        input.value = '';
-        resultsContainer.style.display = 'none';
-        clearBtn.style.display = 'none';
-        input.focus();
-    });
-
-    input.oninput = (e) => {
-        const query = e.target.value.trim().toLowerCase();
-        
-        if(query.length > 0) {
-            clearBtn.style.display = 'block';
-        } else {
-            clearBtn.style.display = 'none';
-        }
-
-        if(query.length < 2) {
-            resultsContainer.style.display = 'none';
-            resultsContainer.innerHTML = '';
-            return;
-        }
-        
-        const results = activeDeck.filter(card => 
-            card.germanWord.toLowerCase().includes(query) || 
-            card.turkishWord.toLowerCase().includes(query)
-        ).slice(0, 10); // max 10 results for dropdown
-        
-        resultsContainer.style.display = 'flex';
-
-        if(results.length === 0) {
-            resultsContainer.innerHTML = '<div style="padding:15px; color:#a0aec0; text-align:center;">Sonuç bulunamadı</div>';
-            return;
-        }
-        
-        let html = '';
-        results.forEach(card => {
-            html += `
-            <div class="search-result-item" data-id="${card.id}">
-                <div>
-                    <div style="font-weight:700; color:var(--primary-color);">${card.germanWord}</div>
-                    <div style="font-size:0.85rem; color:#718096;">${card.turkishWord}</div>
-                </div>
-                <div style="font-size:0.7rem; background:#edf2f7; padding:3px 8px; border-radius:10px; color:#4a5568;">${card.category.toUpperCase()}</div>
-            </div>`;
-        });
-        resultsContainer.innerHTML = html;
-        
-        document.querySelectorAll('.search-result-item').forEach(item => {
-            item.onclick = () => {
-                const id = item.dataset.id;
-                resultsContainer.style.display = 'none';
-                input.value = '';
-                clearBtn.style.display = 'none';
-                
-                // Kategori ayarını tümü yap
-                categoryBtns.forEach(b => b.classList.remove('active'));
-                const allBtn = document.querySelector('.category-btn[data-category="tümü"]');
-                if(allBtn) allBtn.classList.add('active');
-                filterCards('tümü');
-                
-                const idx = filteredCards.findIndex(c => c.id == id);
-                if(idx !== -1) {
-                    currentIndex = idx;
-                    renderCard(filteredCards[currentIndex]);
-                }
-            };
-        });
-    };
 }
 
 // ----- QUIZ SYSTEM -----
@@ -1212,7 +975,6 @@ function renderQuizCard() {
 
     if (quizMode === 5) { startVoiceQuiz(); return; }
     if (quizMode === 6) { startMatchGame(); return; }
-    if (quizMode === 7) { startFillBlankQuiz(); return; }
 
     if (quizMode <= 2) {
         quizNextBtn.innerHTML = 'İleri'; quizNextBtn.disabled = false;
@@ -1269,73 +1031,10 @@ function handleQuizNext() {
         quizResults.push({card, ok, out: val});
         if(!ok) { quizWrongs[card.id] = (quizWrongs[card.id] || 0) + 1; localStorage.setItem('b2_quiz_wrongs', JSON.stringify(quizWrongs)); }
         logActivity();
-    } else if(quizMode === 7) {
-        const val = document.getElementById('blank-input').value.trim().toLowerCase();
-        const strippedGerman = card.germanWord.replace(/der |die |das |\(.*?\)/g, '').trim().toLowerCase();
-        const ok = val === strippedGerman;
-        
-        const feedbackEl = document.getElementById('blank-feedback');
-        if(!feedbackEl.innerHTML) { // İlk basış
-            if(ok) {
-                feedbackEl.innerHTML = '<span style="color:#22c55e">Doğru! 🎉</span>';
-                quizResults.push({card, ok: true});
-                addXP(5);
-                logActivity();
-                setTimeout(() => {
-                    currentQuizIdx++; renderQuizCard();
-                }, 1000);
-            } else {
-                feedbackEl.innerHTML = `<span style="color:#ef4444">Yanlış! Doğrusu: ${strippedGerman}</span>`;
-                quizResults.push({card, ok: false, out: val});
-                quizWrongs[card.id] = (quizWrongs[card.id] || 0) + 1; 
-                localStorage.setItem('b2_quiz_wrongs', JSON.stringify(quizWrongs));
-                logActivity();
-                quizNextBtn.innerHTML = 'İleri'; // İkinci basışta geçecek
-            }
-            return;
-        } else {
-            // İkinci basış
-        }
     } else if(quizMode <= 2) {
         quizResults.push({card, ok: true});
     }
     currentQuizIdx++; renderQuizCard();
-}
-
-function startFillBlankQuiz() {
-    quizCardWrapper.innerHTML = '';
-    const card = quizCards[currentQuizIdx];
-    
-    const word = card.germanWord.replace(/der |die |das |\(.*?\)/g, '').trim();
-    let hiddenWord = '';
-    for(let i=0; i<word.length; i++) {
-        if(word[i] === ' ') {
-            hiddenWord += ' &nbsp; ';
-        } else if (i % 2 === 1 && /[a-zA-ZäöüßÄÖÜ]/.test(word[i])) {
-            hiddenWord += '_';
-        } else {
-            hiddenWord += word[i];
-        }
-    }
-    
-    quizCardWrapper.innerHTML = `
-        <div style="text-align:center; width:100%;">
-            <p style="color:#718096; font-size:0.9rem; margin-bottom:5px;">Türkçe Anlamı:</p>
-            <div style="font-size:1.4rem; font-weight:700; color:var(--text-color); margin-bottom:20px;">${card.turkishWord}</div>
-            <p style="color:#718096; font-size:0.9rem; margin-bottom:5px;">Almancası (Harfleri Tamamla):</p>
-            <div style="font-size:1.8rem; font-weight:800; color:var(--primary-color); letter-spacing:4px; margin-bottom:20px;">${hiddenWord}</div>
-            <input type="text" id="blank-input" autocomplete="off" style="width:100%; max-width:300px; padding:12px; border-radius:10px; border:2px solid #ddd; font-size:1.1rem; text-align:center;" placeholder="Kelimenin tamamını yazın...">
-            <div id="blank-feedback" style="margin-top:15px; min-height:30px; font-weight:bold;"></div>
-        </div>
-    `;
-    quizNextBtn.innerHTML = 'Kontrol Et';
-    quizNextBtn.disabled = false;
-    
-    const inp = document.getElementById('blank-input');
-    inp.focus();
-    inp.onkeydown = (e) => {
-        if(e.key === 'Enter') handleQuizNext();
-    }
 }
 
 function finishQuiz() {
