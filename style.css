@@ -6,11 +6,11 @@
     --accent-color: #ff0055;
     
     /* Category Colors */
-    --tÃ¼mÃ¼-color: #a0aec0;
+    --tumu-color: #a0aec0;
     --isimler-color: #4299e1; /* Blue */
     --fiiller-color: #f56565; /* Red */
-    --sÄ±fatlar-color: #48bb78; /* Green */
-    --baÄŸlaÃ§lar-color: #ed8936; /* Orange */
+    --sifatlar-color: #48bb78; /* Green */
+    --baglaclar-color: #ed8936; /* Orange */
     --favoriler-color: #fc8181; /* Pinkish red */
     
     /* Safa Area Insets for Mobile App feeling */
@@ -1714,3 +1714,108 @@ body.theme-dark .tts-btn { background: rgba(255,255,255,0.15); color: white; }
     }
 }
 
+/* ==========================================
+   SEARCH OVERLAY
+   ========================================== */
+.search-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 80px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+.search-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+.search-box {
+    width: 90%;
+    max-width: 480px;
+    background: var(--card-bg, white);
+    border-radius: 18px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    overflow: hidden;
+    transform: translateY(-20px);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.search-overlay.active .search-box {
+    transform: translateY(0);
+}
+.search-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.search-input-wrap i { color: #94a3b8; font-size: 1rem; }
+.search-input-wrap input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 1rem;
+    font-family: 'Outfit', sans-serif;
+    color: var(--text-color, #2d3748);
+}
+.search-input-wrap input::placeholder { color: #cbd5e1; }
+.search-results {
+    max-height: 350px;
+    overflow-y: auto;
+    padding: 8px;
+}
+.search-result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s;
+    gap: 8px;
+}
+.search-result-item:hover { background: rgba(0,0,0,0.04); }
+.search-result-de {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+.search-result-tr {
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+.search-result-cat {
+    font-size: 0.65rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: rgba(99,102,241,0.1);
+    color: #6366f1;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.search-empty {
+    text-align: center;
+    padding: 30px;
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+/* ==========================================
+   DAILY GOAL CELEBRATION
+   ========================================== */
+@keyframes goalComplete {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+.daily-goal-complete {
+    animation: goalComplete 0.5s ease;
+}

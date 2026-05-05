@@ -1,11 +1,14 @@
-const CACHE_NAME = 'b2-flashcard-v51';
+const CACHE_NAME = 'b2-flashcard-v52';
 const ASSETS = [
     './',
     './index.html',
+    './grammar.html',
     './style.css',
     './app.js',
     './data.js',
-    './manifest.json'
+    './manifest.json',
+    'https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap',
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
 
 self.addEventListener('install', (e) => {

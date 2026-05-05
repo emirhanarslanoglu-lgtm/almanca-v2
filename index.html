@@ -15,11 +15,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <!-- Sidebar ve Overlay -->
@@ -73,6 +68,25 @@
             </div>
         </div>
 
+        <!-- GÜNLÜK HEDEF -->
+        <div class="daily-goal-container" style="margin: 0 15px 10px 15px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <h3 style="font-size: 0.9rem; color: #4a5568; margin:0;"><i class="fas fa-bullseye" style="color:#f43f5e;"></i> Günlük Hedef</h3>
+                <span id="daily-goal-text" style="font-size:0.78rem; color:#718096; font-weight:600;">0 / 20</span>
+            </div>
+            <div style="width:100%; height:12px; background:#e2e8f0; border-radius:6px; overflow:hidden;">
+                <div id="daily-goal-bar" style="width:0%; height:100%; background: linear-gradient(90deg, #f43f5e, #f97316); border-radius:6px; transition: width 0.6s ease;"></div>
+            </div>
+            <div id="daily-goal-status" style="font-size:0.72rem; color:#a0aec0; margin-top:5px;"></div>
+        </div>
+
+        <!-- İLERLEME GRAFİĞİ -->
+        <div style="margin: 0 15px 10px 15px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 12px;">
+            <h3 style="font-size: 0.9rem; margin-bottom: 10px; color: #4a5568;"><i class="fas fa-chart-pie" style="color:#8b5cf6;"></i> İlerleme Grafiği</h3>
+            <canvas id="progress-chart" width="260" height="180" style="width:100%; max-width:260px; display:block; margin:0 auto;"></canvas>
+            <div id="progress-legend" style="display:flex; justify-content:center; gap:12px; margin-top:8px; font-size:0.72rem; flex-wrap:wrap;"></div>
+        </div>
+
         <!-- HEATMAP -->
         <div class="heatmap-container" style="margin: 0 15px 10px 15px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 12px;">
             <h3 style="font-size: 0.9rem; margin-bottom: 10px; color: #4a5568;"><i class="fas fa-fire" style="color:#ed8936;"></i> Çalışma Haritası (Son 30 Gün)</h3>
@@ -122,6 +136,9 @@
                     </button>
                     <button class="action-btn secondary quiz-start-btn" data-mode="5" style="margin-bottom:10px; text-align:left; background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe;">
                         <i class="fas fa-microphone-alt"></i> 5. Konuşma Sınavı (Mikrofon) 🎤
+                    </button>
+                    <button class="action-btn secondary quiz-start-btn" data-mode="7" style="margin-bottom:10px; text-align:left; background: #fef3c7; color: #92400e; border: 1px solid #fde68a;">
+                        <i class="fas fa-pen-fancy"></i> 7. Boşluk Doldurma (Harf Tamamlama) ✍️
                     </button>
                     <button class="action-btn secondary quiz-start-btn" data-mode="6" style="margin-bottom:10px; text-align:left; background: #fae8ff; color: #a21caf; border: 1px solid #f5d0fe;">
                         <i class="fas fa-puzzle-piece"></i> 6. Sürükle-Bırak Eşleştirme 🧩
@@ -181,6 +198,7 @@
                             <button class="theme-btn" data-theme="dark" style="background:#1e293b; color:#94a3b8;" title="Gece Modu"><i class="fas fa-moon" style="font-size:0.7rem;"></i></button>
                             <button class="theme-btn" data-theme="system" style="background:linear-gradient(135deg,#f8fafc 50%,#1e293b 50%); color:#64748b; border:1.5px solid #e2e8f0;" title="Sistem Teması"><i class="fas fa-adjust" style="font-size:0.7rem; color:#64748b;"></i></button>
                         </div>
+                        <button id="search-btn" class="icon-btn bouncy-btn" title="Kelime Ara"><i class="fas fa-search"></i></button>
                         <button id="guide-btn" class="icon-btn bouncy-btn" title="Nasıl Kullanılır?"><i class="fas fa-question-circle"></i></button>
                         <button id="settings-btn" class="icon-btn bouncy-btn" title="Ayarlar ve Veri Yönetimi"><i class="fas fa-cog"></i></button>
                     </div>
@@ -294,6 +312,18 @@
                 <p><strong>📊 Zayıf Nokta Analizi:</strong> Sol menünün altında "Zayıf Nokta Analizi" bölümü yer alır. Quiz'de en çok yanlış yaptığınız kelimeler ve hangi kategorilerde zorlandığınız burada gösterilir. Odaklanmak için bu kelimeleri önce çalışın!</p>
             </div>
             <button id="guide-ok-btn" class="action-btn primary bouncy-btn" style="margin-top:10px;">Anladım, Teşekkürler!</button>
+        </div>
+    </div>
+
+    <!-- Arama Overlay -->
+    <div id="search-overlay" class="search-overlay">
+        <div class="search-box">
+            <div class="search-input-wrap">
+                <i class="fas fa-search"></i>
+                <input type="text" id="search-input" placeholder="Almanca veya Türkçe kelime ara..." autocomplete="off">
+                <button id="search-close-btn" class="icon-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="search-results" class="search-results"></div>
         </div>
     </div>
 
