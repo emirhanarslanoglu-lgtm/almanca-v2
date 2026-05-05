@@ -204,14 +204,8 @@
                         <h1>Almanca B2 🇩🇪</h1>
                     </div>
 
-                    <!-- Orta Kısım: Arama Kutusu -->
+                    <!-- Orta Kısım: Boş bırakıldı (Arama Kutusu alta taşındı) -->
                     <div class="header-center">
-                        <div class="inline-search-wrapper">
-                            <i class="fas fa-search search-icon"></i>
-                            <input type="text" id="inline-search-input" placeholder="Kelime ara..." autocomplete="off">
-                            <button id="inline-search-clear" class="icon-btn" style="display:none;"><i class="fas fa-times"></i></button>
-                            <div id="inline-search-results" class="inline-search-dropdown"></div>
-                        </div>
                     </div>
 
                     <!-- Sağ Taraf: Kontroller -->
@@ -230,6 +224,17 @@
                         <button id="settings-btn" class="icon-btn bouncy-btn" title="Ayarlar ve Veri Yönetimi"><i class="fas fa-cog"></i></button>
                     </div>
                 </div>
+
+                <!-- Tam Genişlikte Arama Kutusu -->
+                <div class="search-row" style="display: flex; justify-content: center; margin-bottom: 20px;">
+                    <div class="inline-search-wrapper" style="width: 90%; max-width: none;">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="inline-search-input" placeholder="Kelime ara..." autocomplete="off">
+                        <button id="inline-search-clear" class="icon-btn" style="display:none;"><i class="fas fa-times"></i></button>
+                        <div id="inline-search-results" class="inline-search-dropdown" style="width: 100%;"></div>
+                    </div>
+                </div>
+
                 <nav class="categories" id="categories-nav">
                     <button class="category-btn active" data-category="tümü">Tümü</button>
                     <button class="category-btn" data-category="isimler">İsimler</button>
