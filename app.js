@@ -261,6 +261,32 @@ function init() {
     if (closeMindmapBtn) closeMindmapBtn.addEventListener('click', closeMindmap);
     if (mindmapRefreshBtn) mindmapRefreshBtn.addEventListener('click', renderMindmap);
 
+    // Search functionality
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const query = searchInput.value.trim().toLowerCase();
+                if (query.length === 0) {
+                    filterCards(currentCategory);
+                    return;
+                }
+                filteredCards = activeDeck.filter(card =>
+                    card.germanWord.toLowerCase().includes(query) ||
+                    card.turkishWord.toLowerCase().includes(query) ||
+                    (card.germanSentence && card.germanSentence.toLowerCase().includes(query)) ||
+                    (card.turkishSentence && card.turkishSentence.toLowerCase().includes(query))
+                );
+                currentIndex = 0;
+                filteredCards.length > 0 ? renderCard(filteredCards[currentIndex]) : renderCard(null);
+                updateProgress();
+                updateControls();
+            }, 300);
+        });
+    }
+
     updateXpUI();
 }
 
