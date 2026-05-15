@@ -34,12 +34,12 @@
         <div id="streak-display"></div>
 
         <!-- XP & LEVEL BAR -->
-        <div style="padding: 0 15px 10px 15px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-                <span style="font-size:0.85rem; font-weight:700; color:var(--primary-color);">⭐ Seviye <span id="user-level">1</span> &mdash; <span id="user-title" style="color:#ed8936;">Anfänger</span></span>
-                <span style="font-size:0.75rem; color:#718096;"><span id="user-xp">0</span> XP</span>
+        <div style="padding: 0 15px 6px 15px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <span style="font-size:0.8rem; font-weight:700; color:var(--primary-color);">⭐ Seviye <span id="user-level">1</span> &mdash; <span id="user-title" style="color:#ed8936;">Anfänger</span></span>
+                <span style="font-size:0.7rem; color:#718096;"><span id="user-xp">0</span> XP</span>
             </div>
-            <div style="width:100%; height:10px; background:#e2e8f0; border-radius:5px; overflow:hidden;">
+            <div style="width:100%; height:8px; background:#e2e8f0; border-radius:5px; overflow:hidden;">
                 <div id="xp-bar-fill" style="width:0%; height:100%; background: linear-gradient(90deg, var(--primary-color), #ed8936); border-radius:5px; transition: width 0.6s ease;"></div>
             </div>
         </div>
@@ -74,17 +74,17 @@
         </div>
 
         <!-- HEATMAP -->
-        <div class="heatmap-container" style="margin: 0 15px 10px 15px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 12px;">
-            <h3 style="font-size: 0.9rem; margin-bottom: 10px; color: #4a5568;"><i class="fas fa-fire" style="color:#ed8936;"></i> Çalışma Haritası (Son 30 Gün)</h3>
-            <div id="heatmap-grid" style="display: flex; gap: 3px; flex-wrap: wrap; height: 60px; align-content: flex-start;"></div>
-            <div style="font-size:0.72rem; color:#a0aec0; margin-top:6px;">
+        <div class="heatmap-container" style="margin: 0 15px 6px 15px; padding: 10px; background: rgba(0,0,0,0.03); border-radius: 10px;">
+            <h3 style="font-size: 0.8rem; margin-bottom: 6px; color: #4a5568;"><i class="fas fa-fire" style="color:#ed8936;"></i> Çalışma Haritası (Son 30 Gün)</h3>
+            <div id="heatmap-grid" style="display: flex; gap: 3px; flex-wrap: wrap; height: 50px; align-content: flex-start;"></div>
+            <div style="font-size:0.65rem; color:#a0aec0; margin-top:4px;">
                 ⬜ Boş &nbsp; 🟩 Az &nbsp; 🟨 Orta &nbsp; 🟧 İyi &nbsp; 🟥 Harika
             </div>
         </div>
 
         <!-- ZAYIF NOKTA ANALİZİ -->
-        <div style="margin: 0 15px 15px 15px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 12px;">
-            <h3 style="font-size: 0.9rem; margin-bottom: 10px; color: #4a5568;"><i class="fas fa-exclamation-triangle" style="color:#ed8936;"></i> Zayıf Nokta Analizi</h3>
+        <div style="margin: 0 15px 10px 15px; padding: 10px; background: rgba(0,0,0,0.03); border-radius: 10px;">
+            <h3 style="font-size: 0.8rem; margin-bottom: 6px; color: #4a5568;"><i class="fas fa-exclamation-triangle" style="color:#ed8936;"></i> Zayıf Nokta Analizi</h3>
             <div id="weak-points-panel"></div>
         </div>
 
@@ -92,9 +92,9 @@
             <button class="menu-btn" data-view="learned"><i class="fas fa-check-double"></i> Öğrendiğim Kelimeler</button>
             <button class="menu-btn" data-view="review"><i class="fas fa-list-ul"></i> Tekrar Edilecekler</button>
             <button class="menu-btn" data-view="quiz"><i class="fas fa-gamepad"></i> Quiz Modu</button>
-            <button class="menu-btn" data-view="mindmap" style="color: #10b981;"><i class="fas fa-network-wired"></i> 🧠 Kelime Ağı (Mindmap)</button>
-            <button class="menu-btn" data-view="zen" style="color: #805ad5;"><i class="fas fa-brain"></i> 15 Dk Derin Odak (Zen)</button>
-            <a href="grammar.html" class="menu-btn" style="text-decoration:none; color: #d97706; display:flex; align-items:center; gap:10px;"><i class="fas fa-book-open"></i> 🇩🇪 Gramer Rehberi (A1→C1)</a>
+            <button class="menu-btn" data-view="mindmap"><i class="fas fa-network-wired"></i> 🧠 Kelime Ağı (Mindmap)</button>
+            <button class="menu-btn" data-view="zen"><i class="fas fa-brain"></i> 15 Dk Derin Odak (Zen)</button>
+            <a href="grammar.html" class="menu-btn" style="text-decoration:none;"><i class="fas fa-book-open"></i> 🇩🇪 Gramer Rehberi (A1→C1)</a>
         </nav>
     </div>
 
